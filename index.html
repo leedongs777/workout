@@ -176,6 +176,22 @@
   .mini-fig{flex:none; width:30px; height:30px; color:var(--accent); opacity:.85;}
   .mini-fig svg{width:100%; height:100%;}
 
+  /* per-set weight logging */
+  .setlog{margin-top:10px;}
+  .lastw{font-size:11.5px; color:var(--faint); margin:0 0 7px; font-variant-numeric:tabular-nums;}
+  .lastw b{color:var(--muted); font-weight:700;}
+  .setrow{display:flex; flex-wrap:wrap; gap:7px;}
+  .setcell{display:flex; flex-direction:column; gap:3px;}
+  .setcell .sn{font-size:10.5px; color:var(--muted); font-weight:600; text-align:center;}
+  .wtwrap{display:flex; align-items:center; border:1px solid var(--line); border-radius:9px; background:var(--surface-2); padding-right:7px;}
+  .wtwrap:focus-within{border-color:var(--accent);}
+  .wt{width:42px; border:none; background:none; color:var(--ink); font-family:inherit; font-size:14px; font-weight:700; text-align:right; padding:7px 2px 7px 8px; font-variant-numeric:tabular-nums; outline:none; -moz-appearance:textfield;}
+  .wt::-webkit-outer-spin-button,.wt::-webkit-inner-spin-button{-webkit-appearance:none; margin:0;}
+  .unit{font-size:11px; color:var(--faint); font-weight:600;}
+  .setrow.dots{gap:8px;}
+  .setdot{width:36px; height:34px; border-radius:9px; border:1px solid var(--line); background:var(--surface-2); color:var(--muted); font-weight:700; font-size:12px; cursor:pointer; font-family:inherit;}
+  .setdot.on{background:var(--accent); border-color:var(--accent); color:#fff;}
+
   .info{font-size:13px; color:var(--muted); line-height:1.6;}
   .info b{color:var(--ink); font-weight:650;}
   .divider{height:1px; background:var(--line-2); margin:18px 0;}
@@ -523,7 +539,7 @@ const SESSIONS=[
 ];
 
 /* ---------------- App state ---------------- */
-let state={ equipment:[...DEFAULT_EQUIP], includeBodyweight:true, startDate:todayStr(), restDays:[], doneDays:[], onboarded:true };
+let state={ equipment:[...DEFAULT_EQUIP], includeBodyweight:true, startDate:todayStr(), restDays:[], doneDays:[], log:{}, onboarded:true };
 let activeTab='today';
 let openDays={}; // schedule expand state
 
@@ -580,7 +596,37 @@ function toast(msg){ const t=$('toast'); t.textContent=msg; t.classList.add('sho
 
 function focusTags(arr){ return arr.map(f=>`<span class="tag">${f}</span>`).join(''); }
 
-function renderExercise(slot,r,i){
+function getLog(date,oi){ return (state.log&&state.log[date]&&state.log[date][oi])||[]; }
+function lastLog(dateStr,oi){
+  const cur=sessionFor(dateStr); if(!cur||cur.rest) return null;
+  const si=cur.session; let d=addDays(parse(dateStr),-1); let guard=0;
+  while(guard++<400){
+    const k=fmt(d); if(k<state.startDate) break;
+    const e=sessionFor(k);
+    if(e&&!e.rest&&e.session===si){
+      const rec=state.log&&state.log[k]&&state.log[k][oi];
+      if(rec&&rec.some(x=>typeof x==='number'&&x>0)) return {date:k,w:rec};
+    }
+    d=addDays(d,-1);
+  }
+  return null;
+}
+function renderSetLog(slot,r,dateStr,oi){
+  const saved=getLog(dateStr,oi);
+  const n=slot.sets;
+  if(r.bw){ // bodyweight/floor move → per-set completion dots
+    let dots='';
+    for(let k=0;k<n;k++){ dots+=`<button class="setdot ${saved[k]?'on':''}" onclick="toggleSetDone('${dateStr}',${oi},${k})">${k+1}</button>`; }
+    return `<div class="setlog"><div class="setrow dots">${dots}</div></div>`;
+  }
+  const last=lastLog(dateStr,oi);
+  let hint='';
+  if(last){ const md=last.date.slice(5).replace('-','/'); const parts=last.w.slice(0,n).map(x=>(typeof x==='number'&&x>0)?(''+x):'–'); hint=`<div class="lastw">지난 기록 <b>${md}</b> · ${parts.join('·')} kg</div>`; }
+  let cells='';
+  for(let k=0;k<n;k++){ const v=(typeof saved[k]==='number')?saved[k]:''; cells+=`<label class="setcell"><span class="sn">${k+1}세트</span><span class="wtwrap"><input class="wt" type="number" inputmode="decimal" min="0" step="0.5" value="${v}" placeholder="–" onchange="logWeight('${dateStr}',${oi},${k},this.value)"><span class="unit">kg</span></span></label>`; }
+  return `<div class="setlog">${hint}<div class="setrow">${cells}</div></div>`;
+}
+function renderExercise(slot,r,i,dateStr,oi){
   const eqChips=r.eq.length? r.eq.map(e=>`<span class="ex-eq">${EQ_LABEL[e]||e}</span>`).join('') : `<span class="ex-eq">맨몸</span>`;
   return `<div class="ex">
     <div class="ex-fig">${patIcon(slot.role)}</div>
@@ -589,15 +635,16 @@ function renderExercise(slot,r,i){
       <div class="ex-name">${r.name}</div>
       <div class="ex-meta"><span class="ex-vol">${slot.sets}세트 × ${slot.reps}</span>${eqChips}</div>
       ${r.cue?`<div class="ex-cue">${r.cue}</div>`:''}
+      ${dateStr?renderSetLog(slot,r,dateStr,oi):''}
     </div>
   </div>`;
 }
 
-function renderSessionCard(s){
+function renderSessionCard(s,dateStr){
   let html=`<div class="card hero">
     <div class="ex" style="border:none;background:var(--surface-2)"><div class="ex-idx">↑</div><div class="ex-body"><div class="ex-role">워밍업</div><div class="ex-cue" style="margin-top:2px">${s.warm}</div></div></div>`;
-  const items=s.slots.map(sl=>({sl,r:resolveSlot(sl)})).filter(x=>x.r);
-  items.forEach((x,idx)=>{ html+=renderExercise(x.sl,x.r,idx+1); });
+  const items=s.slots.map((sl,oi)=>({sl,oi,r:resolveSlot(sl)})).filter(x=>x.r);
+  items.forEach((x,idx)=>{ html+=renderExercise(x.sl,x.r,idx+1,dateStr,x.oi); });
   html+=`<div class="note warm"><b>${s.cardio.label}</b> · ${s.cardio.detail}</div>`;
   html+=`<div class="ex"><div class="ex-idx">↓</div><div class="ex-body"><div class="ex-role">마무리 스트레칭</div><div class="ex-cue" style="margin-top:2px">${s.cool}</div></div></div>`;
   html+=`</div>`;
@@ -642,7 +689,7 @@ function renderToday(){
       ${done?'':`<button class="btn sm ghost" style="width:auto;flex:none" onclick="toggleRest('${t}')">오늘 쉬기</button>`}
     </div></div>`;
     html+=`<div class="sec-label">운동 순서</div>`;
-    html+=renderSessionCard(s);
+    html+=renderSessionCard(s,t);
     html+=`<div class="card" style="margin-top:14px"><div class="note"><b>허리 안전 원칙</b> · 모든 세트는 허리 중립을 유지하고, 통증이 느껴지면 즉시 멈추세요. 무게보다 정확한 자세와 호흡(밀 때 내쉬기)을 우선합니다. 세트 사이 휴식 60–90초.</div></div>`;
   }
   $('view-today').innerHTML=html;
@@ -868,12 +915,28 @@ function toggleBodyweight(){
   toast(state.includeBodyweight?'맨몸 운동을 플랜에 포함했어요':'맨몸 운동을 플랜에서 뺐어요');
 }
 
+function logWeight(date,oi,k,val){
+  const v=parseFloat(val);
+  if(!state.log) state.log={};
+  if(!state.log[date]) state.log[date]={};
+  if(!state.log[date][oi]) state.log[date][oi]=[];
+  state.log[date][oi][k]=isNaN(v)?null:v;
+  touch(); // no re-render: keep input focus while typing across sets
+}
+function toggleSetDone(date,oi,k){
+  if(!state.log) state.log={};
+  if(!state.log[date]) state.log[date]={};
+  if(!state.log[date][oi]) state.log[date][oi]=[];
+  state.log[date][oi][k]=!state.log[date][oi][k];
+  touch(); renderToday();
+}
+
 function resetSchedule(){
   state.restDays=[]; state.doneDays=[]; state.startDate=todayStr(); openDays={};
   touch(); toast('휴식·완료 기록을 초기화했어요'); refresh();
 }
 function resetAll(){
-  state={ equipment:[...DEFAULT_EQUIP], includeBodyweight:true, startDate:todayStr(), restDays:[], doneDays:[], onboarded:true };
+  state={ equipment:[...DEFAULT_EQUIP], includeBodyweight:true, startDate:todayStr(), restDays:[], doneDays:[], log:{}, onboarded:true };
   openDays={}; touch(); toast('전체 초기화 완료'); refresh();
 }
 

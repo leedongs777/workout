@@ -27,7 +27,7 @@ jobs:
       - name: Node 설치
         uses: actions/setup-node@v4
         with:
-          node_version: '20'
+          node-version: '20'
 
       - name: index.html 존재 확인
         run: |

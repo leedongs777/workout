@@ -360,21 +360,22 @@
   .ym-cell.on{background:var(--accent); border-color:var(--accent); color:#fff;}
   .ym-grid-day{grid-template-columns:repeat(7,1fr); gap:6px;}
   .ym-grid-day .ym-cell{padding:10px 0; font-size:13px;}
+  .ym-grid-year{max-height:264px; overflow-y:auto; padding:2px;}
   .cal-head{display:grid; grid-template-columns:repeat(7,1fr); margin-bottom:4px;}
   .cal-wd{text-align:center; font-size:11.5px; font-weight:700; color:var(--muted); padding:4px 0;}
   .cal-wd.sun{color:#c0563f;} .cal-wd.sat{color:#3f6bc0;}
-  .cal-grid{display:grid; grid-template-columns:repeat(7,1fr); gap:5px;}
-  .cal-cell{aspect-ratio:1/1.05; border:1px solid var(--line-2); border-radius:10px; background:var(--surface); display:flex; flex-direction:column; align-items:center; justify-content:flex-start; padding:5px 2px; cursor:pointer; gap:3px;}
-  .cal-cell.empty{border:none; background:none; cursor:default;}
+  .cal-grid{display:grid; grid-template-columns:repeat(7,1fr); gap:4px;}
+  .cal-cell{height:46px; border:1px solid var(--line-2); border-radius:9px; background:var(--surface); display:flex; flex-direction:column; align-items:center; justify-content:center; padding:3px 2px; cursor:pointer; gap:2px;}
+  .cal-cell.empty{border:none; background:none; cursor:default; height:46px;}
   .cal-cell.rest{background:var(--surface-2);}
   .cal-cell.past{background:var(--line-2);}
   .cal-cell.today{border-color:var(--accent); box-shadow:0 0 0 1.5px var(--accent);}
-  .cal-cell .cal-n{font-size:13px; font-weight:700; font-variant-numeric:tabular-nums;}
+  .cal-cell .cal-n{font-size:12.5px; font-weight:700; font-variant-numeric:tabular-nums; line-height:1;}
   .cal-cell.sun .cal-n{color:#c0563f;} .cal-cell.sat .cal-n{color:#3f6bc0;}
-  .cal-dot{width:7px; height:7px; border-radius:50%; background:var(--accent); display:inline-block;}
+  .cal-dot{width:6px; height:6px; border-radius:50%; background:var(--accent); display:inline-block;}
   .cal-dot.rest{background:var(--line);}
-  .cal-chk{font-size:12px; font-weight:800; color:#fff; background:var(--accent); width:16px; height:16px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; line-height:1;}
-  .cal-legend{display:flex; gap:16px; justify-content:center; margin-top:14px; font-size:12px; color:var(--muted);}
+  .cal-chk{font-size:10px; font-weight:800; color:#fff; background:var(--accent); width:14px; height:14px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; line-height:1;}
+  .cal-legend{display:flex; gap:16px; justify-content:center; margin-top:12px; font-size:12px; color:var(--muted);}
   .cal-legend span{display:inline-flex; align-items:center; gap:5px;}
   .cal-legend i{font-style:normal;}
 
@@ -897,7 +898,62 @@ const SESSIONS=[
   cool:[{n:'가슴 스트레칭',a:'40초',d:'벽·기둥·문틀 등에 팔을 대고 몸을 앞으로 기울여 가슴을 펴기'},{n:'어깨·목 스트레칭',a:'좌/우 각각 40초',d:'어깨를 아래로 내리며 반대쪽으로 목을 기울이기'},{n:'앞허벅지 스트레칭',a:'좌/우 각각 40초',d:'서서 한 발등을 잡아 발뒤꿈치를 엉덩이 쪽으로 당기기'},{n:'무릎 끌어안기',a:'40초',d:'누워 양 무릎을 가슴으로 당겨 허리·엉덩이 늘이기',floor:true,alt:{n:'앉아 무릎 끌어안기',a:'40초',d:'앉아서 한 무릎씩 가슴으로 당기기'}}],
  },
 ];
-
+/* ---- 동적 웜업/쿨다운: 전신을 효과적 순서로 훑되, 그날 운동 부위에 중심을 둠 ---- */
+function sessionCat(s){ const t=s.title||''; if(/유산소/.test(t))return 'cardio'; if(/상체|당기기|밀기|가슴/.test(t))return 'upper'; if(/하체|둔근|균형/.test(t))return 'lower'; return 'full'; }
+function isPullDay(s){ return /당기기|등|후면/.test(s.title||''); }
+function buildWU(s){
+  const cat=sessionCat(s), pull=isPullDay(s); const A=[];
+  // 1) 체온 올리기 — 항상(유산소일수록 중요)
+  A.push({cardio:true});
+  // 2) 전신 관절 풀기 — 목→어깨→손목→허리→고관절→무릎→발목 순서
+  A.push({n:'전신 관절 풀기', a:'각 8회', d:'목 → 어깨 → 손목 → 허리 → 고관절 → 무릎 → 발목 순서로 천천히 크게 돌려 풀기'});
+  A.push({n:'허리·옆구리 풀기', a:'좌/우 각각 8회', d:'손을 허리에 얹고 상체를 좌우로 돌린 뒤, 옆으로 번갈아 기울이기'});
+  // 3) 그날 부위 집중
+  if(cat==='upper'){
+    A.push({n:'팔 크게 돌리기', a:'앞·뒤 각 10회', d:'양팔로 큰 원을 그리며 앞으로 10회, 뒤로 10회'});
+    A.push({n:'어깨 으쓱 내리기', a:'12회', d:'어깨를 귀 쪽으로 올렸다가 아래로 꾹 눌러 내리며 날개뼈 모으기'});
+    A.push({n:'밴드 어깨 뒤로 벌리기', a:'15회 ×2', d:'밴드를 가슴 앞에서 잡고 양옆으로 쭉 당겨 벌리기', eq:['band'], alt:{n:'팔 뒤로 모으기', a:'15회 ×2', d:'양 팔꿈치를 뒤로 당겨 날개뼈를 가운데로 모으기'}});
+    if(pull) A.push({n:'턱 당기기', a:'12회', d:'턱을 목 쪽으로 당겨 뒤통수를 위로 미는 느낌 · 거북목 교정'});
+    else { A.push({n:'어깨 바깥으로 돌리기', a:'좌/우 각각 12회', d:'팔꿈치를 옆구리에 붙인 채 손만 바깥쪽으로 돌리기 · 회전근개 예열'}); A.push({n:'벽 팔굽혀펴기', a:'10회', d:'벽·기둥을 짚고 가슴을 벽 쪽으로 가볍게 내렸다 밀기'}); }
+    A.push({n:'하체 가볍게', a:'제자리 마칭 15걸음', d:'상체 위주지만 하체도 가볍게 데우기'});
+  } else if(cat==='lower'){
+    A.push({n:'다리 앞뒤로 흔들기', a:'좌/우 각각 12회', d:'벽·기둥 등을 잡고 한 다리를 앞뒤로 크게 흔들기'});
+    A.push({n:'맨몸 스쿼트', a:'15회', d:'발을 어깨너비로, 엉덩이를 뒤로 빼며 앉았다 서기'});
+    A.push({n:'밴드 옆으로 걷기', a:'좌/우 각각 12걸음', d:'밴드를 무릎에 걸고 반쯤 앉은 자세로 옆으로 이동 · 둔근 활성', eq:['band'], alt:{n:'반쯤 앉아 옆으로 걷기', a:'좌/우 각각 12걸음', d:'무릎을 살짝 굽힌 자세로 옆으로 이동'}});
+    A.push({n:'종아리·발목 풀기', a:'각 15회', d:'제자리에서 발뒤꿈치를 들었다 내리고(카프 레이즈), 발목을 크게 돌리기'});
+    A.push({n:'상체 가볍게', a:'팔 돌리기 10회', d:'하체 위주지만 상체도 가볍게 데우기'});
+  } else { // cardio
+    A.push({n:'다리 앞뒤로 흔들기', a:'좌/우 각각 12회', d:'벽·기둥 등을 잡고 한 다리를 앞뒤로 크게 흔들기 · 고관절 예열'});
+    A.push({n:'무릎 높이 마칭', a:'20걸음', d:'제자리에서 무릎을 배꼽 높이까지 번갈아 올리기'});
+    A.push({n:'종아리·발목 풀기', a:'각 15회', d:'발뒤꿈치를 들었다 내리고, 발목을 크게 돌려 달릴 준비'});
+    A.push({n:'고양이-소 자세', a:'10회', d:'기어가는 자세에서 등을 둥글게 말았다가 배를 내리며 젖히기', floor:true, alt:{n:'선 자세 등 말고 펴기', a:'10회', d:'손을 무릎에 얹고 등을 둥글게 말았다가 가슴을 펴기'}});
+  }
+  return A;
+}
+function buildCD(s){
+  const cat=sessionCat(s), pull=isPullDay(s); const A=[];
+  if(cat==='upper'){
+    A.push({n:'가슴 스트레칭', a:'좌/우 각각 30초', d:'벽·기둥·문틀 등에 팔을 대고 몸을 앞으로 기울여 가슴을 펴기'});
+    if(pull) A.push({n:'등·광배 스트레칭', a:'좌/우 각각 30초', d:'한 팔을 위로 뻗어 반대쪽으로 상체를 기울여 옆구리·등을 늘이기'});
+    else A.push({n:'어깨 앞쪽 스트레칭', a:'좌/우 각각 30초', d:'한 팔을 몸 앞으로 가로질러 반대 팔로 몸쪽으로 당기기'});
+    A.push({n:'목 옆 스트레칭', a:'좌/우 각각 30초', d:'한 손으로 반대쪽 머리를 지그시 당겨 목 옆을 늘이기'});
+    A.push({n:'하체 가볍게 풀기', a:'각 20초', d:'앞허벅지(발등 잡기)와 종아리(벽 밀기)를 가볍게 늘여 마무리'});
+  } else if(cat==='lower'){
+    A.push({n:'앞허벅지 스트레칭', a:'좌/우 각각 30초', d:'서서 한 발등을 잡아 발뒤꿈치를 엉덩이 쪽으로 당기기'});
+    A.push({n:'뒤허벅지 스트레칭', a:'좌/우 각각 30초', d:'다리를 펴고 상체를 앞으로 숙여 발끝을 향하기'});
+    A.push({n:'엉덩이 스트레칭', a:'좌/우 각각 30초', d:'앉아서 한 발목을 반대 무릎에 올리고 상체를 앞으로 숙이기'});
+    A.push({n:'종아리 스트레칭', a:'좌/우 각각 30초', d:'벽·기둥 등을 밀며 뒷다리를 쭉 펴고 뒤꿈치는 바닥에'});
+    A.push({n:'상체 가볍게 풀기', a:'각 20초', d:'가슴(벽에 팔 대기)과 옆구리(팔 위로 뻗어 기울이기)를 가볍게 늘여 마무리'});
+  } else { // cardio
+    A.push({n:'호흡 정리 걷기', a:'2~3분', d:'심박이 안정될 때까지 천천히 걸으며 숨 고르기'});
+    A.push({n:'앞허벅지 스트레칭', a:'좌/우 각각 30초', d:'서서 한 발등을 잡아 발뒤꿈치를 엉덩이 쪽으로 당기기'});
+    A.push({n:'종아리 스트레칭', a:'좌/우 각각 30초', d:'벽·기둥 등을 밀며 뒷다리를 쭉 펴고 뒤꿈치는 바닥에'});
+    A.push({n:'옆구리·등 스트레칭', a:'좌/우 각각 30초', d:'한 팔을 위로 뻗어 반대쪽으로 상체를 기울이기'});
+    A.push({n:'목·어깨 스트레칭', a:'좌/우 각각 30초', d:'어깨를 아래로 내리며 반대쪽으로 목을 기울이기'});
+  }
+  return A;
+}
+SESSIONS.forEach(s=>{ s.warm=buildWU(s); s.cool=buildCD(s); });
 /* ---------------- App state ---------------- */
 let state={ equipment:[...DEFAULT_EQUIP], includeBodyweight:true, includeFloor:true, workoutDays:[0,2,3,4,5,6], sessionMinutes:60, startDate:todayStr(), restDays:[], doneDays:[], log:{}, steps:{}, slotCustom:{}, authPassed:false, authProvider:null, consent:null, profile:null, onboarded:true };
 let activeTab='home';
@@ -2016,9 +2072,9 @@ const Onboard=(()=>{
   function renderBirthCal(){
     const m=document.getElementById('ympick'); const WDh=['일','월','화','수','목','금','토']; let inner;
     if(bdStep==='year'){
-      const base=bdY-6; let cells='';
-      for(let i=0;i<12;i++){ const y=base+i; cells+=`<button class="ym-cell ${y===bdY?'on':''}" onclick="Onboard.bdYear(${y})">${y}</button>`; }
-      inner=`<div class="ymp-title">연도 선택</div><div class="ym-grid">${cells}</div>`;
+      const now=new Date().getFullYear(); let cells='';
+      for(let y=now; y>=1930; y--){ cells+=`<button class="ym-cell ${y===bdY?'on':''}" onclick="Onboard.bdYear(${y})">${y}</button>`; }
+      inner=`<div class="ymp-title">태어난 연도 선택 <span style="font-size:12px;font-weight:600;color:var(--muted)">· 스크롤</span></div><div class="ym-grid ym-grid-year">${cells}</div>`;
     } else if(bdStep==='month'){
       let cells=''; for(let mo=0;mo<12;mo++) cells+=`<button class="ym-cell ${mo===bdM?'on':''}" onclick="Onboard.bdMonth(${mo})">${mo+1}월</button>`;
       inner=`<div class="ymp-title"><button class="ymp-back" onclick="Onboard.bdTo('year')">‹</button><span>${bdY}년 · 월 선택</span></div><div class="ym-grid">${cells}</div>`;
@@ -2032,6 +2088,7 @@ const Onboard=(()=>{
         <div class="bcal-foot"><button onclick="Onboard.bdClear()">지우기</button><button onclick="Onboard.bdToday()">오늘</button></div>`;
     }
     m.innerHTML=`<div class="eqmodal-card" style="max-width:340px"><button class="eqmodal-x" onclick="closeYM()">✕</button>${inner}</div>`;
+    if(bdStep==='year'){ const on=m.querySelector('.ym-cell.on'); if(on) on.scrollIntoView({block:'center'}); }
   }
   const box=()=>document.getElementById('onboard');
   function show(){ box().classList.remove('hidden'); document.body.style.overflow='hidden'; box().scrollTop=0; }

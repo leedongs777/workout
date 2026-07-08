@@ -1,6 +1,7 @@
 @echo off
 cd /d "%~dp0"
 echo === GitHub 배포 시작 ===
+git pull --no-edit
 git add .
 git commit -m "update"
 git push

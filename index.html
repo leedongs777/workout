@@ -236,6 +236,12 @@
   .step-done-btn{width:100%; margin-top:12px; border:1px solid var(--accent); background:transparent; color:var(--accent-ink); font-weight:700; font-size:14px; padding:10px; border-radius:11px; cursor:pointer; font-family:inherit; transition:.14s;}
   .step.active .step-done-btn{background:var(--accent); color:#fff; border-color:var(--accent);}
   .step-done-btn.is-done{background:transparent; color:var(--muted); border-color:var(--line); border-style:dashed;}
+  .step-done-btn.start{background:var(--accent); color:#fff; border-color:var(--accent);}
+  .step-done-btn.timing{background:var(--sand-soft); color:var(--sand); border-color:var(--sand); font-variant-numeric:tabular-nums;}
+  .step.timing{box-shadow:0 0 0 2px var(--sand) inset; border-radius:14px;}
+  .step-done-row{width:100%; margin-top:12px; padding:10px; border-radius:11px; background:var(--accent-soft); color:var(--accent-ink); font-weight:700; font-size:13.5px; text-align:center;}
+  .step-done-row b{font-variant-numeric:tabular-nums;}
+  .step-reopen{margin-left:8px; border:none; background:none; color:var(--muted); font-size:12px; text-decoration:underline; cursor:pointer; font-family:inherit;}
 
   /* volume editor */
   .voledit{display:flex; align-items:center; gap:6px; flex-wrap:wrap; margin-top:9px;}
@@ -392,6 +398,35 @@
   .ob-freq{margin-top:11px; font-size:15px; color:var(--ink); text-align:center; background:var(--accent-soft); border-radius:10px; padding:11px;}
   .ob-freq b{color:var(--accent-ink); font-weight:800;}
   .ob-inline{margin-top:10px; padding:12px; border:1px dashed var(--line); border-radius:12px; background:var(--surface-2);}
+  .ob-inline input{width:100%; height:46px; padding:0 13px; border:1px solid var(--line); border-radius:11px; background:var(--surface); color:var(--ink); font-family:inherit; font-size:15px; box-sizing:border-box; outline:none;}
+  .ob-inline input:focus{border-color:var(--accent);}
+  .obchips.seg{flex-wrap:nowrap; gap:8px;}
+  .obchips.seg .obchip{flex:1 1 0; text-align:center; padding:12px 4px;}
+  .field input[type=date]{color:var(--ink);}
+  .field input[type=date]::-webkit-calendar-picker-indicator{opacity:.5; cursor:pointer;}
+  .ob-next{width:100%; margin-top:22px; height:52px; border:none; border-radius:13px; background:var(--accent); color:#fff; font-family:inherit; font-size:16px; font-weight:800; letter-spacing:-.01em; cursor:pointer; box-shadow:0 8px 20px rgba(46,94,86,.26); transition:.15s;}
+  .ob-next:active{transform:translateY(1px); box-shadow:0 4px 12px rgba(46,94,86,.22);}
+  .ob-datebtn{width:100%; height:48px; padding:0 14px; border:1px solid var(--line); border-radius:12px; background:var(--surface-2); color:var(--ink); font-family:inherit; font-size:15px; text-align:left; cursor:pointer; box-sizing:border-box; display:flex; align-items:center; justify-content:space-between;}
+  .ob-datebtn.ph{color:var(--faint);}
+  .ob-datebtn .dbi{color:var(--muted); font-size:13px;}
+  .obgrid{display:grid; grid-template-columns:repeat(2,1fr); gap:8px;}
+  .obgrid .obchip{text-align:center; padding:11px 6px;}
+  .ob-textin{width:100%; height:46px; margin-top:8px; padding:0 13px; border:1px solid var(--line); border-radius:11px; background:var(--surface); color:var(--ink); font-family:inherit; font-size:15px; box-sizing:border-box; outline:none;}
+  .ob-textin:focus{border-color:var(--accent);}
+  .bcal-head{display:flex; align-items:center; justify-content:space-between; margin-bottom:12px;}
+  .bcal-title{border:none; background:none; font-family:inherit; font-size:15px; font-weight:800; color:var(--ink); cursor:pointer; padding:6px 8px; border-radius:8px;}
+  .bcal-title:active{background:var(--surface-2);}
+  .bcal-wd{display:grid; grid-template-columns:repeat(7,1fr); margin-bottom:6px;}
+  .bcal-wd span{text-align:center; font-size:11.5px; font-weight:700; color:var(--muted);}
+  .bcal-wd .sun{color:#c0563f;} .bcal-wd .sat{color:#3f6bc0;}
+  .bcal-grid{display:grid; grid-template-columns:repeat(7,1fr); gap:3px;}
+  .bcal-cell{aspect-ratio:1/1; border:none; background:none; border-radius:9px; font-family:inherit; font-size:14px; font-weight:600; color:var(--ink); cursor:pointer; font-variant-numeric:tabular-nums;}
+  .bcal-cell:active{background:var(--surface-2);}
+  .bcal-cell.on{background:var(--accent); color:#fff;}
+  .bcal-cell.sun{color:#c0563f;} .bcal-cell.sat{color:#3f6bc0;}
+  .bcal-cell.on.sun,.bcal-cell.on.sat{color:#fff;}
+  .bcal-foot{display:flex; justify-content:space-between; margin-top:12px; padding-top:10px; border-top:1px solid var(--line-2);}
+  .bcal-foot button{border:none; background:none; font-family:inherit; font-size:13.5px; font-weight:700; color:var(--accent-ink); cursor:pointer;}
 
   /* equipment help + sub toggle + modal */
   .toggle-row.sub{margin-top:8px; margin-left:16px; border-style:dashed;}
@@ -864,7 +899,7 @@ const SESSIONS=[
 ];
 
 /* ---------------- App state ---------------- */
-let state={ equipment:[...DEFAULT_EQUIP], includeBodyweight:true, includeFloor:true, workoutDays:[0,2,3,4,5,6], startDate:todayStr(), restDays:[], doneDays:[], log:{}, steps:{}, slotCustom:{}, authPassed:false, authProvider:null, consent:null, profile:null, onboarded:true };
+let state={ equipment:[...DEFAULT_EQUIP], includeBodyweight:true, includeFloor:true, workoutDays:[0,2,3,4,5,6], sessionMinutes:60, startDate:todayStr(), restDays:[], doneDays:[], log:{}, steps:{}, slotCustom:{}, authPassed:false, authProvider:null, consent:null, profile:null, onboarded:true };
 let activeTab='home';
 let openDays={}; // schedule expand state
 
@@ -995,8 +1030,17 @@ function howtoLinks(name){
   </details>`;
 }
 function stepShell(figHtml,figCls,kicker,titleHtml,bodyHtml,id,dateStr,active,done){
-  const label=done?'✓ 완료됨 · 다시 열기':(active?'이 단계 완료 →':'완료');
-  return `<div class="step ${active?'active':''} ${done?'done':''}">
+  const started=state.stepStart&&state.stepStart[dateStr]&&state.stepStart[dateStr][id];
+  const elapsed=state.stepMs&&state.stepMs[dateStr]&&state.stepMs[dateStr][id];
+  let btn;
+  if(done){
+    btn=`<div class="step-done-row">✓ 완료${elapsed?` · <b>${fmtDur(elapsed)}</b> 걸림`:''} <button class="step-reopen" onclick="resetStep('${dateStr}','${id}')">다시 열기</button></div>`;
+  } else if(started){
+    btn=`<button class="step-done-btn timing" onclick="doneStep('${dateStr}','${id}')">완료 · <span class="live-timer" data-start="${started}">0:00</span></button>`;
+  } else {
+    btn=`<button class="step-done-btn start" onclick="startStep('${dateStr}','${id}')">시작 →</button>`;
+  }
+  return `<div class="step ${active?'active':''} ${done?'done':''} ${started&&!done?'timing':''}">
     <div class="step-head">
       <div class="step-fig ${figCls}">${figHtml}</div>
       <div class="step-main">
@@ -1005,7 +1049,7 @@ function stepShell(figHtml,figCls,kicker,titleHtml,bodyHtml,id,dateStr,active,do
         ${bodyHtml}
       </div>
     </div>
-    <button class="step-done-btn ${done?'is-done':''}" onclick="toggleStep('${dateStr}','${id}')">${label}</button>
+    ${btn}
   </div>`;
 }
 function stepIdsFor(dateStr){
@@ -1045,16 +1089,52 @@ function listBody(arr){
   return `<ul class="step-list">${out}</ul>`;
 }
 
+function sessionTimes(s, kept, si){
+  const T=Math.max(20, state.sessionMinutes||60);
+  let warm=Math.max(5,Math.min(12,Math.round(T*0.15)));
+  let cool=Math.max(4,Math.min(8,Math.round(T*0.10)));
+  const cf=/유산소/.test(s.title||'');
+  let cardio=cf?Math.round(T*0.32):Math.max(4,Math.round(T*0.12));
+  let main=T-warm-cool-cardio;
+  const need=kept.length*3;
+  if(main<need){ let d=need-main; const a=Math.min(d,cardio-3);cardio-=a;d-=a;main+=a; if(d>0){const b=Math.min(d,warm-4);warm-=b;d-=b;main+=b;} if(d>0){const c=Math.min(d,cool-3);cool-=c;d-=c;main+=c;} }
+  const setsArr=kept.map(x=>effVol(si,x.oi,x.sl).sets);
+  const tot=setsArr.reduce((a,b)=>a+b,0)||1;
+  let ex=setsArr.map(st=>Math.max(3,Math.round(main*st/tot)));
+  let sum=warm+cool+cardio+ex.reduce((a,b)=>a+b,0);
+  cardio+=(T-sum);
+  if(cardio<3){ let def=3-cardio;cardio=3; while(def>0){const mi=ex.indexOf(Math.max(...ex)); if(ex[mi]<=3)break; ex[mi]--;def--;} }
+  return {warm,cool,cardio,ex,total:T};
+}
+function fmtDur(ms){ const s=Math.round(ms/1000); const m=Math.floor(s/60); const r=s%60; return m>0?`${m}분 ${r}초`:`${r}초`; }
+function startStep(date,id){ if(!state.stepStart)state.stepStart={}; if(!state.stepStart[date])state.stepStart[date]={}; state.stepStart[date][id]=Date.now(); touch(); renderToday(); }
+function doneStep(date,id){
+  if(!state.steps)state.steps={}; if(!state.steps[date])state.steps[date]={};
+  const st=state.stepStart&&state.stepStart[date]&&state.stepStart[date][id];
+  if(st){ if(!state.stepMs)state.stepMs={}; if(!state.stepMs[date])state.stepMs[date]={}; state.stepMs[date][id]=Date.now()-st; }
+  state.steps[date][id]=true;
+  const ids=stepIdsFor(date);
+  if(ids.length && ids.every(x=>state.steps[date][x]) && !state.doneDays.includes(date)){ state.doneDays.push(date); toast('오늘 운동 전체 완료! 잘하셨어요 💪'); }
+  touch(); renderToday();
+}
+function resetStep(date,id){
+  if(state.steps&&state.steps[date]) state.steps[date][id]=false;
+  if(state.stepStart&&state.stepStart[date]) delete state.stepStart[date][id];
+  if(state.stepMs&&state.stepMs[date]) delete state.stepMs[date][id];
+  const i=state.doneDays.indexOf(date); if(i>=0) state.doneDays.splice(i,1);
+  touch(); renderToday();
+}
 function renderSessionCard(s,dateStr,si){
   const completed=(state.steps&&state.steps[dateStr])||{};
   const ids=stepIdsFor(dateStr);
   const activeId=ids.find(id=>!completed[id])||null;
   const kept=s.slots.map((sl,oi)=>({sl,oi,r:resolveSlot(sl)})).filter(x=>x.r);
   const doneCount=ids.filter(id=>completed[id]).length;
-  let html=`<div class="stepprog">진행 ${doneCount} / ${ids.length} 단계 · 현재 단계가 강조 표시됩니다</div>`;
+  const tm=sessionTimes(s,kept,si);
+  let html=`<div class="stepprog">진행 ${doneCount} / ${ids.length} 단계 · 총 약 ${tm.total}분 · 각 운동의 시작/완료로 시간을 재보세요</div>`;
 
   // warmup
-  html+=stepShell(STEP_SVG.warmup,'', '준비 · 워밍업', `<div class="step-title">워밍업</div>`, listBody(s.warm), 'warm', dateStr, activeId==='warm', !!completed['warm']);
+  html+=stepShell(STEP_SVG.warmup,'', `준비 · 워밍업 · 약 ${tm.warm}분`, `<div class="step-title">워밍업</div>`, listBody(s.warm), 'warm', dateStr, activeId==='warm', !!completed['warm']);
 
   // main exercises
   kept.forEach((x,idx)=>{
@@ -1067,14 +1147,14 @@ function renderSessionCard(s,dateStr,si){
     if(x.r.cue) body+=`<div class="step-cue">${x.r.cue}</div>`;
     body+=renderSetLog(x.sl,x.r,dateStr,x.oi,v.sets);
     body+=howtoLinks(x.r.name);
-    html+=stepShell(exFig(x.r,x.sl.role),'', `운동 ${idx+1} / ${kept.length}`, title, body, id, dateStr, active, done);
+    html+=stepShell(exFig(x.r,x.sl.role),'', `운동 ${idx+1} / ${kept.length} · 약 ${tm.ex[idx]}분`, title, body, id, dateStr, active, done);
   });
 
   // cardio
-  html+=stepShell(STEP_SVG.cardio,'', '유산소', `<div class="step-title">${s.cardio.label}</div>`, `${cardioChips()}<div class="step-cue" style="margin-top:8px">${s.cardio.detail}</div>`, 'cardio', dateStr, activeId==='cardio', !!completed['cardio']);
+  html+=stepShell(STEP_SVG.cardio,'', `유산소 · 약 ${tm.cardio}분`, `<div class="step-title">${s.cardio.label}</div>`, `${cardioChips()}<div class="step-cue" style="margin-top:8px">${s.cardio.detail}</div>`, 'cardio', dateStr, activeId==='cardio', !!completed['cardio']);
 
   // cooldown
-  html+=stepShell(STEP_SVG.cooldown,'', '마무리 · 쿨다운', `<div class="step-title">마무리 쿨다운</div>`, listBody(s.cool), 'cool', dateStr, activeId==='cool', !!completed['cool']);
+  html+=stepShell(STEP_SVG.cooldown,'', `마무리 · 쿨다운 · 약 ${tm.cool}분`, `<div class="step-title">마무리 쿨다운</div>`, listBody(s.cool), 'cool', dateStr, activeId==='cool', !!completed['cool']);
 
   return html;
 }
@@ -1093,7 +1173,7 @@ function streak(){ let n=0,guard=0; let d=parse(todayStr()); const today=todaySt
 }
 function renderHome(){
   const t=todayStr(); const entry=sessionFor(t);
-  const nm=(state.profile&&state.profile.name)?state.profile.name+'님, ':'';
+  const nm=(state.profile&&(state.profile.nickname||state.profile.name))?(state.profile.nickname||state.profile.name)+'님, ':'';
   let html=`<div class="home-hi">${nm}오늘도 힘내볼까요?</div><div class="home-date">${human(t)} · ${WD[parse(t).getDay()]}요일</div>`;
   if(!entry||entry.rest){
     html+=`<div class="card hero"><div class="hero-top rest"><div><div class="hero-date"><b>오늘</b></div><div class="hero-title">휴식일</div><div class="hero-est">${entry&&entry.fixed?'정기 휴식일 · 이번 주 쉬는 요일':'쉬는 날'} · 가볍게 회복하세요</div></div><span class="pill ${entry&&entry.fixed?'rest-fixed':'rest'}">REST</span></div></div>`;
@@ -1103,7 +1183,7 @@ function renderHome(){
     html+=`<div class="card"><div class="hero-pad">
       <div class="hero-date"><b>오늘의 운동</b> <span>· ${WD[parse(t).getDay()]}요일</span></div>
       <div class="hero-title">${s.title}</div>
-      <div class="hero-est">예상 ${s.est} · 순환 ${entry.session+1}/6 · ${dn}/${ids.length}단계 완료</div>
+      <div class="hero-est">약 ${state.sessionMinutes||60}분 · 순환 ${entry.session+1}/6 · ${dn}/${ids.length}단계 완료</div>
       ${dn>0?`<div class="home-prog"><div class="home-prog-bar" style="width:${pct}%"></div></div>`:''}
       <button class="btn primary" style="margin-top:14px" onclick="goTab('plan')">${dayDone?'✓ 오늘 완료 · 다시 보기':(dn>0?'이어서 운동하기 →':'오늘 운동 시작하기 →')}</button>
     </div></div>`;
@@ -1207,7 +1287,7 @@ function renderToday(){
     html+=`<div class="card hero"><div class="hero-top">
       <div class="hero-date"><b>${human(t)}</b> <span>${isToday?'· 오늘':'· '+WD[parse(t).getDay()]+'요일'}</span></div>
       <div class="hero-title">${s.title}</div>
-      <div class="hero-est">예상 ${s.est} · 순환 ${entry.session+1}/6</div>
+      <div class="hero-est">약 ${state.sessionMinutes||60}분 · 순환 ${entry.session+1}/6</div>
       <div class="tags">${focusTags(s.focus)}</div>
     </div>`;
     html+=`<div class="btn-row">
@@ -1295,7 +1375,7 @@ function planDayRow(k,t){
     const s=SESSIONS[e.session];
     main=`<div class="day-main" onclick="toggleOpen('${k}')">
       <div class="day-info"><div class="day-ttl">${s.title}${isToday?'<span class="badge today">오늘</span>':''}</div>
-        <div class="day-focus">${s.focus.join(' · ')} · ${s.est}</div></div>
+        <div class="day-focus">${s.focus.join(' · ')} · 약 ${state.sessionMinutes||60}분</div></div>
       ${done?'<span class="badge done">✓ 완료</span>':''}
       <span class="chev">▶</span></div>`;
   }
@@ -1471,7 +1551,7 @@ const Drawer=(()=>{
   function mi(tab,ic,label){ return `<button class="drawer-item ${activeTab===tab?'on':''}" onclick="Drawer.go('${tab}')"><span class="di-ic">${ic}</span>${label}</button>`; }
   function render(){
     const p=state.profile; const ui=(typeof Sync!=='undefined'&&Sync.userInfo)?Sync.userInfo():null;
-    const name=(p&&p.name)?p.name:(ui&&ui.name?ui.name:'게스트');
+    const name=(p&&(p.nickname||p.name))?(p.nickname||p.name):(ui&&ui.name?ui.name:'게스트');
     const sub=state.authProvider==='guest'?'둘러보기 모드':(ui&&ui.email?ui.email:'내 프로필 보기');
     const av=(name&&name[0])?name[0]:'👤';
     const loggedIn=state.authProvider&&state.authProvider!=='guest';
@@ -1499,8 +1579,25 @@ const Drawer=(()=>{
 })();
 
 /* ----- SETTINGS view ----- */
+function toggleWorkoutDay(i){ if(!state.workoutDays) state.workoutDays=[0,2,3,4,5,6]; const j=state.workoutDays.indexOf(i); if(j>=0){ if(state.workoutDays.length<=1){ toast('최소 1개 요일은 운동해야 해요'); return; } state.workoutDays.splice(j,1); } else state.workoutDays.push(i); touch(); renderSetup(); }
+function setSessionMin(m){ state.sessionMinutes=m; touch(); renderSetup(); }
+function scheduleSettingsHTML(){
+  const wd=state.workoutDays||[0,2,3,4,5,6]; const n=wd.length;
+  const dayList=[[1,'월'],[2,'화'],[3,'수'],[4,'목'],[5,'금'],[6,'토'],[0,'일']];
+  const mins=[30,45,60,75,90,120]; const cur=state.sessionMinutes||60;
+  return `<div class="sec-label">회원 정보</div>
+    <button class="btn ghost" onclick="Onboard.startEdit()">회원 정보·목표 수정하기</button>
+    <p class="info" style="margin:8px 4px 0">이름·신체정보·경험·목표·부상·지병을 다시 입력할 수 있어요.</p>
+    <div class="sec-label">운동 요일</div>
+    <div class="obchips">${dayList.map(([i,d])=>`<button class="chip ${wd.includes(i)?'on':''}" onclick="toggleWorkoutDay(${i})">${d}</button>`).join('')}</div>
+    <p class="info" style="margin:8px 4px 0">${n>0?`${n}일 운동 · ${7-n}일 휴식`:'운동할 요일을 선택하세요'} · 바꾸면 이후 일정이 자동으로 재구성돼요.</p>
+    <div class="sec-label">하루 운동 시간</div>
+    <div class="obchips">${mins.map(m=>`<button class="chip ${cur===m?'on':''}" onclick="setSessionMin(${m})">${m}분</button>`).join('')}</div>
+    <p class="info" style="margin:8px 4px 0">이 시간에 맞춰 워밍업·운동·유산소·쿨다운 시간이 자동 배분돼요.</p>`;
+}
 function renderSetup(){
-  let html=equipSectionHTML();
+  let html=scheduleSettingsHTML();
+  html+=equipSectionHTML();
   html+=`<div class="sec-label">플랜 정보</div>
   <div class="card pad info">
     <b>목표</b> · 체중·뱃살 감량 + 자세·체형 교정(거북목·말린 어깨·골반 좌우 불균형) + 적당한 근육량 증가<br>
@@ -1677,7 +1774,7 @@ function resetSchedule(){
   touch(); toast('휴식·완료 기록을 초기화했어요'); refresh();
 }
 function resetAll(){
-  state={ equipment:[...DEFAULT_EQUIP], includeBodyweight:true, includeFloor:true, workoutDays:[0,2,3,4,5,6], startDate:todayStr(), restDays:[], doneDays:[], log:{}, steps:{}, slotCustom:{}, authPassed:false, authProvider:null, consent:null, profile:null, onboarded:true };
+  state={ equipment:[...DEFAULT_EQUIP], includeBodyweight:true, includeFloor:true, workoutDays:[0,2,3,4,5,6], sessionMinutes:60, startDate:todayStr(), restDays:[], doneDays:[], log:{}, steps:{}, slotCustom:{}, authPassed:false, authProvider:null, consent:null, profile:null, onboarded:true };
   openDays={}; touch(); toast('전체 초기화 완료'); if(typeof Auth!=='undefined') Auth.show(); refresh();
 }
 
@@ -1915,17 +2012,38 @@ const Auth=(()=>{
 /* ---------------- Onboarding (signup profile) ---------------- */
 const Onboard=(()=>{
   let ob={}, done=null;
+  let bdY=2000, bdM=0, bdStep='cal';
+  function renderBirthCal(){
+    const m=document.getElementById('ympick'); const WDh=['일','월','화','수','목','금','토']; let inner;
+    if(bdStep==='year'){
+      const base=bdY-6; let cells='';
+      for(let i=0;i<12;i++){ const y=base+i; cells+=`<button class="ym-cell ${y===bdY?'on':''}" onclick="Onboard.bdYear(${y})">${y}</button>`; }
+      inner=`<div class="ymp-title">연도 선택</div><div class="ym-grid">${cells}</div>`;
+    } else if(bdStep==='month'){
+      let cells=''; for(let mo=0;mo<12;mo++) cells+=`<button class="ym-cell ${mo===bdM?'on':''}" onclick="Onboard.bdMonth(${mo})">${mo+1}월</button>`;
+      inner=`<div class="ymp-title"><button class="ymp-back" onclick="Onboard.bdTo('year')">‹</button><span>${bdY}년 · 월 선택</span></div><div class="ym-grid">${cells}</div>`;
+    } else {
+      const first=new Date(bdY,bdM,1); const off=first.getDay(); const last=new Date(bdY,bdM+1,0).getDate(); const sel=ob.birth;
+      let cells=''; for(let i=0;i<off;i++) cells+=`<span></span>`;
+      for(let day=1;day<=last;day++){ const ds=fmt(new Date(bdY,bdM,day)); const dow=(off+day-1)%7; let cls='bcal-cell'; if(ds===sel)cls+=' on'; if(dow===0)cls+=' sun'; if(dow===6)cls+=' sat'; cells+=`<button class="${cls}" onclick="Onboard.bdPick(${day})">${day}</button>`; }
+      inner=`<div class="bcal-head"><button class="ymbtn" onclick="Onboard.bdShift(-1)">‹</button><button class="bcal-title" onclick="Onboard.bdTo('year')">${bdY}년 ${bdM+1}월 ▾</button><button class="ymbtn" onclick="Onboard.bdShift(1)">›</button></div>
+        <div class="bcal-wd">${WDh.map((w,i)=>`<span class="${i===0?'sun':i===6?'sat':''}">${w}</span>`).join('')}</div>
+        <div class="bcal-grid">${cells}</div>
+        <div class="bcal-foot"><button onclick="Onboard.bdClear()">지우기</button><button onclick="Onboard.bdToday()">오늘</button></div>`;
+    }
+    m.innerHTML=`<div class="eqmodal-card" style="max-width:340px"><button class="eqmodal-x" onclick="closeYM()">✕</button>${inner}</div>`;
+  }
   const box=()=>document.getElementById('onboard');
   function show(){ box().classList.remove('hidden'); document.body.style.overflow='hidden'; box().scrollTop=0; }
   function hide(){ box().classList.add('hidden'); document.body.style.overflow=''; }
-  const GENDERS=[['male','남성'],['female','여성'],['other','기타']];
+  const GENDERS=[['male','남성'],['female','여성']];
   const GOALS=['다이어트(체중감량)','근육 만들기','체력 향상','자세교정','현 상태 유지'];
   const INJ=['허리 (디스크/수술)','무릎','어깨','발목','손목','목/거북목'];
   const COND=['고혈압','당뇨','심장질환','천식','갑상선','관절염'];
   function chip(label,on,handler){ return `<span class="obchip ${on?'on':''}" onclick="${handler}">${label}</span>`; }
   function v(id){ const el=document.getElementById(id); return el?el.value.trim():''; }
   function numv(id){ const el=document.getElementById(id); if(!el||el.value==='')return null; const n=parseFloat(el.value); return isNaN(n)?null:n; }
-  function readStep1(){ ob.name=v('ob-name'); ob.birth=v('ob-birth'); }
+  function readStep1(){ ob.name=v('ob-name'); ob.nickname=v('ob-nick'); }
   function readStep2(){ ob.heightCm=numv('ob-h'); ob.weightKg=numv('ob-w'); ob.targetWeightKg=numv('ob-tw'); if(ob.running===true){ const pm=numv('ob-pmin'); if(pm!=null)ob.paceMin=pm; const ps=numv('ob-psec'); if(ps!=null)ob.paceSec=ps; ob.maxKm=numv('ob-maxkm'); } if(ob.goalEtc)ob.goalOther=v('ob-goalother'); if(ob.injEtc)ob.injOther=v('ob-injother'); if(ob.condEtc)ob.condOther=v('ob-condother'); }
   function render(step){ box().innerHTML = step===1?step1():step===2?step2():step3(); }
   function step3(){
@@ -1940,6 +2058,9 @@ const Onboard=(()=>{
       <div class="obchips">${dayList.map(([i,d])=>chip(d, wd.includes(i), `Onboard.toggleDay(${i})`)).join('')}</div>
       <div class="ob-freq">${n>0?`<b>${n}일 운동</b> · ${7-n}일 휴식`:'운동할 요일을 눌러 주세요'}</div>
       <p class="ob-hint" style="margin:6px 0 0">고른 요일에 운동이 배치되고 나머지 요일은 휴식이에요. 요일은 나중에 [일정] 탭에서 자유롭게 조정할 수 있어요.</p>
+      <div class="ob-sec">하루 운동 가능 시간</div>
+      <div class="obchips">${[30,45,60,75,90,120].map(m=>chip(m+'분', ob.sessionMinutes===m, `Onboard.setMin(${m})`)).join('')}</div>
+      <p class="ob-hint" style="margin:6px 0 0">이 시간에 맞춰 워밍업·운동·유산소·쿨다운 시간이 자동 배분돼요.</p>
       <div class="toggle-row ${bw?'on':''}" style="margin-top:16px" onclick="Onboard.obBwT()"><div class="tr-ill">${patIcon('사이드 플랭크 (맥길)')}</div><div class="tr-body"><div class="tr-t">맨몸 운동 포함</div><div class="tr-s">${bw?'기구 없이 하는 맨몸 운동 포함':'맨몸 운동 제외'}</div></div><div class="switch"></div></div>
       ${bw?`<div class="toggle-row sub ${fl?'on':''}" onclick="Onboard.obFloorT()"><div class="tr-ill">${POSE_SVG.deadbug}</div><div class="tr-body"><div class="tr-t">바닥 운동 포함</div><div class="tr-s">${fl?'눕거나 엎드려·앉아서 하는 동작 포함':'바닥에서 하는 동작 제외'}</div></div><div class="switch"></div></div>`:''}
       <div class="ob-sec">보유 기구</div>
@@ -1954,13 +2075,14 @@ const Onboard=(()=>{
       <div class="ob-title">기본 정보를 알려주세요</div>
       <div class="ob-sub">계정과 맞춤 플랜에 사용돼요.</div>
       <div class="field" style="margin-top:16px"><label>이름</label><input id="ob-name" type="text" value="${ob.name||''}" placeholder="이름"></div>
-      <div class="field"><label>생년월일</label><input id="ob-birth" type="date" value="${ob.birth||''}" class="ob-select" style="width:100%"></div>
+      <div class="field"><label>닉네임 <span class="opt">· 최대 10자</span></label><input id="ob-nick" type="text" maxlength="10" value="${ob.nickname||''}" placeholder="앱에서 표시될 이름"></div>
+      <div class="field"><label>생년월일</label><button type="button" class="ob-datebtn ${ob.birth?'':'ph'}" onclick="Onboard.openBirth()">${ob.birth?`${(''+ob.birth).slice(0,4)}년 ${+(''+ob.birth).slice(5,7)}월 ${+(''+ob.birth).slice(8,10)}일`:'생년월일 선택'}<span class="dbi">▾</span></button></div>
       <div class="ob-sec">성별</div>
-      <div class="obchips">${GENDERS.map(([val,l])=>chip(l,ob.gender===val,`Onboard.set('gender','${val}')`)).join('')}</div>
+      <div class="obchips seg">${GENDERS.map(([val,l])=>chip(l,ob.gender===val,`Onboard.set('gender','${val}')`)).join('')}</div>
       <div class="ob-sec">내/외국인</div>
-      <div class="obchips">${chip('내국인',ob.foreigner===false,'Onboard.setForeigner(false)')}${chip('외국인',ob.foreigner===true,'Onboard.setForeigner(true)')}</div>
+      <div class="obchips seg">${chip('내국인',ob.foreigner===false,'Onboard.setForeigner(false)')}${chip('외국인',ob.foreigner===true,'Onboard.setForeigner(true)')}</div>
       <div class="ob-sec">본인인증</div>
-      <div class="obchips">${['휴대폰','이메일','간편인증'].map(m=>chip(m,ob.verifyMethod===m,`Onboard.set('verifyMethod','${m}')`)).join('')}</div>
+      <div class="obchips seg">${['휴대폰','이메일','간편인증'].map(m=>chip(m,ob.verifyMethod===m,`Onboard.set('verifyMethod','${m}')`)).join('')}</div>
       ${ob.foreigner===true?`<div class="ob-hint">외국인은 여권 / 외국인등록번호 기반 인증이 제공될 예정이에요.</div>`:''}
       <div class="ob-verify"><button class="vbtn" onclick="Onboard.verify()">${ob.verified?'✓ 인증됨':'본인인증 하기'}</button></div>
       <div class="ob-hint">지금은 인증 화면만 준비돼 있어요. 실제 본인인증(휴대폰·간편인증)은 정식 출시 때 연동되며, 지금은 건너뛰고 진행돼요.</div>
@@ -1980,9 +2102,9 @@ const Onboard=(()=>{
       </div>
       <div class="field"><label>목표 몸무게 (kg) <span class="opt">· 선택</span></label><input id="ob-tw" type="number" inputmode="decimal" value="${ob.targetWeightKg||''}" placeholder="선택 입력"></div>
       <div class="ob-sec">근력 운동(헬스) 경험</div>
-      <div class="obchips">${chip('있음',ob.lifting===true,'Onboard.set2("lifting",true)')}${chip('없음',ob.lifting===false,'Onboard.set2("lifting",false)')}</div>
+      <div class="obchips seg">${chip('있음',ob.lifting===true,"Onboard.set2('lifting',true)")}${chip('없음',ob.lifting===false,"Onboard.set2('lifting',false)")}</div>
       <div class="ob-sec">러닝 경험</div>
-      <div class="obchips">${chip('있음',ob.running===true,'Onboard.setRunning(true)')}${chip('없음',ob.running===false,'Onboard.setRunning(false)')}</div>
+      <div class="obchips seg">${chip('있음',ob.running===true,'Onboard.setRunning(true)')}${chip('없음',ob.running===false,'Onboard.setRunning(false)')}</div>
       ${r?`<div class="ob-inline">
         <label style="display:block;font-size:12.5px;font-weight:700;color:var(--muted);margin-bottom:6px">1km 페이스</label>
         <div class="pace"><select id="ob-pmin">${mins.map(m=>`<option ${ob.paceMin==m?'selected':''}>${m}</option>`).join('')}</select><span class="u">분</span><select id="ob-psec">${secs.map(sX=>`<option ${ob.paceSec==sX?'selected':''}>${String(sX).padStart(2,'0')}</option>`).join('')}</select><span class="u">초</span></div>
@@ -1990,20 +2112,41 @@ const Onboard=(()=>{
         <input id="ob-maxkm" type="number" inputmode="decimal" value="${ob.maxKm||''}" placeholder="예: 5" style="width:130px">
       </div>`:''}
       <div class="ob-sec">운동 목표 <span class="opt">· 여러 개 선택 가능</span></div>
-      <div class="obchips">${GOALS.map(g=>chip(g,ob.goals.includes(g),`Onboard.toggleGoal('${g}')`)).join('')}${chip('기타',!!ob.goalEtc,'Onboard.toggleGoalEtc()')}</div>
-      ${ob.goalEtc?`<div class="ob-inline"><input id="ob-goalother" type="text" value="${ob.goalOther||''}" placeholder="목표를 직접 입력"></div>`:''}
+      <div class="obgrid">${GOALS.map(g=>chip(g,ob.goals.includes(g),`Onboard.toggleGoal('${g}')`)).join('')}${chip('기타',!!ob.goalEtc,'Onboard.toggleGoalEtc()')}</div>
+      ${ob.goalEtc?`<input class="ob-textin" id="ob-goalother" type="text" value="${ob.goalOther||''}" placeholder="목표를 직접 입력">`:''}
       <div class="ob-sec">부상·수술 이력 <span class="opt">· 선택</span></div>
-      <div class="obchips">${chip('없음',ob.injHas===false,'Onboard.setInj(false)')}${chip('있음',ob.injHas===true,'Onboard.setInj(true)')}</div>
-      ${ob.injHas===true?`<div class="ob-inline"><div class="obchips">${INJ.map(x=>chip(x,ob.injList.includes(x),`Onboard.toggleInj('${x}')`)).join('')}${chip('기타',!!ob.injEtc,'Onboard.toggleInjEtc()')}</div>${ob.injEtc?`<input id="ob-injother" type="text" value="${ob.injOther||''}" placeholder="직접 입력" style="margin-top:8px">`:''}</div>`:''}
+      <div class="obchips seg">${chip('없음',ob.injHas===false,'Onboard.setInj(false)')}${chip('있음',ob.injHas===true,'Onboard.setInj(true)')}</div>
+      ${ob.injHas===true?`<div class="obgrid" style="margin-top:8px">${INJ.map(x=>chip(x,ob.injList.includes(x),`Onboard.toggleInj('${x}')`)).join('')}${chip('기타',!!ob.injEtc,'Onboard.toggleInjEtc()')}</div>${ob.injEtc?`<input class="ob-textin" id="ob-injother" type="text" value="${ob.injOther||''}" placeholder="직접 입력">`:''}`:''}
       <div class="ob-sec">지병 <span class="opt">· 선택</span></div>
-      <div class="obchips">${chip('없음',ob.condHas===false,'Onboard.setCond(false)')}${chip('있음',ob.condHas===true,'Onboard.setCond(true)')}</div>
-      ${ob.condHas===true?`<div class="ob-inline"><div class="obchips">${COND.map(x=>chip(x,ob.condList.includes(x),`Onboard.toggleCond('${x}')`)).join('')}${chip('기타',!!ob.condEtc,'Onboard.toggleCondEtc()')}</div>${ob.condEtc?`<input id="ob-condother" type="text" value="${ob.condOther||''}" placeholder="직접 입력" style="margin-top:8px">`:''}</div>`:''}
+      <div class="obchips seg">${chip('없음',ob.condHas===false,'Onboard.setCond(false)')}${chip('있음',ob.condHas===true,'Onboard.setCond(true)')}</div>
+      ${ob.condHas===true?`<div class="obgrid" style="margin-top:8px">${COND.map(x=>chip(x,ob.condList.includes(x),`Onboard.toggleCond('${x}')`)).join('')}${chip('기타',!!ob.condEtc,'Onboard.toggleCondEtc()')}</div>${ob.condEtc?`<input class="ob-textin" id="ob-condother" type="text" value="${ob.condOther||''}" placeholder="직접 입력">`:''}`:''}
       <button class="ob-next" onclick="Onboard.next2()">다음 · 운동 환경</button>
     </div>`;
   }
   return {
     hide,
-    start:(cb)=>{ done=cb; ob={ gender:null, foreigner:null, verifyMethod:null, verified:false, lifting:null, running:null, goals:[], goalOther:'', injHas:null, injList:[], condHas:null, condList:[], equipment:[...DEFAULT_EQUIP], obBw:true, obFloor:true, workoutDays:[1,3,5,6] }; render(1); show(); },
+    start:(cb)=>{ done=cb; ob={ nickname:'', gender:null, foreigner:null, verifyMethod:null, verified:false, lifting:null, running:null, goals:[], goalOther:'', injHas:null, injList:[], condHas:null, condList:[], equipment:[...DEFAULT_EQUIP], obBw:true, obFloor:true, workoutDays:[1,3,5,6], sessionMinutes:60 }; render(1); show(); },
+    openBirth:()=>{ readStep1(); const b=ob.birth?parse(ob.birth):new Date(2000,0,1); bdY=b.getFullYear(); bdM=b.getMonth(); bdStep='cal'; renderBirthCal(); document.getElementById('ympick').classList.remove('hidden'); },
+    bdShift:(n)=>{ bdM+=n; if(bdM<0){bdM=11;bdY--;} else if(bdM>11){bdM=0;bdY++;} renderBirthCal(); },
+    bdTo:(step)=>{ bdStep=step; renderBirthCal(); },
+    bdYear:(y)=>{ bdY=y; bdStep='month'; renderBirthCal(); },
+    bdMonth:(mo)=>{ bdM=mo; bdStep='cal'; renderBirthCal(); },
+    bdPick:(day)=>{ ob.birth=fmt(new Date(bdY,bdM,day)); closeYM(); render(1); },
+    bdClear:()=>{ ob.birth=''; closeYM(); render(1); },
+    bdToday:()=>{ ob.birth=todayStr(); closeYM(); render(1); },
+    startEdit:()=>{
+      const p=state.profile||{}; let pMin=null,pSec=null; if(p.runPace){ const q=(''+p.runPace).split(':'); pMin=+q[0]; pSec=+q[1]; }
+      done=()=>{ if(typeof refresh==='function') refresh(); };
+      ob={ name:p.name||'', nickname:p.nickname||'', birth:p.birth||'', gender:p.gender||null, foreigner:(p.foreigner===undefined?null:p.foreigner), verifyMethod:p.verifyMethod||null, verified:!!p.verified,
+        heightCm:p.heightCm||'', weightKg:p.weightKg||'', targetWeightKg:p.targetWeightKg||'',
+        lifting:(p.liftingExp===undefined?null:p.liftingExp), running:(p.running===undefined?null:p.running), paceMin:pMin, paceSec:pSec, maxKm:p.runMaxKm||'',
+        goals:(p.goals||[]).slice(), goalOther:p.goalOther||'', goalEtc:!!(p.goalOther),
+        injHas:(p.injuries?p.injuries.has:null), injList:((p.injuries&&p.injuries.list)||[]).slice(), injEtc:!!(p.injuries&&p.injuries.other), injOther:(p.injuries&&p.injuries.other)||'',
+        condHas:(p.conditions?p.conditions.has:null), condList:((p.conditions&&p.conditions.list)||[]).slice(), condEtc:!!(p.conditions&&p.conditions.other), condOther:(p.conditions&&p.conditions.other)||'',
+        equipment:[...(state.equipment||[])], obBw:!!state.includeBodyweight, obFloor:!!state.includeFloor,
+        workoutDays:(state.workoutDays||[1,3,5,6]).slice(), sessionMinutes:state.sessionMinutes||60 };
+      render(1); show();
+    },
     set:(k,val)=>{ readStep1(); ob[k]=val; render(1); },
     setForeigner:(b)=>{ readStep1(); ob.foreigner=b; render(1); },
     verify:()=>{ if(!ob.verifyMethod){ toast('인증 수단을 먼저 선택해 주세요'); return; } readStep1(); ob.verified=true; toast('본인인증은 정식 출시 때 실제로 연동돼요. 지금은 통과 처리했어요.'); render(1); },
@@ -2023,13 +2166,14 @@ const Onboard=(()=>{
     back2:()=>{ render(2); box().scrollTop=0; },
     toggleEq:(id)=>{ const i=ob.equipment.indexOf(id); if(i>=0)ob.equipment.splice(i,1); else ob.equipment.push(id); render(3); },
     toggleDay:(i)=>{ const j=ob.workoutDays.indexOf(i); if(j>=0)ob.workoutDays.splice(j,1); else ob.workoutDays.push(i); render(3); },
+    setMin:(m)=>{ ob.sessionMinutes=m; render(3); },
     obBwT:()=>{ ob.obBw=!ob.obBw; render(3); },
     obFloorT:()=>{ ob.obFloor=!ob.obFloor; render(3); },
     finish:()=>{
       if(!ob.heightCm||!ob.weightKg||ob.lifting===null||ob.running===null){ toast('이전 단계 정보를 확인해 주세요'); render(2); return; }
       if(!ob.workoutDays||ob.workoutDays.length===0){ toast('운동할 요일을 최소 1개 선택해 주세요'); return; }
       state.profile={
-        name:ob.name, birth:ob.birth, gender:ob.gender, foreigner:ob.foreigner,
+        name:ob.name, nickname:ob.nickname||'', birth:ob.birth, gender:ob.gender, foreigner:ob.foreigner,
         verifyMethod:ob.verifyMethod, verified:!!ob.verified,
         heightCm:ob.heightCm, weightKg:ob.weightKg, targetWeightKg:ob.targetWeightKg,
         liftingExp:ob.lifting, running:ob.running,
@@ -2044,12 +2188,16 @@ const Onboard=(()=>{
       state.includeBodyweight=!!ob.obBw;
       state.includeFloor=!!ob.obFloor;
       state.workoutDays=ob.workoutDays.slice();
+      state.sessionMinutes=ob.sessionMinutes||60;
       touch(); hide(); if(done)done();
       if(typeof switchTab==='function') switchTab('home');
       toast('플랜이 준비됐어요! 아래에서 확인해 보세요');
     }
   };
 })();
+
+/* live timers tick */
+setInterval(()=>{ document.querySelectorAll('.live-timer').forEach(el=>{ const st=+el.dataset.start; if(st){ const s=Math.floor((Date.now()-st)/1000); el.textContent=Math.floor(s/60)+':'+String(s%60).padStart(2,'0'); } }); },1000);
 
 /* ---------------- Init ---------------- */
 (async function(){

@@ -1,0 +1,83 @@
+name: Validate & Deploy
+
+# main 브랜치에 index.html 등이 push되면 실행
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:   # 수동 실행 버튼도 추가
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# 동시에 여러 배포가 겹치지 않게
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  # 1) 검증 — 문법 오류가 있으면 여기서 실패 → 배포 안 됨(안전망)
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 저장소 체크아웃
+        uses: actions/checkout@v4
+
+      - name: Node 설치
+        uses: actions/setup-node@v4
+        with:
+          node_version: '20'
+
+      - name: index.html 존재 확인
+        run: |
+          if [ ! -f index.html ]; then
+            echo "::error::index.html 이 저장소 루트에 없습니다."
+            exit 1
+          fi
+
+      - name: HTML 안의 <script> JS 문법 검사
+        run: |
+          node - <<'EOF'
+          const fs = require('fs');
+          const vm = require('vm');
+          const html = fs.readFileSync('index.html', 'utf8');
+          const scripts = [...html.matchAll(/<script(?![^>]*\bsrc=)[^>]*>([\s\S]*?)<\/script>/gi)].map(m => m[1]);
+          if (scripts.length === 0) { console.log('인라인 script 없음 — 스킵'); process.exit(0); }
+          let bad = 0;
+          scripts.forEach((code, i) => {
+            try { new vm.Script(code); console.log(`script #${i+1}: OK`); }
+            catch (e) { bad++; console.error(`::error::script #${i+1} 문법 오류: ${e.message}`); }
+          });
+          if (bad) { console.error(`::error::JS 문법 오류 ${bad}개 — 배포를 중단합니다.`); process.exit(1); }
+          console.log('모든 script 문법 통과 ✅');
+          EOF
+
+      - name: 기본 HTML 구조 확인
+        run: |
+          grep -qi '<!doctype html' index.html || { echo "::error::<!doctype html> 누락"; exit 1; }
+          grep -qi '</html>' index.html || { echo "::error::</html> 누락(파일이 잘렸을 수 있음)"; exit 1; }
+          echo "HTML 구조 OK ✅"
+
+  # 2) 배포 — 검증을 통과했을 때만 실행
+  deploy:
+    needs: validate
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: 저장소 체크아웃
+        uses: actions/checkout@v4
+
+      - name: Pages 설정
+        uses: actions/configure-pages@v5
+
+      - name: 사이트 파일 업로드(저장소 전체)
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: '.'
+
+      - name: GitHub Pages 배포
+        id: deployment
+        uses: actions/deploy-pages@v4

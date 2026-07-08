@@ -41,13 +41,13 @@
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
   html,body{margin:0;padding:0;}
   body{
-    background:var(--bg); color:var(--ink);
+    background:var(--bg); color:var(--ink); min-height:100dvh;
     font-family:"Pretendard Variable","Pretendard",-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Segoe UI",Roboto,"Malgun Gothic","Noto Sans KR",sans-serif;
     letter-spacing:-.005em;
     font-size:16px; line-height:1.5; -webkit-font-smoothing:antialiased;
     font-feature-settings:"tnum" 1;
   }
-  .wrap{max-width:640px; margin:0 auto; padding:0 18px calc(var(--nav-h) + 40px); min-height:100vh;}
+  .wrap{max-width:640px; margin:0 auto; padding:0 18px calc(var(--nav-h) + 24px);}
   .num{font-variant-numeric:tabular-nums;}
 
   /* Header */
@@ -205,7 +205,7 @@
   .step{border:1px solid var(--line); border-radius:var(--radius); background:var(--surface); padding:14px 15px; margin-bottom:10px; transition:.16s;}
   .step.active{border-color:var(--accent); background:var(--accent-soft); box-shadow:0 0 0 2px var(--accent-soft);}
   .step.done{opacity:.62;}
-  .step.done .step-name, .step.done .step-title{text-decoration:line-through; text-decoration-color:var(--faint);}
+  .step.done .step-name, .step.done .step-title{color:var(--muted);}
   .step-head{display:flex; align-items:flex-start; gap:11px;}
   .step-fig{flex:none; width:44px; height:44px; border-radius:10px; background:var(--surface-2); border:1px solid var(--line-2); color:var(--accent); display:flex; align-items:center; justify-content:center;}
   .step.active .step-fig{background:#fff;}
@@ -292,9 +292,9 @@
   .field label{display:block; font-size:12.5px; font-weight:700; color:var(--muted); margin-bottom:6px;}
   .field input{width:100%; height:48px; padding:0 14px; border:1px solid var(--line); border-radius:12px; background:var(--surface-2); color:var(--ink); font-family:inherit; font-size:15px; box-sizing:border-box; outline:none;}
   .field input:focus{border-color:var(--accent);}
-  .seg{display:flex; background:var(--surface-2); border:1px solid var(--line); border-radius:12px; padding:4px; margin-bottom:18px;}
-  .seg button{flex:1; height:38px; border:none; background:none; border-radius:9px; font-family:inherit; font-size:14px; font-weight:700; color:var(--muted); cursor:pointer;}
-  .seg button.on{background:var(--accent); color:#fff;}
+  .seg{display:flex; gap:8px; margin-bottom:18px;}
+  .seg button{flex:1; height:44px; border:1px solid var(--line); background:var(--surface-2); border-radius:11px; font-family:inherit; font-size:14px; font-weight:700; color:var(--muted); cursor:pointer;}
+  .seg button.on{background:var(--accent); border-color:var(--accent); color:#fff;}
 
   /* consent */
   .cons-h{font-size:20px; font-weight:800; letter-spacing:-.02em; margin:6px 0 4px;}
@@ -349,9 +349,9 @@
   .ymbtn:active{background:var(--surface-2);}
   .ymlabel{font-size:16px; font-weight:800; min-width:118px; text-align:center; font-variant-numeric:tabular-nums; background:none; border:none; font-family:inherit; color:var(--ink); cursor:pointer; padding:6px 4px; border-radius:8px;}
   .ymlabel:active{background:var(--surface-2);}
-  .modeseg{display:flex; background:var(--surface-2); border:1px solid var(--line); border-radius:10px; padding:3px;}
-  .modeseg button{border:none; background:none; border-radius:8px; font-family:inherit; font-size:13px; font-weight:700; color:var(--muted); cursor:pointer; padding:7px 14px;}
-  .modeseg button.on{background:var(--accent); color:#fff;}
+  .modeseg{display:flex; gap:8px;}
+  .modeseg button{border:1px solid var(--line); background:var(--surface-2); border-radius:10px; font-family:inherit; font-size:13px; font-weight:700; color:var(--muted); cursor:pointer; padding:8px 15px;}
+  .modeseg button.on{background:var(--accent); border-color:var(--accent); color:#fff;}
   .ymp-title{font-size:15px; font-weight:800; margin-bottom:14px; display:flex; align-items:center; gap:8px;}
   .ymp-back{border:none; background:var(--surface-2); border-radius:8px; width:28px; height:28px; font-size:16px; cursor:pointer; font-family:inherit; color:var(--ink);}
   .ym-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:8px;}
@@ -397,10 +397,10 @@
   .ob-hint{font-size:11.5px; color:var(--faint); margin-top:6px; line-height:1.5;}
   .ob-freq{margin-top:11px; font-size:15px; color:var(--ink); text-align:center; background:var(--accent-soft); border-radius:10px; padding:11px;}
   .ob-freq b{color:var(--accent-ink); font-weight:800;}
-  .ob-inline{margin-top:10px; padding:12px; border:1px dashed var(--line); border-radius:12px; background:var(--surface-2);}
+  .ob-inline{margin-top:10px;}
   .ob-inline input{width:100%; height:46px; padding:0 13px; border:1px solid var(--line); border-radius:11px; background:var(--surface); color:var(--ink); font-family:inherit; font-size:15px; box-sizing:border-box; outline:none;}
   .ob-inline input:focus{border-color:var(--accent);}
-  .obchips.seg{flex-wrap:nowrap; gap:8px;}
+  .obchips.seg{flex-wrap:nowrap; gap:8px; background:none; border:none; padding:0; margin-bottom:0;}
   .obchips.seg .obchip{flex:1 1 0; text-align:center; padding:12px 4px;}
   .field input[type=date]{color:var(--ink);}
   .field input[type=date]::-webkit-calendar-picker-indicator{opacity:.5; cursor:pointer;}

@@ -242,6 +242,24 @@
   .step-done-row{width:100%; margin-top:12px; padding:10px; border-radius:11px; background:var(--accent-soft); color:var(--accent-ink); font-weight:700; font-size:13.5px; text-align:center;}
   .step-done-row b{font-variant-numeric:tabular-nums;}
   .step-reopen{margin-left:8px; border:none; background:none; color:var(--muted); font-size:12px; text-decoration:underline; cursor:pointer; font-family:inherit;}
+  .wu-player{text-align:center; padding:20px 16px;}
+  .wup-head{font-size:12.5px; font-weight:700; color:var(--muted); margin-bottom:8px;}
+  .wup-head b{color:var(--accent-ink);}
+  .wup-name{font-size:21px; font-weight:800; color:var(--ink); letter-spacing:-.02em; margin-bottom:6px;}
+  .wup-desc{font-size:13px; color:var(--muted); line-height:1.5; margin-bottom:14px;}
+  .wup-clock{font-size:40px; font-weight:800; color:var(--accent-ink); font-variant-numeric:tabular-nums; line-height:1;}
+  .wup-dur{font-size:18px; font-weight:700; color:var(--faint);}
+  .wup-reps{margin-top:8px; font-size:16px; font-weight:800; color:var(--ink); font-variant-numeric:tabular-nums;}
+  .wup-reps .wup-sub{font-size:13px; font-weight:600; color:var(--muted);}
+  .wup-bar{margin-top:14px; height:8px; border-radius:99px; background:var(--line-2); overflow:hidden;}
+  .wup-fill{height:100%; width:0%; background:var(--accent); border-radius:99px; transition:width .2s linear;}
+  .wup-dots{display:flex; gap:5px; justify-content:center; margin-top:12px; flex-wrap:wrap;}
+  .wup-dot{width:8px; height:8px; border-radius:50%; background:var(--line);}
+  .wup-dot.done{background:var(--accent);}
+  .wup-dot.cur{background:var(--accent); box-shadow:0 0 0 3px var(--accent-soft);}
+  .wup-btns{display:flex; gap:8px; margin-top:18px;}
+  .wup-next{flex:1; height:46px; border:1px solid var(--line); background:var(--surface-2); color:var(--ink); font-family:inherit; font-size:14px; font-weight:700; border-radius:11px; cursor:pointer;}
+  .wup-fin{flex:1; height:46px; border:none; background:var(--accent); color:#fff; font-family:inherit; font-size:14px; font-weight:800; border-radius:11px; cursor:pointer;}
 
   /* volume editor */
   .voledit{display:flex; align-items:center; gap:6px; flex-wrap:wrap; margin-top:9px;}
@@ -1145,6 +1163,76 @@ function listBody(arr){
   return `<ul class="step-list">${out}</ul>`;
 }
 
+/* ---- 웜업/쿨다운 자동 가이드 플레이어 ---- */
+let wuP=null, wuTimer=null;
+function wuTiming(it){
+  if(it.cardio) return {cardio:true, n:'가벼운 유산소', a:'5분', d:'원하는 유산소 기구로 가볍게 몸 데우기', mode:'hold', dur:300};
+  const a=it.a||''; let mode='hold', reps=0, dur=30;
+  const bilat=/좌\/우|앞·뒤|각각|각\s*\d/.test(a);
+  let mm;
+  if(mm=a.match(/(\d+)\s*(?:~\s*(\d+))?\s*분/)){ const v=mm[2]?((+mm[1])+(+mm[2]))/2:(+mm[1]); mode='hold'; dur=Math.round(v*60); }
+  else if(mm=a.match(/(\d+)\s*초/)){ const per=+mm[1]; mode='hold'; dur=bilat?per*2:per; }
+  else if(mm=a.match(/(\d+)\s*걸음/)){ let n=+mm[1]; if(bilat)n*=2; mode='reps'; reps=n; dur=Math.round(n*0.7); }
+  else if(mm=a.match(/(\d+)\s*회/)){ let n=+mm[1]; const sm=a.match(/[×x]\s*(\d+)/); if(sm)n*=+sm[1]; if(bilat)n*=2; mode='reps'; reps=n; dur=Math.round(n*2); }
+  if(mode==='hold') dur=Math.max(15,Math.min(150,dur)); else dur=Math.max(12,Math.min(90,dur));
+  return {n:it.n, a:it.a, d:it.d, mode, reps, dur};
+}
+function wuBuildItems(arr){ return wuResolve(arr).map(wuTiming); }
+function fmtClock(sec){ sec=Math.max(0,Math.round(sec)); const m=Math.floor(sec/60), r=sec%60; return m+':'+String(r).padStart(2,'0'); }
+function wuStart(phase,dateStr){
+  const e=sessionFor(dateStr); if(!e||e.rest) return;
+  const s=SESSIONS[e.session];
+  const items=wuBuildItems(phase==='warm'?s.warm:s.cool);
+  if(!items.length){ doneStep(dateStr,phase); return; }
+  wuP={phase,dateStr,items,idx:0,t0:Date.now(),beganAt:Date.now()};
+  if(wuTimer) clearInterval(wuTimer); wuTimer=setInterval(wuTick,200);
+  renderToday();
+}
+function wuAdvance(){ if(!wuP) return; wuP.idx++; if(wuP.idx>=wuP.items.length){ wuFinish(); return; } wuP.t0=Date.now(); renderToday(); }
+function wuNext(){ wuAdvance(); }
+function wuFinish(){
+  if(!wuP) return; const {phase,dateStr,beganAt}=wuP;
+  if(wuTimer){ clearInterval(wuTimer); wuTimer=null; }
+  if(!state.stepMs) state.stepMs={}; if(!state.stepMs[dateStr]) state.stepMs[dateStr]={};
+  state.stepMs[dateStr][phase]=Date.now()-beganAt;
+  wuP=null; doneStep(dateStr,phase);
+}
+function wuTick(){
+  if(!wuP){ if(wuTimer){clearInterval(wuTimer);wuTimer=null;} return; }
+  const it=wuP.items[wuP.idx]; if(!it) return;
+  const el=(Date.now()-wuP.t0)/1000, dur=it.dur;
+  const fill=document.getElementById('wup-fill'); if(fill) fill.style.width=Math.min(100,el/dur*100).toFixed(1)+'%';
+  const cnt=document.getElementById('wup-count'); if(cnt) cnt.textContent=fmtClock(Math.min(el,dur));
+  if(it.mode==='reps'){ const rep=document.getElementById('wup-rep'); if(rep) rep.textContent=Math.min(it.reps, Math.floor(el/(dur/it.reps))); }
+  if(el>=dur) wuAdvance();
+}
+function wuPlayerCard(){
+  const it=wuP.items[wuP.idx], total=wuP.items.length, isWarm=wuP.phase==='warm';
+  const dots=wuP.items.map((_,i)=>`<span class="wup-dot ${i<wuP.idx?'done':''}${i===wuP.idx?' cur':''}"></span>`).join('');
+  const mid = it.mode==='reps'
+    ? `<div class="wup-reps">진행 <span id="wup-rep">0</span> <span class="wup-sub">/ ${it.reps}회 · 일정한 속도로</span></div>`
+    : `<div class="wup-reps">${it.cardio?'원하는 기구로 가볍게':'자세를 유지하세요'}</div>`;
+  return `<div class="step active wu-player">
+    <div class="wup-head">${isWarm?'준비 · 워밍업':'마무리 · 쿨다운'} · <b>${wuP.idx+1} / ${total}</b></div>
+    <div class="wup-name">${it.n}</div>
+    ${it.d?`<div class="wup-desc">${it.d}</div>`:''}
+    <div class="wup-clock"><span id="wup-count">0:00</span><span class="wup-dur"> / ${fmtClock(it.dur)}</span></div>
+    ${mid}
+    <div class="wup-bar"><div id="wup-fill" class="wup-fill"></div></div>
+    <div class="wup-dots">${dots}</div>
+    <div class="wup-btns"><button class="wup-next" onclick="wuNext()">다음 →</button><button class="wup-fin" onclick="wuFinish()">${isWarm?'웜업':'쿨다운'} 마침</button></div>
+  </div>`;
+}
+function wuStepCard(phase,s,dateStr,active,done,mins){
+  const isWarm=phase==='warm', title=isWarm?'워밍업':'마무리 쿨다운';
+  const kicker=`${isWarm?'준비 · 워밍업':'마무리 · 쿨다운'} · 약 ${mins}분`;
+  const arr=isWarm?s.warm:s.cool, fig=isWarm?STEP_SVG.warmup:STEP_SVG.cooldown;
+  const elapsed=state.stepMs&&state.stepMs[dateStr]&&state.stepMs[dateStr][phase];
+  let btn;
+  if(done) btn=`<div class="step-done-row">✓ 완료${elapsed?` · <b>${fmtDur(elapsed)}</b> 걸림`:''} <button class="step-reopen" onclick="resetStep('${dateStr}','${phase}')">다시 열기</button></div>`;
+  else btn=`<button class="step-done-btn start" onclick="wuStart('${phase}','${dateStr}')">${isWarm?'웜업':'쿨다운'} 시작 →</button>`;
+  return `<div class="step ${active?'active':''} ${done?'done':''}"><div class="step-head"><div class="step-fig">${fig}</div><div class="step-main"><div class="step-kicker">${kicker}</div><div class="step-title">${title}</div>${listBody(arr)}</div></div>${btn}</div>`;
+}
 function sessionTimes(s, kept, si){
   const T=Math.max(20, state.sessionMinutes||60);
   let warm=Math.max(5,Math.min(12,Math.round(T*0.15)));
@@ -1190,7 +1278,8 @@ function renderSessionCard(s,dateStr,si){
   let html=`<div class="stepprog">진행 ${doneCount} / ${ids.length} 단계 · 총 약 ${tm.total}분 · 각 운동의 시작/완료로 시간을 재보세요</div>`;
 
   // warmup
-  html+=stepShell(STEP_SVG.warmup,'', `준비 · 워밍업 · 약 ${tm.warm}분`, `<div class="step-title">워밍업</div>`, listBody(s.warm), 'warm', dateStr, activeId==='warm', !!completed['warm']);
+  if(wuP && wuP.phase==='warm' && wuP.dateStr===dateStr) html+=wuPlayerCard();
+  else html+=wuStepCard('warm', s, dateStr, activeId==='warm', !!completed['warm'], tm.warm);
 
   // main exercises
   kept.forEach((x,idx)=>{
@@ -1210,7 +1299,8 @@ function renderSessionCard(s,dateStr,si){
   html+=stepShell(STEP_SVG.cardio,'', `유산소 · 약 ${tm.cardio}분`, `<div class="step-title">${s.cardio.label}</div>`, `${cardioChips()}<div class="step-cue" style="margin-top:8px">${s.cardio.detail}</div>`, 'cardio', dateStr, activeId==='cardio', !!completed['cardio']);
 
   // cooldown
-  html+=stepShell(STEP_SVG.cooldown,'', `마무리 · 쿨다운 · 약 ${tm.cool}분`, `<div class="step-title">마무리 쿨다운</div>`, listBody(s.cool), 'cool', dateStr, activeId==='cool', !!completed['cool']);
+  if(wuP && wuP.phase==='cool' && wuP.dateStr===dateStr) html+=wuPlayerCard();
+  else html+=wuStepCard('cool', s, dateStr, activeId==='cool', !!completed['cool'], tm.cool);
 
   return html;
 }

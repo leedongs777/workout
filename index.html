@@ -1220,7 +1220,7 @@ function profileBanner(){
   if(inj.length) caution+=`<div class="note warn"><b>부상·수술 배려</b> · ${inj.join(', ')} 관련 동작은 자동으로 제외·완화됐어요. 통증 시 즉시 중단하고 전문의와 상담하세요.</div>`;
   if(cond.length) caution+=`<div class="note warn"><b>건강 주의</b> · ${cond.join(', ')} 이력이 있어요. 무거운 중량에서 숨 참기(발살바)를 피하고, 세트 사이 충분히 쉬며 어지럼·통증 시 중단하세요.</div>`;
   if(!chips.length && !caution) return '';
-  return `<div class="card" style="margin:0 0 4px"><div class="pbanner-h">🤖 내 프로필 기반 맞춤 조정</div>${chips.length?`<div class="pbanner-chips">${chips.map(c=>`<span class="pchip">${c}</span>`).join('')}</div>`:''}${caution}</div>`;
+  return `<div class="card" style="margin:0 0 4px; padding:16px"><div class="pbanner-h">🤖 내 프로필 기반 맞춤 조정</div>${chips.length?`<div class="pbanner-chips">${chips.map(c=>`<span class="pchip">${c}</span>`).join('')}</div>`:''}${caution}</div>`;
 }
 function safetyBox(){
   const p=state.profile;

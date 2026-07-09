@@ -1219,10 +1219,23 @@ function stepShell(figHtml,figCls,kicker,titleHtml,bodyHtml,id,dateStr,active,do
     ${btn}
   </div>`;
 }
+function sessionExercises(s, si){
+  const out=[];
+  s.slots.forEach((sl,oi)=>{
+    const cands=slotCands(sl); if(!cands.length) return;
+    const eqCands=cands.filter(c=>!c.bw);
+    const bwCand=cands.find(c=>c.bw);
+    const pbw=(sl.options&&sl.options.length>0)&&isBW(sl.options[0].eq||[]);
+    if(pbw && bwCand) out.push({sl,oi,id:'ex'+oi+'b',key:oi+'b',r:bwCand,eqCands:[]});
+    if(eqCands.length){ const nm=state.slotPick&&state.slotPick[si+':'+oi]; const r=(nm&&eqCands.find(c=>c.name===nm))||eqCands[0]; out.push({sl,oi,id:'ex'+oi,key:oi,r,eqCands}); }
+    else if(!pbw && bwCand) out.push({sl,oi,id:'ex'+oi+'b',key:oi+'b',r:bwCand,eqCands:[]});
+  });
+  return out;
+}
 function stepIdsFor(dateStr){
   const e=sessionFor(dateStr); if(!e||e.rest) return [];
   const s=SESSIONS[e.session]; const ids=['warm'];
-  s.slots.forEach((sl,oi)=>{ if(resolveSlot(sl)) ids.push('ex'+oi); });
+  sessionExercises(s, e.session).forEach(x=>ids.push(x.id));
   ids.push('cardio','cool'); return ids;
 }
 function cardioMachines(){
@@ -1458,7 +1471,7 @@ function sessionTimes(s, kept, si){
   let main=T-warm-cool-cardio;
   const need=kept.length*3;
   if(main<need){ let d=need-main; const a=Math.min(d,cardio-3);cardio-=a;d-=a;main+=a; if(d>0){const b=Math.min(d,warm-4);warm-=b;d-=b;main+=b;} if(d>0){const c=Math.min(d,cool-3);cool-=c;d-=c;main+=c;} }
-  const setsArr=kept.map(x=>effVol(si,x.oi,x.sl).sets);
+  const setsArr=kept.map(x=>effVol(si,x.key!=null?x.key:x.oi,x.sl).sets);
   const tot=setsArr.reduce((a,b)=>a+b,0)||1;
   let ex=setsArr.map(st=>Math.max(3,Math.round(main*st/tot)));
   let sum=warm+cool+cardio+ex.reduce((a,b)=>a+b,0);
@@ -1503,7 +1516,7 @@ function renderSessionCard(s,dateStr,si){
   const completed=(state.steps&&state.steps[dateStr])||{};
   const ids=stepIdsFor(dateStr);
   const activeId=ids.find(id=>!completed[id])||null;
-  const kept=s.slots.map((sl,oi)=>({sl,oi,r:resolveSlot(sl,si+':'+oi)})).filter(x=>x.r);
+  const kept=sessionExercises(s,si);
   const doneCount=ids.filter(id=>completed[id]).length;
   const tm=sessionTimes(s,kept,si);
   let html=`<div class="stepprog">진행 ${doneCount} / ${ids.length} 단계 (총 약 ${tm.total}분)</div>`;
@@ -1514,17 +1527,21 @@ function renderSessionCard(s,dateStr,si){
 
   // main exercises
   kept.forEach((x,idx)=>{
-    const id='ex'+x.oi, active=activeId===id, done=!!completed[id];
-    const v=effVol(si,x.oi,x.sl);
+    const id=x.id, active=activeId===id, done=!!completed[id];
+    const v=effVol(si,x.key,x.sl);
     const title=`<div class="step-title">${x.sl.role}</div><div class="step-name">${x.r.name}</div>`;
     let body = v.customized ? `<div class="ex-meta" style="margin-top:6px"><span class="vol-tag">직접 설정</span></div>` : '';
-    const eqLabel=c=> (c.eq||[]).map(e=>EQ_LABEL[e]||e).join('/');
-    const rlab=x.r.bw?'':eqLabel(x.r); const seenEq=new Set(); const eqbtns=[];
-    for(const c of slotCands(x.sl)){ if(c.bw) continue; const lb=eqLabel(c); if(seenEq.has(lb))continue; seenEq.add(lb); eqbtns.push({name:c.name, lb, eq:(c.eq||[])[0]}); if(eqbtns.length>=3)break; }
-    if(eqbtns.length) body+=`<div class="eqsel">${eqbtns.map(b=>`<button class="eqbtn ${b.lb===rlab?'on':''}" onclick="pickSlot(${si},${x.oi},'${b.name.replace(/'/g,"\\'")}')">${b.eq?`<span class="eq-ic">${eqIcon(b.eq)}</span>`:''}<span class="eq-tx">${b.lb}</span></button>`).join('')}</div>`;
-    body+=volEditor(si,x.oi,x.sl,v);
+    if(x.eqCands.length){
+      const eqLabel=c=> (c.eq||[]).map(e=>EQ_LABEL[e]||e).join('/');
+      const rlab=eqLabel(x.r); const seenEq=new Set(); const eqbtns=[];
+      for(const c of x.eqCands){ const lb=eqLabel(c); if(seenEq.has(lb))continue; seenEq.add(lb); eqbtns.push({name:c.name, lb, eq:(c.eq||[])[0]}); if(eqbtns.length>=3)break; }
+      body+=`<div class="eqsel">${eqbtns.map(b=>`<button class="eqbtn ${b.lb===rlab?'on':''}" onclick="pickSlot(${si},${x.oi},'${b.name.replace(/'/g,"\\'")}')">${b.eq?`<span class="eq-ic">${eqIcon(b.eq)}</span>`:''}<span class="eq-tx">${b.lb}</span></button>`).join('')}</div>`;
+    } else {
+      body+=`<div class="ex-meta" style="margin-top:6px"><span class="ex-eq">맨몸 운동</span></div>`;
+    }
+    body+=volEditor(si,x.key,x.sl,v);
     if(x.r.cue) body+=`<div class="step-cue">${fmtCue(x.r.cue)}</div>`;
-    body+=renderSetLog(x.sl,x.r,dateStr,x.oi,v.sets);
+    body+=renderSetLog(x.sl,x.r,dateStr,x.key,v.sets);
     html+=stepShell(exFig(x.r,x.sl.role),'', `운동 ${idx+1} / ${kept.length} (약 ${tm.ex[idx]}분)`, title, body, id, dateStr, active, done, howtoLinks(x.r.name));
   });
 
@@ -1766,8 +1783,8 @@ function planDayRow(k,t){
   let html=`<div class="${cls}"><div class="day-rail"><div class="day-wd">${wd}</div><div class="day-dt num">${d.getDate()}</div></div><div style="flex:1;min-width:0">${main}</div></div>`;
   if(open && !e.rest){
     const s=SESSIONS[e.session]; const steps=(state.steps&&state.steps[k])||{}; let ex='';
-    s.slots.forEach((slot,oi)=>{ const r=resolveSlot(slot); if(!r) return; const exDone=!!steps['ex'+oi];
-      ex+=`<div class="mini-ex ${exDone?'done':''}"><span class="mini-fig">${exFig(r,slot.role)}</span><span class="mn">${r.name}</span>${exDone?'<span class="mini-done">✓</span>':''}<span class="mv">${slot.sets}×${slot.reps}</span></div>`; });
+    sessionExercises(s, e.session).forEach(x=>{ const exDone=!!steps[x.id];
+      ex+=`<div class="mini-ex ${exDone?'done':''}"><span class="mini-fig">${exFig(x.r,x.sl.role)}</span><span class="mn">${x.r.name}</span>${exDone?'<span class="mini-done">✓</span>':''}<span class="mv">${x.sl.sets}×${x.sl.reps}</span></div>`; });
     ex+=`<div class="mini-ex ${steps['cardio']?'done':''}"><span class="mn">${s.cardio.label}</span>${steps['cardio']?'<span class="mini-done">✓</span>':''}<span class="mv">${zoneTxt(cardioDetail(s.cardio.detail).replace(s.cardio.label,'').trim())}</span></div>`;
     html+=`<div class="day-expand">${ex}`;
     let tools='';

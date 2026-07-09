@@ -260,6 +260,15 @@
   .wup-btns{display:flex; gap:8px; margin-top:18px;}
   .wup-next{flex:1; height:46px; border:1px solid var(--line); background:var(--surface-2); color:var(--ink); font-family:inherit; font-size:14px; font-weight:700; border-radius:11px; cursor:pointer;}
   .wup-fin{flex:1; height:46px; border:none; background:var(--accent); color:#fff; font-family:inherit; font-size:14px; font-weight:800; border-radius:11px; cursor:pointer;}
+  /* 카운트다운(시작 전 5초 / 다음 동작 3초) */
+  .wu-cd{cursor:pointer;}
+  .wu-fig{display:flex; align-items:center; justify-content:center; height:150px; margin:8px auto 2px; color:var(--accent);}
+  .wu-fig-svg{width:132px; height:150px;}
+  .wup-cd-num{font-size:74px; font-weight:800; color:var(--accent-ink); line-height:1; font-variant-numeric:tabular-nums; margin:4px 0 10px; animation:cdpop .5s cubic-bezier(.2,.85,.3,1);}
+  .wup-cd-say{font-size:16px; font-weight:600; color:var(--muted); line-height:1.55;}
+  .wup-cd-say b{color:var(--ink); font-weight:800;}
+  .wu-cd-skip{margin-top:14px; font-size:12px; color:var(--faint); font-weight:600;}
+  @keyframes cdpop{0%{transform:scale(.35); opacity:0;} 55%{transform:scale(1.14); opacity:1;} 100%{transform:scale(1);}}
 
   /* volume editor */
   .voledit{display:flex; align-items:center; gap:6px; flex-wrap:wrap; margin-top:9px;}
@@ -1181,12 +1190,13 @@ function wuStart(phase,dateStr){
   const s=SESSIONS[e.session];
   const items=wuBuildItems(phase==='warm'?s.warm:s.cool);
   if(!items.length){ doneStep(dateStr,phase); return; }
-  wuP={phase,dateStr,items,idx:0,t0:Date.now(),beganAt:Date.now()};
+  wuP={phase,dateStr,items,idx:0,t0:Date.now(),beganAt:Date.now(),cd:{total:5,t0:Date.now()}};
   if(wuTimer) clearInterval(wuTimer); wuTimer=setInterval(wuTick,200);
   renderToday();
 }
-function wuAdvance(){ if(!wuP) return; wuP.idx++; if(wuP.idx>=wuP.items.length){ wuFinish(); return; } wuP.t0=Date.now(); renderToday(); }
+function wuAdvance(){ if(!wuP) return; wuP.idx++; if(wuP.idx>=wuP.items.length){ wuFinish(); return; } wuP.cd={total:3,t0:Date.now()}; wuP.t0=Date.now(); renderToday(); }
 function wuNext(){ wuAdvance(); }
+function wuSkipCd(){ if(wuP&&wuP.cd){ wuP.cd=null; wuP.t0=Date.now(); renderToday(); } }
 function wuFinish(){
   if(!wuP) return; const {phase,dateStr,beganAt}=wuP;
   if(wuTimer){ clearInterval(wuTimer); wuTimer=null; }
@@ -1196,6 +1206,14 @@ function wuFinish(){
 }
 function wuTick(){
   if(!wuP){ if(wuTimer){clearInterval(wuTimer);wuTimer=null;} return; }
+  if(wuP.cd){
+    const rem=wuP.cd.total-(Date.now()-wuP.cd.t0)/1000;
+    if(rem<=0){ wuP.cd=null; wuP.t0=Date.now(); renderToday(); return; }
+    const num=String(Math.max(1,Math.ceil(rem)));
+    const cd=document.getElementById('wup-cd-num');
+    if(cd && cd.textContent!==num){ cd.textContent=num; cd.style.animation='none'; void cd.offsetWidth; cd.style.animation=''; }
+    return;
+  }
   const it=wuP.items[wuP.idx]; if(!it) return;
   const el=(Date.now()-wuP.t0)/1000, dur=it.dur;
   const fill=document.getElementById('wup-fill'); if(fill) fill.style.width=Math.min(100,el/dur*100).toFixed(1)+'%';
@@ -1203,8 +1221,72 @@ function wuTick(){
   if(it.mode==='reps'){ const rep=document.getElementById('wup-rep'); if(rep) rep.textContent=Math.min(it.reps, Math.floor(el/(dur/it.reps))); }
   if(el>=dur) wuAdvance();
 }
+/* ---- 카운트다운: 받침 조사(예요/이에요) + 내장 동작 애니메이션(SVG SMIL) ---- */
+function josaYeyo(w){ if(!w) return '예요'; const c=w.charCodeAt(w.length-1); if(c>=0xAC00&&c<=0xD7A3) return ((c-0xAC00)%28)===0?'예요':'이에요'; return '예요'; }
+const _FS='stroke="currentColor" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" fill="none"';
+const _HEAD='<circle cx="60" cy="22" r="12" '+_FS+'/>';
+const _TORSO='<line x1="60" y1="34" x2="60" y2="88" '+_FS+'/>';
+const _ARMS='<path d="M60 48 L40 66 M60 48 L80 66" '+_FS+'/>';
+const _LEGS='<path d="M60 88 L46 124 M60 88 L74 124" '+_FS+'/>';
+const _ALL=_HEAD+_TORSO+_ARMS+_LEGS;
+function _svgFig(inner){ return '<svg class="wu-fig-svg" viewBox="0 0 120 150" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">'+inner+'</svg>'; }
+function _AT(type,values,dur,extra){ return '<animateTransform attributeName="transform" type="'+type+'" values="'+values+'" dur="'+dur+'" repeatCount="indefinite" '+(extra||'')+'/>'; }
+function wuFigKind(n){
+  n=n||'';
+  if(/스트레칭/.test(n)) return 'stretch';
+  if(/유산소|걷기|마치/.test(n)) return 'march';
+  if(/^목.*돌리/.test(n)) return 'neck';
+  if(/(어깨|팔|손목|발목).*돌리/.test(n)) return 'arm';
+  if(/상체 회전/.test(n)) return 'twist';
+  if(/옆구리/.test(n)) return 'bend';
+  if(/레그 스윙/.test(n)) return 'swing';
+  if(/카프 레이즈/.test(n)) return 'calf';
+  if(/스쿼트/.test(n)) return 'squat';
+  if(/풀 어파트|날개뼈/.test(n)) return 'pull';
+  if(/팔굽혀펴기/.test(n)) return 'pushup';
+  if(/사이드 스텝/.test(n)) return 'step';
+  if(/힙 서클/.test(n)) return 'hip';
+  if(/턱 당기기/.test(n)) return 'chintuck';
+  return 'stretch';
+}
+function wuFig(name){
+  const E=' '+_FS+'/>';
+  switch(wuFigKind(name)){
+    case 'neck': return _svgFig('<g>'+_AT('rotate','0 60 34;13 60 34;0 60 34;-13 60 34;0 60 34','2.6s')+_HEAD+'</g>'+_TORSO+_ARMS+_LEGS);
+    case 'arm': return _svgFig(_HEAD+_TORSO+'<g>'+_AT('rotate','0 60 48;360 60 48','2s','calcMode="linear"')+_ARMS+'</g>'+_LEGS);
+    case 'twist': return _svgFig('<g>'+_AT('rotate','0 60 88;16 60 88;0 60 88;-16 60 88;0 60 88','2.4s')+_HEAD+_TORSO+_ARMS+'</g>'+_LEGS);
+    case 'bend': return _svgFig('<g>'+_AT('rotate','0 60 124;15 60 124;0 60 124;-15 60 124;0 60 124','2.6s')+_ALL+'</g>');
+    case 'swing': return _svgFig(_HEAD+_TORSO+_ARMS+'<line x1="60" y1="88" x2="74" y2="124"'+E+'<g>'+_AT('rotate','-24 60 88;24 60 88;-24 60 88','1.8s')+'<line x1="60" y1="88" x2="46" y2="124"'+E+'</g>');
+    case 'march': return _svgFig(_HEAD+_TORSO
+      +'<g>'+_AT('rotate','16 60 48;-16 60 48;16 60 48','0.9s')+'<line x1="60" y1="48" x2="40" y2="66"'+E+'</g>'
+      +'<g>'+_AT('rotate','-16 60 48;16 60 48;-16 60 48','0.9s')+'<line x1="60" y1="48" x2="80" y2="66"'+E+'</g>'
+      +'<g>'+_AT('rotate','-22 60 88;22 60 88;-22 60 88','0.9s')+'<line x1="60" y1="88" x2="46" y2="124"'+E+'</g>'
+      +'<g>'+_AT('rotate','22 60 88;-22 60 88;22 60 88','0.9s')+'<line x1="60" y1="88" x2="74" y2="124"'+E+'</g>');
+    case 'calf': return _svgFig('<g>'+_AT('translate','0 0;0 -9;0 0','1.6s')+_ALL+'</g>');
+    case 'squat': return _svgFig('<g>'+_AT('translate','0 0;0 16;0 0','2s')+_ALL+'</g>');
+    case 'pull': return _svgFig(_HEAD+_TORSO+_LEGS
+      +'<g>'+_AT('rotate','22 60 48;-8 60 48;22 60 48','1.6s')+'<line x1="60" y1="48" x2="42" y2="60"'+E+'</g>'
+      +'<g>'+_AT('rotate','-22 60 48;8 60 48;-22 60 48','1.6s')+'<line x1="60" y1="48" x2="78" y2="60"'+E+'</g>');
+    case 'pushup': return _svgFig('<line x1="104" y1="18" x2="104" y2="126" stroke="currentColor" stroke-width="4" stroke-linecap="round" opacity="0.3"/><g>'+_AT('rotate','0 60 124;13 60 124;0 60 124','1.8s')+_ALL+'</g>');
+    case 'step': return _svgFig('<g>'+_AT('translate','-12 0;12 0;-12 0','1.5s')+_ALL+'</g>');
+    case 'hip': return _svgFig('<g>'+_AT('translate','0 0;7 -5;10 0;7 5;0 7;-7 5;-10 0;-7 -5;0 0','2.4s')+_ALL+'</g>');
+    case 'chintuck': return _svgFig('<g>'+_AT('translate','0 0;0 -5;0 -5;0 0','2.4s','keyTimes="0;.3;.7;1"')+_HEAD+'</g>'+_TORSO+_ARMS+_LEGS);
+    default: return _svgFig('<g>'+_AT('rotate','-5 60 124;5 60 124;-5 60 124','3s')+_HEAD+_TORSO+'<path d="M60 48 L44 32 M60 48 L78 66" '+_FS+'/>'+_LEGS+'</g>');
+  }
+}
 function wuPlayerCard(){
   const it=wuP.items[wuP.idx], total=wuP.items.length, isWarm=wuP.phase==='warm';
+  if(wuP.cd){
+    const label=wuP.idx===0?`${isWarm?'웜업':'쿨다운'} 첫 동작은`:'다음 동작은';
+    const secs=Math.max(1,Math.ceil(wuP.cd.total));
+    return `<div class="step active wu-player wu-cd" onclick="wuSkipCd()">
+      <div class="wup-head">${isWarm?'준비 · 워밍업':'마무리 · 쿨다운'} · <b>${wuP.idx+1} / ${total}</b></div>
+      <div class="wu-fig">${wuFig(it.n)}</div>
+      <div class="wup-cd-num" id="wup-cd-num">${secs}</div>
+      <div class="wup-cd-say">${label} <b>${it.n}</b>${josaYeyo(it.n)}!</div>
+      <div class="wu-cd-skip">화면을 누르면 바로 시작</div>
+    </div>`;
+  }
   const dots=wuP.items.map((_,i)=>`<span class="wup-dot ${i<wuP.idx?'done':''}${i===wuP.idx?' cur':''}"></span>`).join('');
   const mid = it.mode==='reps'
     ? `<div class="wup-reps">진행 <span id="wup-rep">0</span> <span class="wup-sub">/ ${it.reps}회 · 일정한 속도로</span></div>`

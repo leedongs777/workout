@@ -829,6 +829,9 @@ const ROLE_PAT={
   '코어 · 안티 익스텐션':'deadbug','코어 · 안정화':'birddog','코어 · 측면':'sideplank','자세교정 종합':'facepull',
 };
 function eqWrap(inner){return `<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">${inner}</svg>`;}
+/* 아래 7개 머신 아이콘은 원본 벡터에 한글 이름이 박혀 있어, 글자 없는 깔끔한 웨이트 머신 아이콘으로 교체 */
+const _MACH_SVG='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 44" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" preserveAspectRatio="xMidYMid meet"><path d="M9 21h12v3.2H9z" fill="currentColor" stroke="none"/><path d="M9 24.2v9M21 24.2v9"/><path d="M21 11.5v13h13.5"/><rect x="30.5" y="13" width="9.5" height="19.5" rx="1.6"/><path d="M33 18h4.5M33 22h4.5M33 26h4.5"/></svg>';
+['leg_press','leg_extension','leg_curl','lying_leg_curl','hack_squat','hip_abduction','hip_adduction'].forEach(k=>{ EQ_SVG[k]=_MACH_SVG; });
 function eqIcon(id){return EQ_SVG[id]||eqWrap(EQ_ICON[id]||EQ_ICON._fallback);}
 function patIcon(role){const pat=ROLE_PAT[role]||'strength';return (typeof POSE_SVG!=='undefined'&&POSE_SVG[pat])||svgWrap(PAT_ICON[pat]||PAT_ICON.strength);}
 function exFig(r,role){ if(r && !r.bw && r.eq && r.eq.length) return eqIcon(r.eq[0]); return patIcon(role); }

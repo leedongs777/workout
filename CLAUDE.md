@@ -9,7 +9,7 @@
 ## 0. 한눈에 보기
 - **제품**: MATE (My AI Training Expert). 태그라인 "AI가 짜주는 나만의 운동 플랜".
 - **형태**: **단일 HTML 파일** 웹앱. 바닐라 JS(프레임워크 없음). 모바일 우선, 한국어 전용.
-- **배포본**: 저장소 루트의 **`index.html`** 이 곧 사이트. (`workout-planner.html`은 동일 사본 — 아래 파일 규칙 참고)
+- **배포본**: 저장소 루트의 **`index.html`** 이 곧 사이트. (단일 파일 — 이것만 편집)
 - **호스팅**: GitHub Pages, 소스=GitHub Actions. 사이트: `https://leedongs777.github.io/workout/`
 - **저장소**: `leedongs777/workout` (사용자명 `leedongs777`, 저장소명 `workout`). `index.html`은 **루트**에 위치.
 - **회원**: 비개발자(호스팅/git 관점). **허리 수술 이력** 있음 → 백세이프 프로그래밍 필수(아래 3장).
@@ -17,12 +17,12 @@
 
 ---
 
-## 1. 파일 구조 & 동기화 규칙 (매우 중요)
-- 앱 전체가 **하나의 HTML 파일**에 들어 있음(임베드된 SVG 아이콘 때문에 ~560KB).
-- 두 파일을 **항상 동일하게** 유지: `workout-planner.html` == `index.html`.
-  - 편집은 `workout-planner.html`에 하고, 끝나면 반드시 `cp workout-planner.html index.html`.
-  - **파일을 제시/커밋하기 전에 항상 두 파일이 identical한지 `diff -q`로 확인.**
+## 1. 파일 구조 (단일 파일)
+- 앱 전체가 **하나의 HTML 파일 `index.html`**에 들어 있음(임베드된 SVG 아이콘 때문에 ~560KB). 바닐라 JS(`<script>` 인라인) + `<style>` 인라인.
+- **`index.html`을 직접 편집**한다. 이게 곧 배포본이자 사이트.
 - 배포용 자동화: `.github/workflows/deploy.yml` (push 시 JS 문법검사 → 통과하면 Pages 자동 배포).
+- 참고: 과거 채팅 작업 환경에서는 `workout-planner.html`이라는 검증용 사본을 두고 `index.html`로 복사하는 2파일 방식을 썼으나, **이 저장소에는 `index.html` 하나만 존재**한다. 사본·동기화 개념은 필요 없다.
+- ⚠️ **공개 배포 주의**: `deploy.yml`이 저장소 전체(`path: '.'`)를 Pages로 업로드함 → `CLAUDE.md`·`배포.bat` 등 저장소 안 모든 파일이 `https://leedongs777.github.io/workout/<파일명>`으로 **공개 접근 가능**. 따라서 저장소에는 **비밀키·PAT·민감정보·불필요한 파일을 두지 말 것**(PAT는 절대 커밋 금지). 임시/잡파일도 커밋 전에 정리.
 
 ---
 
@@ -32,9 +32,9 @@
    - 예: HTML에서 `<script>…</script>` 안 JS를 파일로 뽑아 `node --check file.js`.
 2. **로직 유닛 테스트**: 함수/상수를 brace-match로 추출해 mock state로 `eval` 실행.
    - 헬퍼 패턴: 이름으로 함수 본문을 뽑는 `grab()`, `const`를 brace-match로 뽑는 `gc()`.
-3. **UI 렌더링 확인**: `wkhtmltoimage`(한국어 폰트 `/usr/share/fonts/truetype/nanum/NanumGothic.ttf`) + `cairosvg`.
-   - ⚠️ `wkhtmltoimage`는 **구형 webkit이라 CSS Grid 지원이 약함** → 달력 등 grid 레이아웃 미리보기가 실제와 다르게(겹치거나 세로 stack) 나옴. 실제 iOS/안드 Safari에선 정상. **grid는 시각 검증 불가**로 간주.
-4. 편집 완료 후: `node --check` → `cp workout-planner.html index.html` → 두 파일 diff 확인.
+3. **UI 렌더링 확인**(가능한 환경일 때): 헤드리스 브라우저 스크린샷 등으로 확인. 과거엔 `wkhtmltoimage`(한국어 폰트 NanumGothic) + `cairosvg`를 썼음.
+   - ⚠️ `wkhtmltoimage`는 **구형 webkit이라 CSS Grid 지원이 약함** → 달력 등 grid 레이아웃 미리보기가 실제와 다르게(겹치거나 세로 stack) 나옴. 실제 iOS/안드 Safari에선 정상. **grid는 그 도구로 시각 검증 불가**로 간주.
+4. 편집 완료 후: `index.html`에서 `<script>` 추출해 `node --check`로 문법 확인 → 로직 테스트 → (가능하면) 렌더 확인.
 
 ---
 
@@ -46,7 +46,7 @@
 
 ---
 
-## 4. 앱 아키텍처 (workout-planner.html 내부)
+## 4. 앱 아키텍처 (index.html 내부)
 
 ### 4.1 저장/상태
 - 저장 계층: `window.storage → localStorage → memory`. 키 **`workoutPlanner:v1`**.
@@ -138,15 +138,16 @@
 
 ## 6. 배포 (현재 워크플로, 회원의 주 방법)
 1. Windows PC. `workout` 저장소는 로컬에 clone됨:
-   `C:\DONGHUN\11. 비즈니스\MATE(My AI Trainer for Exercise)\99. 배포\workout`
+   `C:\DONGHUN\11. 비즈니스\01. MATE(My AI Trainer for Exercise)\99. 배포\workout`
 2. git 사용자 정보·`credential.helper manager` 설정 완료(로그인 저장됨).
-3. 폴더 안 **`배포.bat`** (더블클릭): `git add . && git commit -m "update" && git push`.
+3. 폴더 안 **`배포.bat`** (더블클릭): `git pull --no-edit → git add . → git commit -m "update" → git push`.
 4. push → GitHub Actions(`deploy.yml`)가 **JS 문법검사 → 통과 시 자동 배포**. (Settings→Pages Source = GitHub Actions)
 5. 확인: `leedongs777.github.io/workout/` 강력 새로고침(Ctrl/Cmd+Shift+R).
 - 보조 경로: 아이폰 단축어(GitHub API로 index.html PUT). URL은 `https://api.github.com/repos/leedongs777/workout/contents/index.html`, 헤더 `Authorization: Bearer <PAT>`, Base64 인코딩 시 **줄바꿈 없음** 필수(안 그러면 "content is not valid Base64" 422).
 
 ### Claude Code에서 배포할 때
-- 편집 → `cp workout-planner.html index.html` → `diff -q`로 동일 확인 → `git add . && git commit -m "..." && git push`.
+- `index.html` 직접 편집 → `<script>` 문법 확인(`node --check`) → `git pull --no-edit` → `git add . && git commit -m "..." && git push`.
+- `git pull --no-edit`를 push 전에 먼저(원격에 없는 로컬 변경으로 인한 rejected 방지).
 - **커밋·푸시 전 회원 확인**을 받는 걸 기본으로(자율 배포 지양). 의료·안전 로직 변경은 특히 신중히.
 
 ---
@@ -167,6 +168,7 @@ PWA+웹푸시 리마인더, 세트 휴식 타이머+이전 기록 표시, 바디
 2. 백세이프 원칙 절대 유지(척추 축부하 금지).
 3. 장비 게이팅: 선택 안 한 장비는 운동생성·설명·웜업/쿨다운·isBW 무료목록 어디에도 안 나오게.
 4. 웜업/쿨다운: 한 항목=한 동작, 정식 명칭만, 전신 커버+그날 부위 중심, 유지형/횟수형 구분.
-5. 편집 후 `node --check` → `cp workout-planner.html index.html` → `diff -q` 확인.
+5. `index.html` 직접 편집 후 `<script>` 문법 확인(`node --check`). 배포는 `git pull --no-edit` → add → commit → push.
 6. grid 레이아웃은 wkhtmltoimage로 시각검증 불가(실제 브라우저는 정상).
 7. 커밋·푸시 전 회원 확인. 자율 배포 지양.
+8. 저장소 전체가 공개 배포됨 → 비밀키·PAT·민감정보·잡파일 커밋 금지(§1 참고).

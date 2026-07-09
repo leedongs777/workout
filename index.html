@@ -262,7 +262,7 @@
   .eqsel{display:flex; flex-wrap:wrap; gap:7px; margin-top:9px; align-items:stretch;}
   .eqsel .eqbtn{flex:1 1 0; min-width:0; padding:9px 8px; border-radius:10px; border:1px solid var(--line); background:var(--surface-2); color:var(--muted); font-family:inherit; font-size:12.5px; font-weight:700; cursor:pointer; text-align:center; white-space:normal; word-break:keep-all; line-height:1.3;}
   .eqsel .eqbtn.on{background:var(--accent); border-color:var(--accent); color:#fff;}
-  .eqsel .eqbtn, .cardio-chips .cardio-chip{display:flex; align-items:center; justify-content:center; gap:4px; white-space:nowrap; padding-left:5px; padding-right:5px; overflow:hidden;}
+  .eqsel .eqbtn, .cardio-chips .cardio-chip{display:flex; align-items:center; justify-content:center; gap:4px; white-space:nowrap; padding-left:4px; padding-right:4px;}
   .eq-ic{flex:none; width:16px; height:16px; display:inline-flex; align-items:center; justify-content:center; color:inherit;}
   .eq-ic svg{width:16px; height:16px;}
   .eq-tx{min-width:0; font-size:10.5px; letter-spacing:-.02em; white-space:nowrap;}
@@ -841,7 +841,10 @@ function eqIcon(id){
   if(f) svg=svg.replace(/viewBox="([-\d.]+)\s+([-\d.]+)\s+([-\d.]+)\s+([-\d.]+)"/, (m,x,y,w,h)=>`viewBox="${x} ${y} ${w} ${((+h)*f).toFixed(2)}"`);
   return svg;
 }
-function patIcon(role){const pat=ROLE_PAT[role]||'strength';return (typeof POSE_SVG!=='undefined'&&POSE_SVG[pat])||svgWrap(PAT_ICON[pat]||PAT_ICON.strength);}
+/* 벡터 하단에 이름이 박힌 자세 아이콘 — viewBox 높이를 줄여 이름 부분 잘라냄 */
+const _CROP_POSE={legext:.80, stepup:.80, chestpress:.80, ytw:.82};
+function cropSvg(svg,f){ return f? svg.replace(/viewBox="([-\d.]+)\s+([-\d.]+)\s+([-\d.]+)\s+([-\d.]+)"/, (m,x,y,w,h)=>`viewBox="${x} ${y} ${w} ${((+h)*f).toFixed(2)}"`) : svg; }
+function patIcon(role){const pat=ROLE_PAT[role]||'strength'; const svg=(typeof POSE_SVG!=='undefined'&&POSE_SVG[pat]); return svg? cropSvg(svg,_CROP_POSE[pat]) : svgWrap(PAT_ICON[pat]||PAT_ICON.strength);}
 function exFig(r,role){ if(r && !r.bw && r.eq && r.eq.length) return eqIcon(r.eq[0]); return patIcon(role); }
 
 /* ---------------- Session templates (6-day rotation) ----------------
@@ -1257,7 +1260,8 @@ function pickCardio(id){ state.cardioChoice=(state.cardioChoice===id?null:id); t
 function cardioChips(){
   const m=cardioMachines();
   if(!m.length) return wuDesc('보유한 유산소 기구가 없어요.|제자리 걷기·마칭으로 대체하세요.');
-  return `<div class="cardio-chips ${m.length>4?'q4':''}">${m.map(([id,label])=>`<button class="cardio-chip ${state.cardioChoice===id?'on':''}" onclick="pickCardio('${id}')"><span class="eq-ic">${eqIcon(id)}</span><span class="eq-tx">${label}</span></button>`).join('')}</div>`;
+  const cb=cellBasis(m.length);
+  return `<div class="cardio-chips" style="justify-content:center">${m.map(([id,label])=>`<button class="cardio-chip ${state.cardioChoice===id?'on':''}" style="${cb}" onclick="pickCardio('${id}')"><span class="eq-ic">${eqIcon(id)}</span><span class="eq-tx">${label}</span></button>`).join('')}</div>`;
 }
 function wuResolve(arr){
   const okEq=e=>!e||e.every(x=>state.equipment.includes(x));

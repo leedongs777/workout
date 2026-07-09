@@ -51,7 +51,7 @@
 ### 4.1 저장/상태
 - 저장 계층: `window.storage → localStorage → memory`. 키 **`workoutPlanner:v1`**.
 - `persist()`(디바운스), `touch()`(=_ts 갱신 + persist + Sync.push). Firebase 설정 키 `workoutPlanner:fbcfg`.
-- **state 필드**: `equipment[]`, `includeBodyweight`, `includeFloor`, `workoutDays:[0,2,3,4,5,6]`(요일 인덱스, 0=일), `sessionMinutes:60`, `startDate`, `restDays[]`, `doneDays[]`, `log{}`, `steps{}`(날짜별 단계 완료), `stepStart{}`(단계 시작 타임스탬프), `stepMs{}`(단계 소요 ms), `slotCustom{}`, `cardioChoice`, `authPassed`, `authProvider`, `consent`, `profile`, `onboarded`, `_ts`.
+- **state 필드**: `equipment[]`, `includeBodyweight`, `includeFloor`, `workoutDays:[0,2,3,4,5,6]`(요일 인덱스, 0=일), `sessionMinutes:60`, `startDate`, `restDays[]`, `doneDays[]`, `log{}`, `steps{}`(날짜별 단계 완료), `stepStart{}`(단계 시작 타임스탬프), `stepMs{}`(단계 소요 ms), `slotCustom{}`, `cardioChoice`, `cardioMin{}`(세션 인덱스별 유산소 분 override, 없으면 추천값 `sessionTimes().cardioAuto`), `authPassed`, `authProvider`, `consent`, `profile`, `onboarded`, `_ts`.
 - `resetAll`과 state 기본값 모두 `workoutDays`, `sessionMinutes:60` 포함.
 
 ### 4.2 스케줄 엔진 (요일 기반)
@@ -132,7 +132,14 @@
   - 과거 버그: 온보딩 행 `class="obchips seg"`가 별도 `.seg` 박스 스타일에 걸려 감싸는 네모 생성됨 → `.obchips.seg{background:none;border:none;padding:0;margin-bottom:0}`로 무효화. `.seg`(이메일 토글)·`.modeseg`(일정 토글)·`.ob-inline`(러닝 입력)의 감싸는 박스도 제거함.
 - 다중 선택 칩은 `.obgrid`(2열 균등 너비). 성별·내외국인·본인인증·근력/러닝 유무 등 이지선다형은 `.obchips.seg`(한 줄 균등 너비).
 - 폰트 Pretendard. 다크모드는 `prefers-color-scheme` 자동. 테두리 변수(라이트 `--line:#D8D3C6 --line-2:#E3DFD3`, 다크 `--line:#3A3F47 --line-2:#31363D`).
-- **한글 문장부호 규칙**: 명사형 어미(~기/~하기 등)는 마침표 없음. `~다/~요`는 마침표 유지. 내부 ". " → " · ".
+- **레이아웃 폭**: `.wrap`·`.nav-inner` `max-width:430px`(폰 폭). 넓은 화면·미리보기에서도 폰처럼 가운데 정렬(모바일 전용 앱). 640px 등으로 넓히지 말 것.
+- **한글 문장부호 규칙**: 명사형 어미(~기/~하기 등)는 마침표 없음. `~다/~요`는 마침표 유지.
+- **텍스트 줄바꿈 규칙 (전역 · 모바일 기준)** — 긴 문구는 다음 규칙으로 보기 좋게 끊는다. 핵심 헬퍼 **`smartBreak(text, cap)`**(cap=한 줄에 들어가는 대략 글자 수, 기본 26~27). `periodLines()`=`smartBreak(t,27)`(문단), `fmtCue()`=절 분리 후 `smartBreak(c,26)`(운동 큐/유산소). 웜업/쿨다운 항목 설명은 `wuDesc()`가 수동 `|` 마커(nowrap 조각)로 처리.
+  1. **마침표(. ) 뒤에서 줄바꿈** — 문장 단위로 나눔.
+  2. **쉼표 줄바꿈은 조건부**: ①문장이 한 줄(cap)을 넘칠 때만, ②쉼표 앞부분(part1)이 한 줄에 들어갈 때만(≤cap), ③쉼표가 문장의 35% 이후일 때만 → 그 쉼표에서 줄바꿈(중앙에 가장 가까운 것). **짧으면 그대로 한 줄**, **너무 길어 part1이 한 줄을 못 넘으면 억지로 안 끊고 자연 줄바꿈**(예: 안전 안내문의 긴 문장). 조기 쉼표(나열 "무릎, 어깨")도 안 끊음.
+  3. **`·`(가운뎃점)은 정말 필요할 때만** — 항목 "이름 · 분량"은 `이름(분량)`으로, "좌·우/앞·뒤"는 `좌/우·앞/뒤`(슬래시)로. **예외(유지)**: 공백 없는 합성 나열(`둔근·햄스트링`, `팔·다리`, `벽·기둥`)과 구조적 구분자(`준비 · 워밍업`, `유산소 · 약 6분`).
+  4. **어절(단어) 중간에서 안 끊기**: 전역 `word-break:keep-all`. 불릿("- ") 줄은 flex 행잉인덴트로 둘째 줄을 텍스트 첫 글자에 맞춤.
+  5. **운동 큐/유산소 설명**: `" · "`·`" — "`(양옆 공백)를 절 구분으로 보고 `- ` 불릿으로 분리, 절 안은 쉼표/마침표에서 끊음. 새 문구 작성 시에도 위 규칙을 따를 것.
 
 ---
 

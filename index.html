@@ -43,11 +43,11 @@
   body{
     background:var(--bg); color:var(--ink); min-height:100dvh;
     font-family:"Pretendard Variable","Pretendard",-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Segoe UI",Roboto,"Malgun Gothic","Noto Sans KR",sans-serif;
-    letter-spacing:-.005em;
+    letter-spacing:-.005em; word-break:keep-all; overflow-wrap:break-word;
     font-size:16px; line-height:1.5; -webkit-font-smoothing:antialiased;
     font-feature-settings:"tnum" 1;
   }
-  .wrap{max-width:640px; margin:0 auto; padding:0 18px calc(var(--nav-h) + 24px);}
+  .wrap{max-width:430px; margin:0 auto; padding:0 18px calc(var(--nav-h) + 24px);}
   .num{font-variant-numeric:tabular-nums;}
 
   /* Header */
@@ -68,7 +68,8 @@
   .hero{overflow:hidden; margin-top:2px;}
   .hero-top{padding:18px 18px 16px; border-bottom:1px solid var(--line-2); position:relative;}
   .hero-top.rest{background:var(--sand-soft); border-bottom-color:transparent;}
-  .hero-date{display:flex; align-items:baseline; gap:9px; color:var(--muted); font-size:13px; letter-spacing:.02em;}
+  .hero-date{color:var(--muted); font-size:13px; letter-spacing:.02em;}
+  .vdiv{display:inline-block; width:1px; height:0.82em; background:var(--line); margin:0 9px; vertical-align:middle;}
   .hero-date b{color:var(--ink); font-weight:650;}
   .hero-title{font-size:26px; font-weight:760; letter-spacing:-.02em; margin:8px 0 2px;}
   .hero-est{font-size:13px; color:var(--muted);}
@@ -191,13 +192,18 @@
   .lastw b{color:var(--muted); font-weight:700;}
   .setrow{display:flex; flex-wrap:wrap; gap:7px;}
   .setcell{display:flex; flex-direction:column; gap:3px;}
+  .setrow:not(.dots){flex-wrap:wrap;}
+  .setrow:not(.dots) .setcell{flex:1 1 0; min-width:0;}
+  .setrow:not(.dots).q4 .setcell{flex:0 0 calc((100% - 21px)/4);}
   .setcell .sn{font-size:10.5px; color:var(--muted); font-weight:600; text-align:center;}
   .wtwrap{display:flex; align-items:center; border:1px solid var(--line); border-radius:9px; background:var(--surface-2); padding-right:7px;}
   .wtwrap:focus-within{border-color:var(--accent);}
-  .wt{width:42px; border:none; background:none; color:var(--ink); font-family:inherit; font-size:14px; font-weight:700; text-align:right; padding:7px 2px 7px 8px; font-variant-numeric:tabular-nums; outline:none; -moz-appearance:textfield;}
+  .wt{flex:1 1 0; width:0; min-width:0; border:none; background:none; color:var(--ink); font-family:inherit; font-size:14px; font-weight:700; text-align:right; padding:7px 2px 7px 8px; font-variant-numeric:tabular-nums; outline:none; -moz-appearance:textfield;}
   .wt::-webkit-outer-spin-button,.wt::-webkit-inner-spin-button{-webkit-appearance:none; margin:0;}
   .unit{font-size:11px; color:var(--faint); font-weight:600;}
-  .setrow.dots{gap:8px;}
+  .setrow.dots{gap:7px;}
+  .setrow.dots .setdot{flex:1 1 0; min-width:0;}
+  .setrow.dots.q4 .setdot{flex:0 0 calc((100% - 21px)/4);}
   .setdot{width:36px; height:34px; border-radius:9px; border:1px solid var(--line); background:var(--surface-2); color:var(--muted); font-weight:700; font-size:12px; cursor:pointer; font-family:inherit;}
   .setdot.on{background:var(--accent); border-color:var(--accent); color:#fff;}
 
@@ -212,7 +218,10 @@
   .step-fig svg{width:36px; height:36px;}
   .step-fig.badge{font-size:12px; font-weight:800; color:var(--accent-ink); background:#fff;}
   .step-main{flex:1; min-width:0;}
-  .step-kicker{font-size:11px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; color:var(--faint); margin-bottom:2px;}
+  .step-body{margin-top:11px;}
+  .step-hrow{display:flex; align-items:flex-start; gap:8px;}
+  .step-hmain{flex:1; min-width:0;}
+  .step-kicker{flex:none; font-size:11px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; color:var(--faint); white-space:nowrap; padding-top:2px;}
   .step-title{font-weight:700; font-size:15px;}
   .step-name{font-weight:800; font-size:16px; color:var(--accent-ink); margin-top:1px;}
   .step-list{margin:9px 0 2px; padding:0; list-style:none;}
@@ -220,12 +229,18 @@
   .step-list li:first-child{border-top:none;}
   .step-list li::before{content:""; position:absolute; left:4px; top:11px; width:6px; height:6px; border-radius:50%; background:var(--accent); opacity:.5;}
   .step-cue{font-size:12.5px; color:var(--muted); line-height:1.55; margin-top:6px;}
+  .step-cue .wu-desc:first-child{margin-top:0;}
   .step-list li.wu-item{padding-top:7px; padding-bottom:7px;}
   .step-list li.nodot::before{display:none;}
   .wu-name{font-weight:600; font-size:13.5px; color:var(--ink);}
-  .wu-desc{font-size:12.5px; color:var(--muted); margin-top:3px; line-height:1.5;}
-  .cardio-chips{display:flex; flex-wrap:wrap; gap:6px; margin-top:7px;}
-  .cardio-chip{padding:7px 13px; border-radius:9px; border:1px solid var(--line); background:var(--surface-2); color:var(--muted); font-family:inherit; font-size:12.5px; font-weight:700; cursor:pointer;}
+  .wu-desc{font-size:12.5px; color:var(--muted); margin-top:3px; line-height:1.5; display:flex; gap:.3em; word-break:keep-all;}
+  .wu-desc .wu-dash{flex:none;}
+  .wu-desc .wu-dtx{flex:1; min-width:0;}
+  .wu-desc .wu-seg{white-space:nowrap;}
+  .cardio-chips{display:flex; flex-wrap:wrap; gap:7px; margin-top:7px;}
+  .cardio-chips .cardio-chip{flex:1 1 0; min-width:0;}
+  .cardio-chips.q4 .cardio-chip{flex:0 0 calc((100% - 21px)/4);}
+  .cardio-chip{padding:7px 10px; border-radius:9px; border:1px solid var(--line); background:var(--surface-2); color:var(--muted); font-family:inherit; font-size:12.5px; font-weight:700; cursor:pointer; text-align:center; white-space:nowrap;}
   .cardio-chip.on{background:var(--accent); border-color:var(--accent); color:#fff;}
   .safety{margin-top:14px; padding:16px;}
   .safety-h{font-size:14px; font-weight:800; color:var(--accent-ink); margin-bottom:10px;}
@@ -271,10 +286,12 @@
   @keyframes cdpop{0%{transform:scale(.35); opacity:0;} 55%{transform:scale(1.14); opacity:1;} 100%{transform:scale(1);}}
 
   /* volume editor */
-  .voledit{display:flex; align-items:center; gap:6px; flex-wrap:wrap; margin-top:9px;}
+  .voledit{display:flex; align-items:center; justify-content:center; gap:6px; flex-wrap:wrap; margin-top:9px;}
   .voledit .stp{width:28px; height:28px; border-radius:8px; border:1px solid var(--line); background:var(--surface-2); color:var(--accent-ink); font-size:17px; font-weight:700; line-height:1; cursor:pointer; font-family:inherit;}
   .voledit .volnum{font-weight:800; font-size:14px; min-width:44px; text-align:center; font-variant-numeric:tabular-nums;}
   .voledit .voltimes{color:var(--faint); font-weight:700;}
+  .cardiomin{margin-top:2px; margin-bottom:10px;}
+  .cardiomin .cm-label{font-size:12.5px; font-weight:700; color:var(--muted); margin-right:4px;}
   .repin{width:74px; border:1px solid var(--line); border-radius:8px; background:var(--surface-2); color:var(--ink); font-family:inherit; font-size:13px; font-weight:700; text-align:center; padding:6px 4px; outline:none;}
   .repin:focus{border-color:var(--accent);}
   .volreset{margin-left:2px; border:none; background:none; color:var(--accent-ink); font-size:12px; font-weight:700; cursor:pointer; font-family:inherit; text-decoration:underline;}
@@ -283,8 +300,11 @@
   /* how-to links */
   .howto{margin-top:11px; border:1px solid var(--line-2); border-radius:10px; background:var(--surface-2); overflow:hidden;}
   .howto>summary{list-style:none; cursor:pointer; padding:10px 12px; font-size:13px; font-weight:700; color:var(--accent-ink); display:flex; align-items:center; gap:7px;}
+  .howto>summary.howto-sm{font-size:11.5px;}
+  .howto>summary.howto-xs{font-size:10.5px;}
+  .howto>summary .hs-txt{flex:1 1 auto; min-width:0;}
   .howto>summary::-webkit-details-marker{display:none;}
-  .howto>summary .chev{margin-left:auto; transition:.18s; color:var(--faint);}
+  .howto>summary .chev{flex:none; margin-left:6px; transition:.18s; color:var(--faint);}
   .howto[open]>summary .chev{transform:rotate(180deg);}
   .howto-body{padding:2px 12px 12px; display:flex; flex-direction:column; gap:8px;}
   .howto-body a{display:flex; align-items:center; gap:9px; padding:10px 12px; border:1px solid var(--line); border-radius:9px; background:var(--surface); color:var(--ink); text-decoration:none; font-size:13.5px; font-weight:600;}
@@ -346,6 +366,7 @@
   .pbanner-chips{display:flex; flex-wrap:wrap; gap:7px; margin-bottom:2px;}
   .pchip{font-size:12px; font-weight:700; color:var(--accent-ink); background:var(--accent-soft); border-radius:8px; padding:5px 10px;}
   .note.warn{background:var(--sand-soft); border:1px solid var(--sand); color:var(--ink); border-radius:10px; padding:10px 12px; margin-top:9px; font-size:12.5px; line-height:1.55;}
+  .note.warn .note-t{display:block; margin-bottom:3px;}
 
   /* home dashboard */
   .home-hi{font-size:22px; font-weight:800; letter-spacing:-.02em; margin:4px 0 2px;}
@@ -500,7 +521,7 @@
 
   /* bottom nav */
   nav{position:fixed; left:0; right:0; bottom:0; height:calc(var(--nav-h) + env(safe-area-inset-bottom)); padding-bottom:env(safe-area-inset-bottom); background:color-mix(in srgb, var(--surface) 88%, transparent); backdrop-filter:saturate(1.4) blur(14px); border-top:1px solid var(--line); z-index:40;}
-  .nav-inner{max-width:640px; margin:0 auto; height:var(--nav-h); display:flex;}
+  .nav-inner{max-width:430px; margin:0 auto; height:var(--nav-h); display:flex;}
   .nav-btn{flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; background:none; border:none; color:var(--muted); font-family:inherit; font-size:11px; font-weight:650; cursor:pointer; letter-spacing:.02em;}
   .nav-btn svg{width:23px; height:23px; fill:currentColor; stroke:none;}
   .nav-btn.active{color:var(--accent);}
@@ -807,7 +828,7 @@ const SESSIONS=[
  },
  { // S1
   title:'상체 당기기 · 자세교정', focus:['등','후면','말린어깨','거북목'], est:'45–55분',
-  warm:[{cardio:true},{n:'팔 크게 돌리기',a:'앞·뒤 각 10회',d:'양팔로 큰 원을 그리며 앞으로 10회, 뒤로 10회'},{n:'어깨 으쓱 내리기',a:'12회',d:'어깨를 귀 쪽으로 올렸다가 아래로 꾹 눌러 내리며 날개뼈 모으기'},{n:'밴드 어깨 뒤로 벌리기',a:'15회 ×2',d:'밴드를 가슴 앞에서 잡고 양옆으로 쭉 당겨 벌리기',eq:['band'],alt:{n:'팔 뒤로 모으기',a:'15회 ×2',d:'양 팔꿈치를 뒤로 당겨 날개뼈를 가운데로 모으기'}},{n:'밴드 페이스풀',a:'15회',d:'밴드를 얼굴 높이로 당기며 팔꿈치를 뒤로 벌리기',eq:['band'],alt:{n:'턱 당기기',a:'12회',d:'턱을 목 쪽으로 당겨 뒤통수를 위로 미는 느낌 · 거북목 교정'}}],
+  warm:[{cardio:true},{n:'팔 크게 돌리기',a:'앞/뒤 각 10회',d:'양팔로 큰 원을 그리며 앞으로 10회, 뒤로 10회'},{n:'어깨 으쓱 내리기',a:'12회',d:'어깨를 귀 쪽으로 올렸다가 아래로 꾹 눌러 내리며 날개뼈 모으기'},{n:'밴드 어깨 뒤로 벌리기',a:'15회 ×2',d:'밴드를 가슴 앞에서 잡고 양옆으로 쭉 당겨 벌리기',eq:['band'],alt:{n:'팔 뒤로 모으기',a:'15회 ×2',d:'양 팔꿈치를 뒤로 당겨 날개뼈를 가운데로 모으기'}},{n:'밴드 페이스풀',a:'15회',d:'밴드를 얼굴 높이로 당기며 팔꿈치를 뒤로 벌리기',eq:['band'],alt:{n:'턱 당기기',a:'12회',d:'턱을 목 쪽으로 당겨 뒤통수를 위로 미는 느낌 · 거북목 교정'}}],
   slots:[
    {role:'수직 당기기', sets:4, reps:'12회', options:[
      {name:'랫풀다운', eq:['lat_pulldown'], cue:'견갑을 먼저 아래로 내리고 당기기 · 반동·상체 뒤로 젖힘 금지, 허리 중립'},
@@ -881,7 +902,7 @@ const SESSIONS=[
  },
  { // S4
   title:'상체 밀기 · 자세교정', focus:['가슴','어깨','자세교정','체중감량'], est:'45–55분',
-  warm:[{cardio:true},{n:'팔 크게 돌리기',a:'앞·뒤 각 10회',d:'양팔로 큰 원을 그리며 앞으로 10회, 뒤로 10회'},{n:'어깨 바깥으로 돌리기',a:'좌/우 각각 12회',d:'팔꿈치를 옆구리에 붙인 채 손만 바깥쪽으로 돌리기'},{n:'밴드 어깨 뒤로 벌리기',a:'15회 ×2',d:'밴드를 가슴 앞에서 잡고 양옆으로 당겨 벌리기',eq:['band'],alt:{n:'팔 뒤로 모으기',a:'15회 ×2',d:'양 팔꿈치를 뒤로 당겨 날개뼈를 모으기'}},{n:'벽 팔굽혀펴기',a:'10회',d:'벽·기둥을 짚고 가슴을 벽 쪽으로 가볍게 내렸다 밀기'}],
+  warm:[{cardio:true},{n:'팔 크게 돌리기',a:'앞/뒤 각 10회',d:'양팔로 큰 원을 그리며 앞으로 10회, 뒤로 10회'},{n:'어깨 바깥으로 돌리기',a:'좌/우 각각 12회',d:'팔꿈치를 옆구리에 붙인 채 손만 바깥쪽으로 돌리기'},{n:'밴드 어깨 뒤로 벌리기',a:'15회 ×2',d:'밴드를 가슴 앞에서 잡고 양옆으로 당겨 벌리기',eq:['band'],alt:{n:'팔 뒤로 모으기',a:'15회 ×2',d:'양 팔꿈치를 뒤로 당겨 날개뼈를 모으기'}},{n:'벽 팔굽혀펴기',a:'10회',d:'벽·기둥을 짚고 가슴을 벽 쪽으로 가볍게 내렸다 밀기'}],
   slots:[
    {role:'수평 밀기', sets:4, reps:'12회', options:[
      {name:'체스트 프레스 머신', eq:['chest_press'], cue:'견갑을 안정시키고 허리 과도한 아치 없이 · 등받이에 기대 요추 보호'},
@@ -932,43 +953,43 @@ function buildWU(s){
   const cat=sessionCat(s), pull=isPullDay(s); const A=[];
   A.push({cardio:true}); // 체온 올리기
   // 전신 부위별 단일 동작: 목→어깨→팔→허리→옆구리→고관절→허벅지→종아리→손목→발목
-  A.push({n:'목 돌리기', a:'좌·우 각 5회', d:'고개를 천천히 원을 그리듯 좌우로 5회씩 돌리기'});
-  A.push({n:'어깨 돌리기', a:'앞·뒤 각 10회', d:'양 어깨를 크게 앞으로 10회, 뒤로 10회 돌리기'});
-  A.push({n:'팔 돌리기', a:'앞·뒤 각 10회', d:'양팔을 곧게 펴고 큰 원을 그리며 앞뒤로 돌리기'});
-  A.push({n:'상체 회전', a:'좌·우 각 10회', d:'다리를 어깨너비로 벌리고 상체를 좌우로 비틀기'});
-  A.push({n:'옆구리 늘리기', a:'좌·우 각 10회', d:'한 팔을 위로 뻗어 반대쪽으로 상체를 기울이기'});
-  A.push({n:'레그 스윙', a:'좌/우 각각 12회', d:'벽·기둥을 잡고 한 다리를 앞뒤로 크게 흔들기'});
-  A.push({n:'니 하이 마치', a:'20걸음', d:'제자리에서 무릎을 배꼽 높이까지 번갈아 올리기'});
-  A.push({n:'카프 레이즈', a:'15회', d:'발뒤꿈치를 최대한 들었다가 천천히 내리기'});
-  A.push({n:'손목 돌리기', a:'좌·우 각 10회', d:'양손을 깍지 끼고 손목을 원을 그리며 돌리기'});
-  A.push({n:'발목 돌리기', a:'좌/우 각각 10회', d:'한 발끝을 바닥에 대고 발목을 원을 그리며 돌리기'});
+  A.push({n:'목 돌리기', a:'좌/우 각 5회', d:'고개를 천천히 원을 그리듯|좌우로 5회씩 돌리기'});
+  A.push({n:'어깨 돌리기', a:'앞/뒤 각 10회', d:'양 어깨를 크게 앞으로 10회,|뒤로 10회 돌리기'});
+  A.push({n:'팔 돌리기', a:'앞/뒤 각 10회', d:'양팔을 곧게 펴고|큰 원을 그리며 앞뒤로 돌리기'});
+  A.push({n:'상체 회전', a:'좌/우 각 10회', d:'다리를 어깨너비로 벌리고|상체를 좌우로 비틀기'});
+  A.push({n:'옆구리 늘리기', a:'좌/우 각 10회', d:'한 팔을 위로 뻗어|반대쪽으로 상체를 기울이기'});
+  A.push({n:'레그 스윙', a:'좌/우 각각 12회', d:'벽·기둥을 잡고|한 다리를 앞뒤로 크게 흔들기'});
+  A.push({n:'니 하이 마치', a:'20걸음', d:'제자리에서 무릎을|배꼽 높이까지 번갈아 올리기'});
+  A.push({n:'카프 레이즈', a:'15회', d:'발뒤꿈치를 최대한 들었다가|천천히 내리기'});
+  A.push({n:'손목 돌리기', a:'좌/우 각 10회', d:'양손을 깍지 끼고|손목을 원을 그리며 돌리기'});
+  A.push({n:'발목 돌리기', a:'좌/우 각각 10회', d:'한 발끝을 바닥에 대고|발목을 원을 그리며 돌리기'});
   // 그날 부위 집중(활성화) — 정식 명칭
   if(cat==='upper'){
-    A.push({n:'밴드 풀 어파트', a:'15회', d:'밴드를 가슴 앞에서 잡고 양옆으로 쭉 당겨 벌리기', eq:['band'], alt:{n:'날개뼈 모으기', a:'15회', d:'양 팔꿈치를 뒤로 당겨 날개뼈를 가운데로 모으기'}});
-    if(pull) A.push({n:'턱 당기기', a:'30초', d:'턱을 목 쪽으로 살짝 당겨 뒤통수를 위로 미는 느낌으로 유지 · 거북목 교정'});
-    else A.push({n:'벽 팔굽혀펴기', a:'12회', d:'벽·기둥을 짚고 가슴을 벽 쪽으로 가볍게 내렸다 밀기'});
+    A.push({n:'밴드 풀 어파트', a:'15회', d:'밴드를 가슴 앞에서 잡고|양옆으로 쭉 당겨 벌리기', eq:['band'], alt:{n:'날개뼈 모으기', a:'15회', d:'양 팔꿈치를 뒤로 당겨|날개뼈를 가운데로 모으기'}});
+    if(pull) A.push({n:'턱 당기기', a:'30초', d:'턱을 목 쪽으로 살짝 당겨|뒤통수를 위로 미는 느낌으로 유지'});
+    else A.push({n:'벽 팔굽혀펴기', a:'12회', d:'벽·기둥을 짚고|가슴을 벽 쪽으로 가볍게 내렸다 밀기'});
   } else if(cat==='lower'){
-    A.push({n:'바디웨이트 스쿼트', a:'15회', d:'발을 어깨너비로, 엉덩이를 뒤로 빼며 앉았다 서기'});
-    A.push({n:'밴드 사이드 스텝', a:'좌/우 각각 12걸음', d:'밴드를 무릎에 걸고 반쯤 앉은 자세로 옆으로 이동', eq:['band'], alt:{n:'사이드 스텝', a:'좌/우 각각 12걸음', d:'무릎을 살짝 굽힌 반쯤 앉은 자세로 옆으로 이동'}});
+    A.push({n:'바디웨이트 스쿼트', a:'15회', d:'발을 어깨너비로,|엉덩이를 뒤로 빼며 앉았다 서기'});
+    A.push({n:'밴드 사이드 스텝', a:'좌/우 각각 12걸음', d:'밴드를 무릎에 걸고|반쯤 앉은 자세로 옆으로 이동', eq:['band'], alt:{n:'사이드 스텝', a:'좌/우 각각 12걸음', d:'무릎을 살짝 굽힌|반쯤 앉은 자세로 옆으로 이동'}});
   } else {
-    A.push({n:'힙 서클', a:'좌·우 각 8회', d:'손을 허리에 얹고 골반으로 큰 원을 그리기'});
+    A.push({n:'힙 서클', a:'좌/우 각 8회', d:'손을 허리에 얹고|골반으로 큰 원을 그리기'});
   }
   return A;
 }
 function buildCD(s){
   const cat=sessionCat(s); const A=[];
-  if(cat==='cardio') A.push({n:'호흡 정리 걷기', a:'2~3분', d:'심박이 안정될 때까지 천천히 걸으며 숨 고르기'});
+  if(cat==='cardio') A.push({n:'호흡 정리 걷기', a:'2~3분', d:'심박이 안정될 때까지|천천히 걸으며 숨 고르기'});
   const M={
-    neck:{n:'목 스트레칭', a:'좌/우 각각 25초', d:'한 손으로 반대쪽 머리를 지그시 당겨 목 옆을 늘이기'},
-    shoulder:{n:'어깨 스트레칭', a:'좌/우 각각 25초', d:'한 팔을 몸 앞으로 가로질러 반대 팔로 몸쪽으로 당기기'},
-    triceps:{n:'삼두 스트레칭', a:'좌/우 각각 25초', d:'한 팔을 머리 뒤로 접어 반대 손으로 팔꿈치를 아래로 당기기'},
-    chest:{n:'가슴 스트레칭', a:'좌/우 각각 30초', d:'벽·기둥·문틀 등에 팔을 대고 몸을 앞으로 기울여 가슴을 펴기'},
-    back:{n:'등 스트레칭', a:'30초', d:'양손을 깍지 껴 앞으로 뻗고 등을 둥글게 말아 견갑 사이를 늘이기'},
-    side:{n:'옆구리 스트레칭', a:'좌/우 각각 25초', d:'한 팔을 위로 뻗어 반대쪽으로 상체를 기울이기'},
-    glute:{n:'엉덩이 스트레칭', a:'좌/우 각각 30초', d:'앉아서 한 발목을 반대 무릎에 올리고 상체를 앞으로 숙이기'},
-    quad:{n:'앞허벅지 스트레칭', a:'좌/우 각각 30초', d:'서서 한 발등을 잡아 발뒤꿈치를 엉덩이 쪽으로 당기기'},
-    ham:{n:'뒤허벅지 스트레칭', a:'좌/우 각각 30초', d:'다리를 펴고 상체를 앞으로 숙여 발끝을 향하기'},
-    calf:{n:'종아리 스트레칭', a:'좌/우 각각 25초', d:'벽·기둥 등을 밀며 뒷다리를 쭉 펴고 뒤꿈치는 바닥에'}
+    neck:{n:'목 스트레칭', a:'좌/우 각각 25초', d:'한 손으로 반대쪽 머리를 지그시 당겨|목 옆을 늘이기'},
+    shoulder:{n:'어깨 스트레칭', a:'좌/우 각각 25초', d:'한 팔을 몸 앞으로 가로질러|반대 팔로 몸쪽으로 당기기'},
+    triceps:{n:'삼두 스트레칭', a:'좌/우 각각 25초', d:'한 팔을 머리 뒤로 접어|반대 손으로 팔꿈치를 아래로 당기기'},
+    chest:{n:'가슴 스트레칭', a:'좌/우 각각 30초', d:'벽·기둥·문틀 등에 팔을 대고|몸을 앞으로 기울여 가슴을 펴기'},
+    back:{n:'등 스트레칭', a:'30초', d:'양손을 깍지 껴 앞으로 뻗고|등을 둥글게 말아 견갑 사이를 늘이기'},
+    side:{n:'옆구리 스트레칭', a:'좌/우 각각 25초', d:'한 팔을 위로 뻗어|반대쪽으로 상체를 기울이기'},
+    glute:{n:'엉덩이 스트레칭', a:'좌/우 각각 30초', d:'앉아서 한 발목을 반대 무릎에 올리고|상체를 앞으로 숙이기'},
+    quad:{n:'앞허벅지 스트레칭', a:'좌/우 각각 30초', d:'서서 한 발등을 잡아|발뒤꿈치를 엉덩이 쪽으로 당기기'},
+    ham:{n:'뒤허벅지 스트레칭', a:'좌/우 각각 30초', d:'다리를 펴고|상체를 앞으로 숙여 발끝을 향하기'},
+    calf:{n:'종아리 스트레칭', a:'좌/우 각각 25초', d:'벽·기둥 등을 밀며 뒷다리를 쭉 펴고|뒤꿈치는 바닥에 붙이기'}
   };
   let order;
   if(cat==='upper') order=['chest','shoulder','triceps','back','neck','side','quad','calf'];
@@ -1069,14 +1090,14 @@ function renderSetLog(slot,r,dateStr,oi,nSets){
   if(r.bw){ // bodyweight/floor move → per-set completion dots
     let dots='';
     for(let k=0;k<n;k++){ dots+=`<button class="setdot ${saved[k]?'on':''}" onclick="toggleSetDone('${dateStr}',${oi},${k})">${k+1}</button>`; }
-    return `<div class="setlog"><div class="setrow dots">${dots}</div></div>`;
+    return `<div class="setlog"><div class="setrow dots ${n>4?'q4':''}">${dots}</div></div>`;
   }
   const last=lastLog(dateStr,oi);
   let hint='';
   if(last){ const md=last.date.slice(5).replace('-','/'); const parts=last.w.slice(0,n).map(x=>(typeof x==='number'&&x>0)?(''+x):'–'); hint=`<div class="lastw">지난 기록 <b>${md}</b> · ${parts.join('·')} kg</div>`; }
   let cells='';
   for(let k=0;k<n;k++){ const v=(typeof saved[k]==='number')?saved[k]:''; cells+=`<label class="setcell"><span class="sn">${k+1}세트</span><span class="wtwrap"><input class="wt" type="number" inputmode="decimal" min="0" step="0.5" value="${v}" placeholder="–" onchange="logWeight('${dateStr}',${oi},${k},this.value)"><span class="unit">kg</span></span></label>`; }
-  return `<div class="setlog">${hint}<div class="setrow">${cells}</div></div>`;
+  return `<div class="setlog">${hint}<div class="setrow ${n>4?'q4':''}">${cells}</div></div>`;
 }
 
 function effVol(si,oi,slot){
@@ -1101,7 +1122,7 @@ function howtoLinks(name){
   const yt='https://www.youtube.com/results?search_query='+encodeURIComponent(name+' 운동 방법 정확한 자세');
   const bl='https://search.naver.com/search.naver?ssc=tab.blog.all&sm=tab_jum&query='+encodeURIComponent(name+' 운동 방법 자세');
   return `<details class="howto">
-    <summary>📺 ${name} 운동 방법 영상·글 확인하기 <span class="chev">▾</span></summary>
+    <summary class="howto-sum"><span class="hs-txt">📺 운동 방법 영상·글 확인하기</span><span class="chev">▾</span></summary>
     <div class="howto-body">
       <a href="${yt}" target="_blank" rel="noopener"><span class="ho-ic yt">▶</span>유튜브에서 자세 영상 보기<span class="go">›</span></a>
       <a href="${bl}" target="_blank" rel="noopener"><span class="ho-ic bl">글</span>블로그에서 운동법 읽기<span class="go">›</span></a>
@@ -1109,7 +1130,7 @@ function howtoLinks(name){
     </div>
   </details>`;
 }
-function stepShell(figHtml,figCls,kicker,titleHtml,bodyHtml,id,dateStr,active,done){
+function stepShell(figHtml,figCls,kicker,titleHtml,bodyHtml,id,dateStr,active,done,foot){
   const started=state.stepStart&&state.stepStart[dateStr]&&state.stepStart[dateStr][id];
   const elapsed=state.stepMs&&state.stepMs[dateStr]&&state.stepMs[dateStr][id];
   let btn;
@@ -1124,11 +1145,11 @@ function stepShell(figHtml,figCls,kicker,titleHtml,bodyHtml,id,dateStr,active,do
     <div class="step-head">
       <div class="step-fig ${figCls}">${figHtml}</div>
       <div class="step-main">
-        <div class="step-kicker">${kicker}</div>
-        ${titleHtml}
-        ${bodyHtml}
+        <div class="step-hrow"><div class="step-hmain">${titleHtml}</div><div class="step-kicker">${kicker}</div></div>
       </div>
     </div>
+    ${bodyHtml?`<div class="step-body">${bodyHtml}</div>`:''}
+    ${foot||''}
     ${btn}
   </div>`;
 }
@@ -1145,8 +1166,8 @@ function cardioMachines(){
 function pickCardio(id){ state.cardioChoice=(state.cardioChoice===id?null:id); touch(); refresh(); }
 function cardioChips(){
   const m=cardioMachines();
-  if(!m.length) return `<div class="wu-desc">- 보유한 유산소 기구가 없어요. 제자리 걷기·마칭으로 대체하세요.</div>`;
-  return `<div class="cardio-chips">${m.map(([id,label])=>`<button class="cardio-chip ${state.cardioChoice===id?'on':''}" onclick="pickCardio('${id}')">${label}</button>`).join('')}</div>`;
+  if(!m.length) return wuDesc('보유한 유산소 기구가 없어요.|제자리 걷기·마칭으로 대체하세요.');
+  return `<div class="cardio-chips ${m.length>4?'q4':''}">${m.map(([id,label])=>`<button class="cardio-chip ${state.cardioChoice===id?'on':''}" onclick="pickCardio('${id}')">${label}</button>`).join('')}</div>`;
 }
 function wuResolve(arr){
   const okEq=e=>!e||e.every(x=>state.equipment.includes(x));
@@ -1160,11 +1181,40 @@ function wuResolve(arr){
     return null;
   }).filter(Boolean);
 }
+function wuDesc(t){ t=String(t); const inner=t.indexOf('|')>=0?t.split('|').map(p=>`<span class="wu-seg">${p}</span>`).join(' '):t; return `<div class="wu-desc"><span class="wu-dash">-</span><span class="wu-dtx">${inner}</span></div>`; }
+/* 스마트 줄바꿈: (1)마침표(. ) 뒤 문장 분리 (2)문장이 한 줄(cap)을 넘칠 때만, 그리고 쉼표 앞부분이 한 줄에 들어갈 때만 그 쉼표에서 줄바꿈. cap = 한 줄에 들어가는 대략 글자 수 */
+function smartBreak(t, cap){
+  cap=cap||26; t=String(t);
+  const sents=[]; let buf='';
+  for(let i=0;i<t.length;i++){ buf+=t[i]; if(t[i]==='.'&&t[i+1]===' '){ sents.push(buf); buf=''; i++; } }
+  if(buf) sents.push(buf);
+  return sents.map(s=>{
+    if(s.length<=cap) return s; // 한 줄에 들어가면 그대로
+    const mid=s.length*0.5, minPos=s.length*0.35; let best=-1, bestD=1e9;
+    for(let i=0;i<s.length;i++){ if(s[i]===',' && i>=minPos && (i+1)<=cap){ const d=Math.abs(i-mid); if(d<bestD){ bestD=d; best=i; } } }
+    if(best>=0) return s.slice(0,best+1)+'<br>'+s.slice(best+1).replace(/^\s+/,'');
+    return s;
+  }).join('<br>');
+}
+function periodLines(t){ return smartBreak(t, 27); }
+/* 절 안에서 쉼표/마침표 뒤를 끊음 — 짧은 조각만 nowrap로 묶어 그 지점에서만 줄바꿈, 긴 조각은 keep-all로 안전 줄바꿈 */
+function segify(t){
+  t=String(t); const parts=[]; let buf='';
+  for(let i=0;i<t.length;i++){ buf+=t[i]; if((t[i]===','||t[i]==='.') && t[i+1]===' '){ parts.push(buf); buf=''; i++; } }
+  if(buf) parts.push(buf);
+  return parts.map(p=> p.length<=20 ? `<span class="wu-seg">${p}</span>` : p).join(' ');
+}
+/* 운동 큐: " · "(공백 있는 가운뎃점)를 절 구분으로 보고 "- " 불릿 + 행잉인덴트로 렌더 */
+function fmtCue(cue){ if(!cue) return ''; return String(cue).split(/ (?:·|—|–) /).map(c=>c.trim()).filter(Boolean).map(c=>`<div class="wu-desc"><span class="wu-dash">-</span><span class="wu-dtx">${smartBreak(c,28)}</span></div>`).join(''); }
+/* 제목의 " · "를 회색 세로선으로, 날짜 상대 라벨(오늘/N일 후/N일 전), 유산소 상세의 총 시간(분) 제거 */
+function sessTitle(t){ return String(t).split(' · ').join('<span class="vdiv"></span>'); }
+function relDay(t){ const d=Math.round((parse(t)-parse(todayStr()))/86400000); return d===0?'오늘':(d>0?d+'일 후':(-d)+'일 전'); }
+function cardioDetail(d){ return String(d).replace(/\s\d+(?:[–-]\d+)?분(?=\s*—)/,''); }
 function listBody(arr){
   const items=wuResolve(arr); let out='';
   items.forEach(it=>{
-    if(it.cardio){ const m=cardioMachines(); out+=`<li class="wu-item"><div class="wu-name">가벼운 유산소 5분</div>${m.length?`<div class="wu-desc">- 아래에서 원하는 기구를 선택하세요</div>${cardioChips()}`:`<div class="wu-desc">- 유산소 기구가 없어요. 제자리 걷기·마칭으로 대체하세요.</div>`}</li>`; return; }
-    out+=`<li class="wu-item"><div class="wu-name">${it.n}${it.a?` · ${it.a}`:''}</div>${it.d?`<div class="wu-desc">- ${it.d}</div>`:''}</li>`;
+    if(it.cardio){ const m=cardioMachines(); out+=`<li class="wu-item"><div class="wu-name">가벼운 유산소 5분</div>${m.length?`${wuDesc('아래에서 원하는 기구를 선택하세요')}${cardioChips()}`:wuDesc('유산소 기구가 없어요. 제자리 걷기·마칭으로 대체하세요.')}</li>`; return; }
+    out+=`<li class="wu-item"><div class="wu-name">${it.n}${it.a?`(${it.a})`:''}</div>${it.d?wuDesc(it.d):''}</li>`;
   });
   return `<ul class="step-list">${out}</ul>`;
 }
@@ -1294,7 +1344,7 @@ function wuPlayerCard(){
   return `<div class="step active wu-player">
     <div class="wup-head">${isWarm?'준비 · 워밍업':'마무리 · 쿨다운'} · <b>${wuP.idx+1} / ${total}</b></div>
     <div class="wup-name">${it.n}</div>
-    ${it.d?`<div class="wup-desc">${it.d}</div>`:''}
+    ${it.d?`<div class="wup-desc">${it.d.replace(/\|/g,' ')}</div>`:''}
     <div class="wup-clock"><span id="wup-count">0:00</span><span class="wup-dur"> / ${fmtClock(it.dur)}</span></div>
     ${mid}
     <div class="wup-bar"><div id="wup-fill" class="wup-fill"></div></div>
@@ -1303,14 +1353,14 @@ function wuPlayerCard(){
   </div>`;
 }
 function wuStepCard(phase,s,dateStr,active,done,mins){
-  const isWarm=phase==='warm', title=isWarm?'워밍업':'마무리 쿨다운';
-  const kicker=`${isWarm?'준비 · 워밍업':'마무리 · 쿨다운'} · 약 ${mins}분`;
+  const isWarm=phase==='warm', title=isWarm?'준비 운동 워밍업':'마무리 쿨다운';
+  const kicker=`약 ${mins}분`;
   const arr=isWarm?s.warm:s.cool, fig=isWarm?STEP_SVG.warmup:STEP_SVG.cooldown;
   const elapsed=state.stepMs&&state.stepMs[dateStr]&&state.stepMs[dateStr][phase];
   let btn;
   if(done) btn=`<div class="step-done-row">✓ 완료${elapsed?` · <b>${fmtDur(elapsed)}</b> 걸림`:''} <button class="step-reopen" onclick="resetStep('${dateStr}','${phase}')">다시 열기</button></div>`;
   else btn=`<button class="step-done-btn start" onclick="wuStart('${phase}','${dateStr}')">${isWarm?'웜업':'쿨다운'} 시작 →</button>`;
-  return `<div class="step ${active?'active':''} ${done?'done':''}"><div class="step-head"><div class="step-fig">${fig}</div><div class="step-main"><div class="step-kicker">${kicker}</div><div class="step-title">${title}</div>${listBody(arr)}</div></div>${btn}</div>`;
+  return `<div class="step ${active?'active':''} ${done?'done':''}"><div class="step-head"><div class="step-fig">${fig}</div><div class="step-main"><div class="step-hrow"><div class="step-hmain"><div class="step-title">${title}</div></div><div class="step-kicker">${kicker}</div></div></div></div><div class="step-body">${listBody(arr)}</div>${btn}</div>`;
 }
 function sessionTimes(s, kept, si){
   const T=Math.max(20, state.sessionMinutes||60);
@@ -1327,7 +1377,22 @@ function sessionTimes(s, kept, si){
   let sum=warm+cool+cardio+ex.reduce((a,b)=>a+b,0);
   cardio+=(T-sum);
   if(cardio<3){ let def=3-cardio;cardio=3; while(def>0){const mi=ex.indexOf(Math.max(...ex)); if(ex[mi]<=3)break; ex[mi]--;def--;} }
-  return {warm,cool,cardio,ex,total:T};
+  const cardioAuto=cardio;
+  const ov=state.cardioMin&&state.cardioMin[si];
+  if(ov!=null) cardio=Math.max(0,ov);
+  const total=warm+cool+cardio+ex.reduce((a,b)=>a+b,0);
+  return {warm,cool,cardio,ex,total,cardioAuto};
+}
+function setCardioMin(si,v){ v=Math.max(0,Math.min(120,Math.round(v))); if(!state.cardioMin)state.cardioMin={}; state.cardioMin[si]=v; touch(); renderToday(); }
+function resetCardioMin(si){ if(state.cardioMin){ delete state.cardioMin[si]; } touch(); renderToday(); }
+function cardioMinCtrl(si,mins){
+  const custom=!!(state.cardioMin&&state.cardioMin[si]!=null);
+  return `<div class="voledit cardiomin"><span class="cm-label">유산소 시간</span>
+    <button class="stp" onclick="setCardioMin(${si},${mins-5})">−</button>
+    <span class="volnum">${mins}분</span>
+    <button class="stp" onclick="setCardioMin(${si},${mins+5})">+</button>
+    ${custom?`<button class="volreset" onclick="resetCardioMin(${si})">추천값으로</button>`:''}
+  </div>`;
 }
 function fmtDur(ms){ const s=Math.round(ms/1000); const m=Math.floor(s/60); const r=s%60; return m>0?`${m}분 ${r}초`:`${r}초`; }
 function startStep(date,id){ if(!state.stepStart)state.stepStart={}; if(!state.stepStart[date])state.stepStart[date]={}; state.stepStart[date][id]=Date.now(); touch(); renderToday(); }
@@ -1368,14 +1433,13 @@ function renderSessionCard(s,dateStr,si){
     const title=`<div class="step-title">${x.sl.role}</div><div class="step-name">${x.r.name}</div>`;
     let body=`<div class="ex-meta" style="margin-top:6px">${eqChips}${v.customized?'<span class="vol-tag">직접 설정</span>':''}</div>`;
     body+=volEditor(si,x.oi,x.sl,v);
-    if(x.r.cue) body+=`<div class="step-cue">${x.r.cue}</div>`;
+    if(x.r.cue) body+=`<div class="step-cue">${fmtCue(x.r.cue)}</div>`;
     body+=renderSetLog(x.sl,x.r,dateStr,x.oi,v.sets);
-    body+=howtoLinks(x.r.name);
-    html+=stepShell(exFig(x.r,x.sl.role),'', `운동 ${idx+1} / ${kept.length} · 약 ${tm.ex[idx]}분`, title, body, id, dateStr, active, done);
+    html+=stepShell(exFig(x.r,x.sl.role),'', `운동 ${idx+1} / ${kept.length} (약 ${tm.ex[idx]}분)`, title, body, id, dateStr, active, done, howtoLinks(x.r.name));
   });
 
   // cardio
-  html+=stepShell(STEP_SVG.cardio,'', `유산소 · 약 ${tm.cardio}분`, `<div class="step-title">${s.cardio.label}</div>`, `${cardioChips()}<div class="step-cue" style="margin-top:8px">${s.cardio.detail}</div>`, 'cardio', dateStr, activeId==='cardio', !!completed['cardio']);
+  html+=stepShell(STEP_SVG.cardio,'', `약 ${tm.cardio}분`, `<div class="step-title">${s.cardio.label}</div>`, `${cardioMinCtrl(si,tm.cardio)}${cardioChips()}<div class="step-cue" style="margin-top:8px">${fmtCue(cardioDetail(s.cardio.detail))}</div>`, 'cardio', dateStr, activeId==='cardio', !!completed['cardio']);
 
   // cooldown
   if(wuP && wuP.phase==='cool' && wuP.dateStr===dateStr) html+=wuPlayerCard();
@@ -1407,7 +1471,7 @@ function renderHome(){
     const dayDone=state.doneDays.includes(t);
     html+=`<div class="card"><div class="hero-pad">
       <div class="hero-date"><b>오늘의 운동</b> <span>· ${WD[parse(t).getDay()]}요일</span></div>
-      <div class="hero-title">${s.title}</div>
+      <div class="hero-title">${sessTitle(s.title)}</div>
       <div class="hero-est">약 ${state.sessionMinutes||60}분 · 순환 ${entry.session+1}/6 · ${dn}/${ids.length}단계 완료</div>
       ${dn>0?`<div class="home-prog"><div class="home-prog-bar" style="width:${pct}%"></div></div>`:''}
       <button class="btn primary" style="margin-top:14px" onclick="goTab('plan')">${dayDone?'✓ 오늘 완료 · 다시 보기':(dn>0?'이어서 운동하기 →':'오늘 운동 시작하기 →')}</button>
@@ -1432,6 +1496,7 @@ function renderHome(){
 }
 
 /* ----- TODAY view ----- */
+function warnNote(label, body){ return `<div class="note warn"><b class="note-t">${label}</b><div class="note-b">${periodLines(body)}</div></div>`; }
 function profileBanner(){
   const p=state.profile; if(!p) return '';
   const chips=[];
@@ -1442,8 +1507,8 @@ function profileBanner(){
   const inj=(p.injuries&&p.injuries.has)?((p.injuries.list||[]).concat(p.injuries.other?[p.injuries.other]:[])):[];
   const cond=(p.conditions&&p.conditions.has)?((p.conditions.list||[]).concat(p.conditions.other?[p.conditions.other]:[])):[];
   let caution='';
-  if(inj.length) caution+=`<div class="note warn"><b>부상·수술 배려</b> · ${inj.join(', ')} 관련 동작은 자동으로 제외·완화됐어요. 통증 시 즉시 중단하고 전문의와 상담하세요.</div>`;
-  if(cond.length) caution+=`<div class="note warn"><b>건강 주의</b> · ${cond.join(', ')} 이력이 있어요. 무거운 중량에서 숨 참기(발살바)를 피하고, 세트 사이 충분히 쉬며 어지럼·통증 시 중단하세요.</div>`;
+  if(inj.length) caution+=warnNote('부상·수술 이력 반영', `${inj.join(', ')} 관련 동작은 자동으로 제외·완화됐어요. 통증 시 즉시 중단하고 전문의와 상담하세요.`);
+  if(cond.length) caution+=warnNote('건강 주의', `${cond.join(', ')} 이력이 있어요. 무거운 중량에서 숨 참기(발살바)를 피하고, 세트 사이 충분히 쉬며 어지럼이나 통증 시 중단하세요.`);
   if(!chips.length && !caution) return '';
   return `<div class="card" style="margin:0 0 4px; padding:16px"><div class="pbanner-h">🤖 내 프로필 기반 맞춤 조정</div>${chips.length?`<div class="pbanner-chips">${chips.map(c=>`<span class="pchip">${c}</span>`).join('')}</div>`:''}${caution}</div>`;
 }
@@ -1475,9 +1540,9 @@ function safetyBox(){
     });
   }
   const title = personalized?'나를 위한 맞춤 안전 원칙':'안전 원칙';
-  const list = rules.map(r=>`<li>${r}</li>`).join('');
+  const list = rules.map(r=>`<li>${periodLines(r)}</li>`).join('');
   return `<div class="card safety"><div class="safety-h">🛡️ ${title}</div><ul class="safety-list">${list}</ul>
-    <div class="safety-note">위 플랜은 회원님이 입력한 정보(경험·목표·부상·지병 등)를 바탕으로 AI가 자동으로 구성한 거예요. 실제 몸 상태는 사람마다 다를 수 있으니 통증이 있거나 걱정되는 부분이 있으면 무리하지 말고, 필요하면 의사·물리치료사 등 전문가와 상담한 뒤 진행해주세요.</div></div>`;
+    <div class="safety-note">${periodLines('위 플랜은 회원님이 입력한 정보(경험·목표·부상·지병 등)를 바탕으로 AI가 자동으로 구성한 거예요. 실제 몸 상태는 사람마다 다를 수 있으니 통증이 있거나 걱정되는 부분이 있으면 무리하지 말고, 필요하면 의사·물리치료사 등 전문가와 상담한 뒤 진행해주세요.')}</div></div>`;
 }
 function renderToday(){
   const t=planDate||todayStr();
@@ -1510,8 +1575,8 @@ function renderToday(){
   } else {
     const s=SESSIONS[entry.session];
     html+=`<div class="card hero"><div class="hero-top">
-      <div class="hero-date"><b>${human(t)}</b> <span>${isToday?'· 오늘':'· '+WD[parse(t).getDay()]+'요일'}</span></div>
-      <div class="hero-title">${s.title}</div>
+      <div class="hero-date"><b>${human(t)}</b><span class="vdiv"></span><span>${relDay(t)}</span></div>
+      <div class="hero-title">${sessTitle(s.title)}</div>
       <div class="hero-est">약 ${state.sessionMinutes||60}분 · 순환 ${entry.session+1}/6</div>
       <div class="tags">${focusTags(s.focus)}</div>
     </div>`;
@@ -1609,7 +1674,7 @@ function planDayRow(k,t){
     const s=SESSIONS[e.session]; const steps=(state.steps&&state.steps[k])||{}; let ex='';
     s.slots.forEach((slot,oi)=>{ const r=resolveSlot(slot); if(!r) return; const exDone=!!steps['ex'+oi];
       ex+=`<div class="mini-ex ${exDone?'done':''}"><span class="mini-fig">${exFig(r,slot.role)}</span><span class="mn">${r.name}</span>${exDone?'<span class="mini-done">✓</span>':''}<span class="mv">${slot.sets}×${slot.reps}</span></div>`; });
-    ex+=`<div class="mini-ex ${steps['cardio']?'done':''}"><span class="mn">${s.cardio.label}</span>${steps['cardio']?'<span class="mini-done">✓</span>':''}<span class="mv">${s.cardio.detail.split(' — ')[0].replace(s.cardio.label,'').trim()||s.cardio.detail}</span></div>`;
+    ex+=`<div class="mini-ex ${steps['cardio']?'done':''}"><span class="mn">${s.cardio.label}</span>${steps['cardio']?'<span class="mini-done">✓</span>':''}<span class="mv">${cardioDetail(s.cardio.detail).split(' — ')[0].replace(s.cardio.label,'').trim()||cardioDetail(s.cardio.detail)}</span></div>`;
     html+=`<div class="day-expand">${ex}`;
     let tools='';
     if(!isPast && !(isToday && done)) tools+=`<button class="btn sm ghost" onclick="toggleRest('${k}')">이 날 쉬기</button>`;

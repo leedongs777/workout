@@ -262,10 +262,10 @@
   .eqsel{display:flex; flex-wrap:wrap; gap:7px; margin-top:9px; align-items:stretch;}
   .eqsel .eqbtn{flex:1 1 0; min-width:0; padding:9px 8px; border-radius:10px; border:1px solid var(--line); background:var(--surface-2); color:var(--muted); font-family:inherit; font-size:12.5px; font-weight:700; cursor:pointer; text-align:center; white-space:normal; word-break:keep-all; line-height:1.3;}
   .eqsel .eqbtn.on{background:var(--accent); border-color:var(--accent); color:#fff;}
-  .eqsel .eqbtn, .cardio-chips .cardio-chip{display:flex; align-items:center; justify-content:center; gap:5px;}
-  .eq-ic{flex:none; width:17px; height:17px; display:inline-flex; align-items:center; justify-content:center; color:inherit;}
-  .eq-ic svg{width:17px; height:17px;}
-  .eq-tx{min-width:0;}
+  .eqsel .eqbtn, .cardio-chips .cardio-chip{display:flex; align-items:center; justify-content:center; gap:4px; white-space:nowrap; padding-left:5px; padding-right:5px; overflow:hidden;}
+  .eq-ic{flex:none; width:16px; height:16px; display:inline-flex; align-items:center; justify-content:center; color:inherit;}
+  .eq-ic svg{width:16px; height:16px;}
+  .eq-tx{min-width:0; font-size:10.5px; letter-spacing:-.02em; white-space:nowrap;}
   .cardio-chip.on{background:var(--accent); border-color:var(--accent); color:#fff;}
   .safety{margin-top:14px; padding:16px;}
   .safety-h{font-size:14px; font-weight:800; color:var(--accent-ink); margin-bottom:10px;}
@@ -273,7 +273,9 @@
   .safety-list li{display:flex; gap:7px; align-items:flex-start; padding:5px 0; font-size:13px; color:var(--ink); line-height:1.55;}
   .safety-list .sl-tx{flex:1; min-width:0;}
   .warn-tri{flex:none; margin-top:3px; color:var(--sand);}
-  .safety-note{display:flex; gap:6px; align-items:flex-start; margin-top:12px; background:var(--surface-2); border-radius:10px; padding:11px 12px; font-size:12px; color:var(--muted); line-height:1.6;}
+  .safety-note{margin-top:12px; background:var(--surface-2); border-radius:10px; padding:11px 12px; font-size:12px; color:var(--muted); line-height:1.6;}
+  .safety-note .sn-line{display:flex; gap:6px; align-items:flex-start;}
+  .safety-note .sn-line + .sn-line{margin-top:6px;}
   .safety-note .sn-dot{flex:none; font-weight:800; color:var(--accent);}
   .safety-note .sl-tx{flex:1; min-width:0;}
   .step-done-btn{width:100%; margin-top:12px; border:1px solid var(--accent); background:transparent; color:var(--accent-ink); font-weight:700; font-size:14px; padding:10px; border-radius:11px; cursor:pointer; font-family:inherit; transition:.14s;}
@@ -345,7 +347,8 @@
   .stepprog{font-size:12px; font-weight:700; color:var(--muted); text-align:center; margin:2px 0 12px;}
   /* 심박존 배지 — 팬톤: Z1 7723C, Z2 2277C, Z3 143C, Z4 1495C, Z5 179C (그린→레드) */
   .cz{display:flex; align-items:center; gap:9px; flex-wrap:wrap;}
-  .cz-badge{color:#fff; font-weight:800; font-size:12px; padding:3px 11px; border-radius:8px; letter-spacing:.03em;}
+  .cz-badge{display:inline-flex; align-items:center; gap:4px; color:#fff; font-weight:800; font-size:12px; padding:3px 10px; border-radius:8px; letter-spacing:.03em;}
+  .cz-i{opacity:.9;}
   .cz-hr{font-size:12.5px; font-weight:700; color:var(--ink); font-variant-numeric:tabular-nums;}
   .cz-heart{color:#E1607A;}
   .cz-note{font-size:12.5px; font-weight:600; color:var(--muted);}
@@ -417,7 +420,7 @@
   .note.warn .note-t{display:block; margin-bottom:3px;}
 
   /* home dashboard */
-  .home-hi{font-size:16.5px; font-weight:700; letter-spacing:-.01em; color:var(--muted); margin:4px 0 10px;}
+  .home-hi{font-size:16.5px; font-weight:700; letter-spacing:-.01em; color:var(--accent-ink); margin:16px 0 15px;}
   .home-date{font-size:13px; color:var(--muted); margin-bottom:16px;}
   .hero-pad{padding:18px;}
   .home-prog{height:8px; border-radius:99px; background:rgba(46,94,86,.14); overflow:hidden; margin-top:12px;}
@@ -829,10 +832,15 @@ const ROLE_PAT={
   '코어 · 안티 익스텐션':'deadbug','코어 · 안정화':'birddog','코어 · 측면':'sideplank','자세교정 종합':'facepull',
 };
 function eqWrap(inner){return `<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">${inner}</svg>`;}
-/* 아래 7개 머신 아이콘은 원본 벡터에 한글 이름이 박혀 있어, 글자 없는 깔끔한 웨이트 머신 아이콘으로 교체 */
-const _MACH_SVG='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 44" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" preserveAspectRatio="xMidYMid meet"><path d="M9 21h12v3.2H9z" fill="currentColor" stroke="none"/><path d="M9 24.2v9M21 24.2v9"/><path d="M21 11.5v13h13.5"/><rect x="30.5" y="13" width="9.5" height="19.5" rx="1.6"/><path d="M33 18h4.5M33 22h4.5M33 26h4.5"/></svg>';
-['leg_press','leg_extension','leg_curl','lying_leg_curl','hack_squat','hip_abduction','hip_adduction'].forEach(k=>{ EQ_SVG[k]=_MACH_SVG; });
-function eqIcon(id){return EQ_SVG[id]||eqWrap(EQ_ICON[id]||EQ_ICON._fallback);}
+/* 아래 7개 머신 아이콘은 원본 벡터 하단에 한글 이름이 박혀 있어, viewBox 높이를 줄여 이름 부분만 잘라냄 */
+const _CROP_ICON={leg_press:.77, leg_extension:.77, leg_curl:.77, lying_leg_curl:.77, hack_squat:.79, hip_abduction:.79, hip_adduction:.80};
+function eqIcon(id){
+  let svg=EQ_SVG[id];
+  if(!svg) return eqWrap(EQ_ICON[id]||EQ_ICON._fallback);
+  const f=_CROP_ICON[id];
+  if(f) svg=svg.replace(/viewBox="([-\d.]+)\s+([-\d.]+)\s+([-\d.]+)\s+([-\d.]+)"/, (m,x,y,w,h)=>`viewBox="${x} ${y} ${w} ${((+h)*f).toFixed(2)}"`);
+  return svg;
+}
 function patIcon(role){const pat=ROLE_PAT[role]||'strength';return (typeof POSE_SVG!=='undefined'&&POSE_SVG[pat])||svgWrap(PAT_ICON[pat]||PAT_ICON.strength);}
 function exFig(r,role){ if(r && !r.bw && r.eq && r.eq.length) return eqIcon(r.eq[0]); return patIcon(role); }
 
@@ -1273,12 +1281,12 @@ function smartBreak(t, cap){
   return sents.map(s=>{
     if(s.length<=cap) return s; // 한 줄에 들어가면 그대로
     const mid=s.length*0.5, minPos=s.length*0.40; let best=-1, bestD=1e9;
-    for(let i=0;i<s.length;i++){ if(s[i]===',' && i>=minPos){ const d=Math.abs(i-mid); if(d<bestD){ bestD=d; best=i; } } }
+    for(let i=0;i<s.length;i++){ if(s[i]===',' && i>=minPos && (i+1)<=cap){ const d=Math.abs(i-mid); if(d<bestD){ bestD=d; best=i; } } }
     if(best>=0) return s.slice(0,best+1)+'<br>'+s.slice(best+1).replace(/^\s+/,'');
     return s;
   }).join('<br>');
 }
-function periodLines(t){ return smartBreak(t, 27); }
+function periodLines(t){ return smartBreak(t, 34); }
 /* 절 안에서 쉼표/마침표 뒤를 끊음 — 짧은 조각만 nowrap로 묶어 그 지점에서만 줄바꿈, 긴 조각은 keep-all로 안전 줄바꿈 */
 function segify(t){
   t=String(t); const parts=[]; let buf='';
@@ -1303,7 +1311,7 @@ function cardioGuide(detail){
   const hr=hrZone(z);
   const hrTxt = hr.abs ? `심박수 ${hr.lo}~${hr.hi}` : `최대심박의 ${hr.plo}~${hr.phi}%`;
   let note=detail.replace(/존\s*[1-5]\s*강도?/,'').replace(/^\s*·\s*/,'').trim();
-  return `<div class="cz"><button class="cz-badge cz${z} cz-tap" onclick="showZoneInfo()">Zone ${z} ⓘ</button><span class="cz-hr"><span class="cz-heart">♥</span> ${hrTxt}</span>${note?`<span class="vdiv"></span><span class="cz-note">${note}</span>`:''}</div>`;
+  return `<div class="cz"><button class="cz-badge cz${z} cz-tap" onclick="showZoneInfo()">Zone ${z}<svg class="cz-i" viewBox="0 0 20 20" width="13" height="13" aria-hidden="true"><circle cx="10" cy="10" r="8.4" fill="none" stroke="currentColor" stroke-width="1.7"/><circle cx="10" cy="6.3" r="1.15" fill="currentColor"/><path d="M10 9.3v4.6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button><span class="cz-hr"><span class="cz-heart">♥</span> ${hrTxt}</span>${note?`<span class="vdiv"></span><span class="cz-note">${note}</span>`:''}</div>`;
 }
 function showZoneInfo(){
   const m=document.getElementById('ympick'); if(!m) return;
@@ -1573,7 +1581,7 @@ function streak(){ let n=0,guard=0; let d=parse(todayStr()); const today=todaySt
 function weekTotal(){ return (state.workoutDays||[0,2,3,4,5,6]).length; }
 function monthDone(){ const t=parse(todayStr()),y=t.getFullYear(),m=t.getMonth(); return state.doneDays.filter(k=>{const d=parse(k);return d.getFullYear()===y&&d.getMonth()===m;}).length; }
 function monthTotal(){ const t=parse(todayStr()),y=t.getFullYear(),m=t.getMonth(),last=new Date(y,m+1,0).getDate(); let c=0; for(let i=1;i<=last;i++){ const e=sessionFor(fmt(new Date(y,m,i))); if(e&&!e.rest)c++; } return c; }
-const MOTIV=['오늘의 땀은 내일의 자신감이 돼요','작은 한 걸음이 큰 변화를 만들어요','어제의 나를 이기는 하루예요','꾸준함이 재능을 이겨요','이미 시작했으니 절반은 온 거예요','몸은 오늘의 노력을 기억해요','포기하지 않는 한 실패는 없어요','건강은 가장 확실한 투자예요','미래의 나에게 선물을 주는 시간이에요','완벽함보다 꾸준함이에요','움직이는 만큼 강해져요','오늘 하루도 나를 아끼는 방법이에요'];
+const MOTIV=['오늘의 땀은 내일의 자신감이 돼요.','작은 한 걸음이 큰 변화를 만들어요!','어제의 나를 이겨볼까요?','꾸준함이 재능을 이겨요.','이미 시작했으니 절반은 온 거예요!','몸은 오늘의 노력을 기억해요.','포기하지 않는 한 실패는 없어요!','건강은 가장 확실한 투자예요.','미래의 나에게 선물을 줄 시간이에요!','완벽함보다 꾸준함이에요.','움직이는 만큼 강해져요!','오늘도 나를 아껴볼까요?'];
 let _motiv=null; function homeMotiv(){ if(!_motiv) _motiv=MOTIV[Math.floor(Math.random()*MOTIV.length)]; return _motiv; }
 function longDate(t){ const d=parse(t); return `${d.getMonth()+1}월 ${d.getDate()}일 ${WD[d.getDay()]}요일`; }
 function renderHome(){
@@ -1659,7 +1667,7 @@ function safetyBox(){
   const TRI='<svg class="warn-tri" viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path d="M12 3.4 L22 20 H2 Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M12 9.5 V13.6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="16.7" r="1.15" fill="currentColor"/></svg>';
   const list = rules.map(r=>`<li>${TRI}<span class="sl-tx">${periodLines(r)}</span></li>`).join('');
   return `<div class="card safety"><div class="safety-h">🛡️ ${title}</div><ul class="safety-list">${list}</ul>
-    <div class="safety-note"><span class="sn-dot">·</span><span class="sl-tx">${periodLines('위 플랜은 회원님이 입력한 정보(경험, 목표, 부상, 지병 등)를 바탕으로 AI가 자동으로 구성한 거예요. 실제 몸 상태는 사람마다 다를 수 있으니 통증이 있거나 걱정되는 부분이 있으면 무리하지 말고, 필요하면 의사나 물리치료사 등 전문가와 상담한 뒤 진행해주세요.')}</span></div></div>`;
+    <div class="safety-note">${['위 플랜은 회원님이 입력한 정보(경험, 목표, 부상, 지병 등)를 바탕으로 AI가 자동으로 구성한 거예요.','실제 몸 상태는 사람마다 다를 수 있으니 통증이 있거나 걱정되는 부분이 있으면 무리하지 말고, 필요하면 의사나 물리치료사 등 전문가와 상담한 뒤 진행해주세요.'].map(s=>`<div class="sn-line"><span class="sn-dot">·</span><span class="sl-tx">${periodLines(s)}</span></div>`).join('')}</div></div>`;
 }
 function renderToday(){
   const t=planDate||todayStr();
@@ -1703,8 +1711,7 @@ function renderToday(){
     html+=safetyBox();
   }
   $('view-today').innerHTML=html;
-  const cyc = (entry && !entry.rest) ? `순환 ${entry.session+1} / 6` : (entry?'휴식일':'');
-  $('hd-cyc').innerHTML = cyc;
+  $('hd-cyc').innerHTML = '';
   $('hd-title').textContent = isToday?'오늘의 운동':human(t);
 }
 
@@ -1828,7 +1835,7 @@ function renderPlan(){
     <div class="modeseg"><button class="${planMode==='list'?'on':''}" onclick="planSetMode('list')">리스트</button><button class="${planMode==='cal'?'on':''}" onclick="planSetMode('cal')">달력</button></div>
   </div>`;
   html+=(planMode==='list')?planListHTML():planCalHTML();
-  html+=`<p class="info" style="margin-top:14px;padding:0 4px">오늘 이전은 지난 날이라 고정돼요. 앞으로의 날짜에 <b>쉬는 날</b>을 표시하면 이후 일정이 6일 순환에 맞춰 자동으로 다시 배정됩니다.</p>`;
+  html+=`<p class="info" style="margin-top:14px;padding:0 4px">오늘 이전은 지난 날이라 고정돼요. 앞으로의 날짜에 <b>쉬는 날</b>을 표시하면<br>이후 일정이 6일 순환에 맞춰 자동으로 다시 배정됩니다.</p>`;
   $('view-plan').innerHTML=html;
   $('hd-title').textContent='일정'; $('hd-cyc').innerHTML='';
 }
@@ -1875,7 +1882,7 @@ function equipSectionHTML(){
   html+=`<p class="info" style="margin:9px 4px 0">환경에 맞게 켜고 끄면 워밍업·본 운동·쿨다운이 즉시 다시 구성됩니다.</p>`;
 
   html+=`<div class="sec-label">보유 기구</div>
-    <p class="info" style="margin:0 4px 12px">헬스장에 있는 기구를 눌러 주세요. 선택한 기구로 가능한 운동 플랜이 구성되고, 기구를 추가/제거하면 자동으로 플랜에 반영됩니다. 각 기구의 <b>?</b>를 누르면 어떤 기구인지 설명을 볼 수 있어요.</p>`;
+    <p class="info" style="margin:0 4px 12px">헬스장에 있는 기구를 눌러 주세요. 선택한 기구로 가능한 운동 플랜이 구성되고, 기구를 추가/제거하면 자동으로 플랜에 반영됩니다.<br>각 기구의 <b>?</b>를 누르면 어떤 기구인지 설명을 볼 수 있어요.</p>`;
   html+=eqGridHTML(state.equipment,'toggleEquip');
   return html;
 }
@@ -1994,17 +2001,17 @@ function scheduleSettingsHTML(){
     <p class="info" style="margin:8px 4px 0">이름, 신체정보, 경험, 목표, 부상, 지병을 다시 입력할 수 있어요.</p>
     <div class="sec-label">운동 요일</div>
     <div class="obchips">${dayList.map(([i,d])=>`<button class="chip ${wd.includes(i)?'on':''}" onclick="toggleWorkoutDay(${i})">${d}</button>`).join('')}</div>
-    <p class="info" style="margin:8px 4px 0">${n>0?`${n}일 운동 · ${7-n}일 휴식`:'운동할 요일을 선택하세요'} · 바꾸면 이후 일정이 자동으로 재구성돼요.</p>
+    <p class="info" style="margin:8px 4px 0">${n>0?`${n}일 운동 후 ${7-n}일 휴식 - 요일을 바꾸면 일정이 자동으로 재구성돼요.`:'운동할 요일을 선택하세요.'}</p>
     <div class="sec-label">하루 운동 시간</div>
     <div class="obchips">${mins.map(m=>`<button class="chip ${cur===m?'on':''}" onclick="setSessionMin(${m})">${m}분</button>`).join('')}</div>
-    <p class="info" style="margin:8px 4px 0">이 시간에 맞춰 워밍업·운동·유산소·쿨다운 시간이 자동 배분돼요.</p>`;
+    <p class="info" style="margin:8px 4px 0">이 시간에 맞춰 워밍업, 운동, 유산소, 쿨다운 시간이 자동 배분돼요.</p>`;
 }
 function renderSetup(){
   let html=scheduleSettingsHTML();
   html+=equipSectionHTML();
   html+=`<div class="sec-label">플랜 정보</div>
   <div class="card pad info">
-    <b>목표</b><br>${periodLines('체중, 뱃살 감량 + 자세, 체형 교정(거북목, 말린 어깨, 골반 좌우 불균형) + 적당한 근육량 증가')}
+    <b>목표</b><br>${(()=>{ const p=state.profile; const g=(p&&p.goals)?p.goals.slice():[]; if(p&&p.goalOther)g.push(p.goalOther); return g.length?periodLines(g.join(', ')):'회원 정보 수정에서 목표를 선택하면 여기에 표시돼요.'; })()}
     <div style="height:9px"></div>
     <b>구성</b><br>${periodLines('설정한 운동 요일에 따라 쉬는 날이 정해지고, 운동일은 아래 6일 순환을 반복해요')}
     <div class="divider"></div>
@@ -2466,7 +2473,7 @@ const Onboard=(()=>{
       <p class="ob-hint" style="margin:6px 0 0">고른 요일에 운동이 배치되고 나머지 요일은 휴식이에요. 요일은 나중에 [일정] 탭에서 자유롭게 조정할 수 있어요.</p>
       <div class="ob-sec">하루 운동 가능 시간</div>
       <div class="obchips">${[30,45,60,75,90,120].map(m=>chip(m+'분', ob.sessionMinutes===m, `Onboard.setMin(${m})`)).join('')}</div>
-      <p class="ob-hint" style="margin:6px 0 0">이 시간에 맞춰 워밍업·운동·유산소·쿨다운 시간이 자동 배분돼요.</p>
+      <p class="ob-hint" style="margin:6px 0 0">이 시간에 맞춰 워밍업, 운동, 유산소, 쿨다운 시간이 자동 배분돼요.</p>
       <div class="toggle-row ${bw?'on':''}" style="margin-top:16px" onclick="Onboard.obBwT()"><div class="tr-ill">${patIcon('사이드 플랭크 (맥길)')}</div><div class="tr-body"><div class="tr-t">맨몸 운동 포함</div><div class="tr-s">${bw?'기구 없이 하는 맨몸 운동 포함':'맨몸 운동 제외'}</div></div><div class="switch"></div></div>
       ${bw?`<div class="toggle-row sub ${fl?'on':''}" onclick="Onboard.obFloorT()"><div class="tr-ill">${POSE_SVG.deadbug}</div><div class="tr-body"><div class="tr-t">바닥 운동 포함</div><div class="tr-s">${fl?'눕거나 엎드려·앉아서 하는 동작 포함':'바닥에서 하는 동작 제외'}</div></div><div class="switch"></div></div>`:''}
       <div class="ob-sec">보유 기구</div>

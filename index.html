@@ -274,6 +274,10 @@
   .eqsel{display:flex; flex-wrap:wrap; gap:7px; margin-top:9px; align-items:stretch;}
   .eqsel .eqbtn{flex:1 1 0; min-width:0; padding:9px 8px; border-radius:10px; border:1px solid var(--line); background:var(--surface-2); color:var(--muted); font-family:inherit; font-size:12.5px; font-weight:700; cursor:pointer; text-align:center; white-space:normal; word-break:keep-all; line-height:1.3;}
   .eqsel .eqbtn.on{background:var(--accent); border-color:var(--accent); color:var(--on-accent);}
+  /* 부상 부위에 부담이 큰 동작 — 금지가 아니라 주의 표시 */
+  .eqsel .eqbtn.caution{border-color:var(--sand); border-style:dashed;}
+  .eqsel .eqbtn.caution::after{content:"주의"; margin-left:4px; font-size:9px; font-weight:800; color:var(--sand); flex:none;}
+  .eqsel .eqbtn.caution.on::after{color:var(--on-accent);}
   .eqsel .eqbtn, .cardio-chips .cardio-chip{display:flex; align-items:center; justify-content:center; gap:4px; white-space:nowrap; padding-left:4px; padding-right:4px;}
   .eq-ic{flex:none; width:16px; height:16px; display:inline-flex; align-items:center; justify-content:center; color:inherit;}
   .eq-ic svg{width:16px; height:16px;}
@@ -379,6 +383,10 @@
   .zi-warn{font-size:12px; color:var(--muted); line-height:1.6; word-break:keep-all;}
   .zi-src{margin-top:8px; font-size:11px; color:var(--faint); line-height:1.6; word-break:keep-all;}
   .src-link{color:var(--muted); text-decoration:underline;}
+  .src-list{display:flex; flex-direction:column; gap:10px;}
+  .src-item{padding-left:10px; border-left:2px solid var(--line-2);}
+  .src-item .src-link{font-size:12.5px; font-weight:650; color:var(--accent-ink);}
+  .src-note{font-size:11.5px; color:var(--muted); line-height:1.55; margin-top:2px; word-break:keep-all;}
   .zi-row{display:flex; align-items:center; gap:9px;}
   .zi-row .cz-badge{flex:none;}
   .zi-hr{flex:none; min-width:72px; font-size:12px; font-weight:700; color:var(--ink); font-variant-numeric:tabular-nums; line-height:1.5;}
@@ -1162,11 +1170,15 @@ function sessionFor(dateStr){
 /* ---------------- Slot resolution ---------------- */
 function has(eq){ return eq.every(e=>state.equipment.includes(e)); }
 function isBW(eq){ return (eq||[]).every(e=>e==='mat'); } // only a floor mat is treated as no-equipment; other tools must be selected
-/* profile-driven contraindications: skip movements that stress an injured joint */
 const INJ_JOINT={'무릎':'knee','어깨':'shoulder','허리 (디스크/수술)':'lower_back','허리':'lower_back','발목':'ankle','손목':'wrist','목/거북목':'neck','목':'neck'};
-/* 운동별 금기 관절 — 부상 부위와 겹치는 운동만 제외되고, 같은 슬롯의 안전한 대체 동작이 대신 선택됨.
-   (예전엔 슬롯을 통째로 삭제해서 부상자는 그 부위 운동 자체가 사라졌음) */
-const CONTRA_EX={
+/* 부하가 큰 바벨 컴파운드 — 주의군 안에서 기본 추천을 가장 가벼운 동작으로 만들기 위한 후순위 목록 */
+const _HEAVY=['바벨 백 스쿼트','바벨 벤치 프레스','바벨 오버헤드 프레스','컨벤셔널 데드리프트','바벨 루마니안 데드리프트','바벨 벤트오버 로우'];
+/* ⚠️ 이것은 "금기(contraindication)" 목록이 아니라 "주의(caution)" 목록이다.
+   임상진료지침은 공통적으로 ① 운동이 1차 치료이고 ② 특정 동작을 금지할 근거는 없으며
+   ③ 통증 반응에 따라 범위와 부하를 조절하라고 권고한다(SRC.lbp / SRC.pfp / SRC.rcsp).
+   따라서 여기 있는 운동도 "제외"하지 않는다. 관절 부담이 큰 축이라 기본 추천에서 뒤로 밀고,
+   사용자가 고르면 주의 안내를 띄운다. 최종 선택은 사용자와 의료진의 몫이다. */
+const CAUTION_EX={
   /* 무릎 — 무릎 굽힘 부하·개방사슬 신전 */
   '레그 익스텐션':['knee'], '핵 스쿼트':['knee'], '고블릿 박스 스쿼트':['knee'],
   '체어 스쿼트':['knee'], '맨몸 스플릿 스쿼트':['knee'], '불가리안 스플릿 스쿼트':['knee'],
@@ -1197,24 +1209,38 @@ const CONTRA_EX={
 };
 function avoidJoints(){ const s=new Set(); const p=state.profile; if(p&&p.injuries&&p.injuries.has){(p.injuries.list||[]).forEach(x=>{const j=INJ_JOINT[x]; if(j)s.add(j);});} return s; }
 function isFloorMove(name){ return /데드버그|버드독|플랭크|브릿지|브리지|클램셸|캣카우|캣 카우|프론|누워|엎드려|90\/90|글루트|파이크|스트레이트 레그 레이즈/.test(name); }
-function slotCands(slot){
+/* 이 운동이 사용자의 부상 부위에 부담이 큰 축인가 (제외 사유가 아니라 주의 사유) */
+function cautionJoints(name){
   const avoid=avoidJoints();
-  const contra=n=>(CONTRA_EX[n]||[]).some(j=>avoid.has(j));
+  return (CAUTION_EX[name]||[]).filter(j=>avoid.has(j));
+}
+function isCaution(name){ return cautionJoints(name).length>0; }
+
+function slotCands(slot){
   /* 순서 = 기구 옵션 → 기본 맨몸(fb) → 부상 시에만 쓰이는 안전 대안(alts) */
   const all=[...slot.options, {name:slot.fb.name, eq:(slot.fb.eq||[]), cue:slot.fb.cue, reps:slot.fb.reps}, ...(slot.alts||[])];
   const out=[]; const seen=new Set();
   for(const c of all){
     if(seen.has(c.name)) continue;
-    if(contra(c.name)) continue; // 부상 부위에 금기인 운동만 제외 (슬롯은 유지)
     if(isBW(c.eq)){
       if(!state.includeBodyweight) continue;
       if(isFloorMove(c.name) && !state.includeFloor) continue; // floor move but floor not allowed
-      seen.add(c.name); out.push({name:c.name, eq:c.eq, cue:c.cue, reps:c.reps, bw:true});
+      seen.add(c.name); out.push({name:c.name, eq:c.eq, cue:c.cue, reps:c.reps, bw:true, caution:isCaution(c.name)});
     } else if(has(c.eq)){
-      seen.add(c.name); out.push({name:c.name, eq:c.eq, cue:c.cue, reps:c.reps, bw:false});
+      seen.add(c.name); out.push({name:c.name, eq:c.eq, cue:c.cue, reps:c.reps, bw:false, caution:isCaution(c.name)});
     }
   }
-  return out;
+  /* 부상 부위에 부담이 큰 운동은 제외하지 않고 뒤로 민다.
+     → 기본 추천(cands[0])은 자연히 보수적인 동작이 되고, 사용자는 원하면 앞의 것도 고를 수 있다.
+     후보가 전부 주의 대상인 슬롯(예: 어깨 부상자의 수직 밀기)에서는
+     그 안에서도 무거운 바벨 종목을 뒤로 보내야 기본값이 가장 가벼운 동작이 된다.
+     부상이 없으면 caution이 모두 false라 원래 순서가 그대로 유지된다. */
+  const heavy=n=>_HEAVY.indexOf(n)>=0;
+  return out.map((c,i)=>[c,i])
+            .sort((a,b)=> (a[0].caution - b[0].caution)
+                       || ((a[0].caution&&heavy(a[0].name)?1:0) - (b[0].caution&&heavy(b[0].name)?1:0))
+                       || (a[1]-b[1]))
+            .map(x=>x[0]);
 }
 function resolveSlot(slot, pickKey){
   const cands=slotCands(slot);
@@ -1222,7 +1248,13 @@ function resolveSlot(slot, pickKey){
   if(pickKey && state.slotPick){ const nm=state.slotPick[pickKey]; if(nm){ const f=cands.find(c=>c.name===nm); if(f) return f; } }
   return cands[0]; // 기본: 첫 후보(선택 안 했으면)
 }
-function pickSlot(si,oi,name){ if(!state.slotPick)state.slotPick={}; state.slotPick[si+':'+oi]=name; touch(); renderToday(); }
+const _JOINT_KO={knee:'무릎',shoulder:'어깨',lower_back:'허리',ankle:'발목',wrist:'손목',neck:'목'};
+function pickSlot(si,oi,name){
+  if(!state.slotPick)state.slotPick={}; state.slotPick[si+':'+oi]=name; touch(); renderToday();
+  /* 부담이 큰 동작을 고르면 금지가 아니라 "조절해서 하라"고 안내한다 (진료지침 취지) */
+  const j=cautionJoints(name);
+  if(j.length) toast(j.map(k=>_JOINT_KO[k]||k).join(', ')+'에 부담이 큰 동작이에요. 통증 없는 범위에서 가볍게 시작하세요.');
+}
 
 /* ---------------- Rendering ---------------- */
 const $=id=>document.getElementById(id);
@@ -1458,6 +1490,26 @@ const SRC={
     label:'ACSM, Tips for Monitoring Aerobic Exercise Intensity',
     note:'중강도 = 최대심박의 65~75%, 고강도 = 76~96%.',
     url:'https://acsm.org/wp-content/uploads/2025/02/Exercise-intensity-infographic-PDF.pdf'
+  },
+  lbp:{
+    label:'미국내과학회(ACP) 요통 진료지침, 2017',
+    note:'만성 요통의 1차 치료는 운동. 특정 동작을 금지하라는 권고는 없다.',
+    url:'https://www.acpjournals.org/doi/10.7326/M16-2367'
+  },
+  pfp:{
+    label:'APTA/JOSPT 슬개대퇴통증 진료지침, 2019',
+    note:'스쿼트와 무릎 신전은 금기가 아니며, 통증이 나지 않는 범위에서 점진적으로 늘린다.',
+    url:'https://www.jospt.org/doi/10.2519/jospt.2019.0302'
+  },
+  rcsp:{
+    label:'JOSPT 회전근개 건병증 진료지침, 2025',
+    note:'운동 치료가 1차 치료. 통증 범위를 피할지에 대해서는 아직 근거가 확립되지 않았다.',
+    url:'https://www.jospt.org/doi/10.2519/jospt.2025.13182'
+  },
+  htn:{
+    label:'ACSM, 고혈압 운동 처방',
+    note:'안정시 혈압 180/110 이상이면 운동 시작 전 의사 상담. 저항 운동 중 숨 참기(발살바) 금지.',
+    url:'https://acsm.org/exercise-for-the-prevention-and-treatment-of-hypertension/'
   }
 };
 function srcLine(key){ const s=SRC[key]; return s?`<a class="src-link" href="${s.url}" target="_blank" rel="noopener">${s.label}</a>`:''; }
@@ -1757,8 +1809,8 @@ function renderSessionCard(s,dateStr,si){
     if(x.eqCands.length){
       const eqLabel=c=>{ const ids=c.eq||[]; return EQ_COMBO_LABEL[ids.join(',')] || ids.map(e=>EQ_SHORT[e]||EQ_LABEL[e]||e).join('/'); };
       const rlab=eqLabel(x.r); const seenEq=new Set(); const eqbtns=[];
-      for(const c of x.eqCands){ const lb=eqLabel(c); if(seenEq.has(lb))continue; seenEq.add(lb); eqbtns.push({name:c.name, lb, eq:(c.eq||[])[0]}); if(eqbtns.length>=3)break; }
-      body+=`<div class="eqsel">${eqbtns.map(b=>`<button class="eqbtn ${b.lb===rlab?'on':''}" onclick="pickSlot(${si},${x.oi},'${b.name.replace(/'/g,"\\'")}')">${b.eq?`<span class="eq-ic">${eqIcon(b.eq)}</span>`:''}<span class="eq-tx">${b.lb}</span></button>`).join('')}</div>`;
+      for(const c of x.eqCands){ const lb=eqLabel(c); if(seenEq.has(lb))continue; seenEq.add(lb); eqbtns.push({name:c.name, lb, eq:(c.eq||[])[0], caution:!!c.caution}); if(eqbtns.length>=3)break; }
+      body+=`<div class="eqsel">${eqbtns.map(b=>`<button class="eqbtn ${b.lb===rlab?'on':''} ${b.caution?'caution':''}" title="${b.caution?'부상 부위에 부담이 큰 동작':''}" onclick="pickSlot(${si},${x.oi},'${b.name.replace(/'/g,"\\'")}')">${b.eq?`<span class="eq-ic">${eqIcon(b.eq)}</span>`:''}<span class="eq-tx">${b.lb}</span></button>`).join('')}</div>`;
     } else {
       body+=`<div class="ex-meta" style="margin-top:6px"><span class="ex-eq">맨몸 운동</span></div>`;
     }
@@ -1849,18 +1901,18 @@ function profileBanner(){
   return `<div class="card" style="margin:0 0 4px; padding:16px"><div class="pbanner-h">🤖 내 프로필 기반 맞춤 조정</div>${chips.length?`<div class="pbanner-chips">${chips.map(c=>`<span class="pchip">${c}</span>`).join('')}</div>`:''}${caution}</div>`;
 }
 /* 부상 때문에 실제로 플랜에서 빠진 동작들 (보유 장비로 할 수 있었던 것만) */
-function excludedByInjury(){
+/* 부상 부위에 부담이 커서 "뒤로 밀린" 운동들 (제외된 것이 아니다) */
+function cautionedByInjury(){
   const avoid=avoidJoints();
   if(!avoid.size) return [];
   const out=[], seen=new Set();
   SESSIONS.forEach(s=>s.slots.forEach(sl=>{
-    if(!slotActive(sl)) return; // 애초에 플랜에 없는 슬롯은 "제외됨" 안내에서 빼기
+    if(!slotActive(sl)) return; // 애초에 플랜에 없는 슬롯은 안내에서 빼기
     [...sl.options, sl.fb, ...(sl.alts||[])].forEach(o=>{
       if(!o||!o.name||seen.has(o.name)) return;
-      const c=CONTRA_EX[o.name]||[];
-      if(!c.some(j=>avoid.has(j))) return;
+      if(!isCaution(o.name)) return;
       const eq=o.eq||[];
-      if(!(isBW(eq)?state.includeBodyweight:has(eq))) return; // 애초에 못 하던 운동은 제외 안내에서 뺌
+      if(!(isBW(eq)?state.includeBodyweight:has(eq))) return; // 애초에 못 하던 운동은 안내에서 뺌
       seen.add(o.name); out.push(o.name);
     });
   }));
@@ -1906,15 +1958,18 @@ function safetyBox(){
       else rules.push(x+' 관련 부위는 통증이 없는 범위 안에서만 천천히 움직여주세요.');
     });
     cond.forEach(x=>{
-      if(/고혈압|심장/.test(x)) rules.push(x+'이 있으니 무거운 중량에서 숨을 참지 말고(발살바 금지), 세트 사이 충분히 쉬며 어지러우면 바로 멈춰주세요.');
+      if(/고혈압|심장/.test(x)){
+        rules.push(x+'이 있으니 힘을 줄 때 숨을 참지 말고 내쉬어 주세요. 숨을 참으면(발살바) 혈압이 크게 올라 어지럼이나 실신이 올 수 있어요.');
+        rules.push('안정시 혈압이 180/110mmHg 이상이면 운동을 시작하기 전에 먼저 의사와 상의해 혈압을 조절해 주세요.');
+      }
       else if(/당뇨/.test(x)) rules.push('당뇨가 있으니 저혈당에 주의하고, 필요하면 간단한 당분을 미리 준비해주세요.');
       else if(/천식/.test(x)) rules.push('천식이 있으니 흡입기를 가까이 두고, 호흡이 가빠지면 강도를 낮춰주세요.');
       else rules.push(x+' 이력이 있으니 무리한 강도는 피하고, 몸 상태를 자주 살펴주세요.');
     });
-    const ex=excludedByInjury();
+    const ex=cautionedByInjury();
     if(ex.length){
-      const head=ex.slice(0,3).join(', ');
-      rules.push('입력하신 부상 이력에 맞춰 '+head+(ex.length>3?(' 등 '+ex.length+'개 동작'):' 동작')+'은 플랜에서 빼고, 부담이 적은 대체 동작으로 바꿨어요.');
+      rules.push('입력하신 부상 부위에 부담이 큰 동작 '+ex.length+'개는 기본 추천에서 뒤로 미뤘어요. 금지된 동작은 아니며, 필요하면 직접 고를 수 있어요.');
+      rules.push('진료지침은 부상이 있어도 운동을 권합니다. 다만 통증이 생기지 않는 범위에서 무게와 각도를 조절하고, 부상 이력이 있다면 시작 전 의료진과 상의해 주세요.');
     }
   }
   const title = personalized?'나를 위한 맞춤 안전 원칙':'안전 원칙';
@@ -2337,6 +2392,14 @@ function renderSetup(){
     <button class="btn ghost" style="margin-bottom:9px" onclick="resetSchedule()">휴식/완료 기록 초기화</button>
     <button class="btn ghost" onclick="resetAll()">전체 초기화 (기구 포함)</button>
   </div>`;
+
+  /* 앱이 제시하는 수치·권고의 근거를 사용자가 직접 확인할 수 있게 노출 */
+  html+=`<div class="sec-label">근거와 출처</div>
+    <div class="card" style="padding:14px 16px">
+      <p class="info" style="margin:0 0 10px">이 앱의 심박존, 운동 강도, 부상 관련 안내는 아래 자료를 근거로 합니다.</p>
+      <div class="src-list">${Object.keys(SRC).map(k=>`<div class="src-item"><a class="src-link" href="${SRC[k].url}" target="_blank" rel="noopener">${SRC[k].label}</a><div class="src-note">${SRC[k].note}</div></div>`).join('')}</div>
+      <p class="info" style="margin:12px 0 0;color:var(--faint)">운동 종목과 자세 설명, 세트와 횟수는 아직 위 자료로 검증되지 않은 일반 정보입니다. 참고용으로만 사용하고, 몸에 이상이 있으면 전문가와 상의해 주세요.</p>
+    </div>`;
 
   /* 부상/지병을 입력한 사용자에게만 의료 상담 문구를 강하게 안내 */
   const _p=state.profile;

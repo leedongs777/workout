@@ -381,7 +381,8 @@
   .src-link{color:var(--muted); text-decoration:underline;}
   .zi-row{display:flex; align-items:center; gap:9px;}
   .zi-row .cz-badge{flex:none;}
-  .zi-hr{flex:none; min-width:64px; font-size:12px; font-weight:700; color:var(--ink); font-variant-numeric:tabular-nums;}
+  .zi-hr{flex:none; min-width:72px; font-size:12px; font-weight:700; color:var(--ink); font-variant-numeric:tabular-nums; line-height:1.5;}
+  .zi-rpe{font-size:11px; font-weight:600; color:var(--faint);}
   .zi-d{flex:1; min-width:0; font-size:12px; color:var(--muted); line-height:1.5;}
   .zi-talk{font-size:11px; color:var(--faint);}
 
@@ -1499,7 +1500,7 @@ function cardioGuide(detail){
   let note=detail.replace(/존\s*[1-5]\s*강도?/,'').replace(/^\s*[·,]\s*/,'').trim();
   /* 심박수는 추정치이므로 대화 검사를 함께 제시 */
   const talk=ZONE_INFO[z]?ZONE_INFO[z].talk:'';
-  if(talk) note = note ? (talk+' · '+note) : talk;
+  if(talk) note = note ? (talk+'<span class="vdiv"></span>'+note) : talk;
   return `<div class="cz"><button class="cz-badge cz${z} cz-tap" onclick="showZoneInfo()">Zone ${z}<svg class="cz-i" viewBox="0 0 20 20" width="13" height="13" aria-hidden="true"><circle cx="10" cy="10" r="8.4" fill="none" stroke="currentColor" stroke-width="1.7"/><circle cx="10" cy="6.3" r="1.15" fill="currentColor"/><path d="M10 9.3v4.6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button><span class="cz-hr"><span class="cz-heart">♥</span> ${hrTxt}</span>${note?`<span class="vdiv"></span><span class="cz-note">${note}</span>`:''}</div>`;
 }
 function showZoneInfo(){
@@ -1509,8 +1510,8 @@ function showZoneInfo(){
     const hrt=hr.abs?`${hr.lo}~${hr.hi}`:`${hr.plo}~${hr.phi}%`;
     const pct=ZONE_PCT[z];
     return `<div class="zi-row"><span class="cz-badge cz${z}">Zone ${z}</span>
-      <span class="zi-hr">♥ ${hrt}</span>
-      <span class="zi-d"><b>${zi.acsm}</b> · ${pct[0]}~${pct[1]}%<br><span class="zi-talk">${zi.talk} · RPE ${zi.rpe}</span></span></div>`;
+      <span class="zi-hr">♥ ${hrt}<br><span class="zi-rpe">RPE ${zi.rpe}</span></span>
+      <span class="zi-d"><b>${zi.acsm}</b> (${pct[0]}~${pct[1]}%)<br><span class="zi-talk">${zi.talk}</span></span></div>`;
   }).join('');
   const bar=`<div class="zi-bar"><span class="cz1"></span><span class="cz2"></span><span class="cz3"></span><span class="cz4"></span><span class="cz5"></span></div><div class="zi-barlab"><span>낮은 강도</span><span>높은 강도</span></div>`;
   const a=userAge();
@@ -1519,9 +1520,10 @@ function showZoneInfo(){
     : `최대심박 추정 = 208 − 0.7 × 나이`;
   const foot=`<div class="zi-foot">
     <div class="zi-formula">${formula}</div>
-    <div class="zi-warn">심박수는 <b>추정치</b>라 개인차가 큽니다(±10회/분 이상). 숫자보다 <b>대화 가능 여부</b>를 먼저 믿으세요.</div>
+    <div class="zi-warn"><b>RPE</b>는 운동자각도예요. 지금 얼마나 힘든지를 스스로 0(전혀 힘들지 않음)에서 10(최대로 힘듦)까지 매긴 값입니다. 장비 없이 쓸 수 있어서, 심박수와 함께 강도를 가늠하는 데 도움이 돼요.</div>
+    <div class="zi-warn" style="margin-top:6px">심박수는 <b>추정치</b>라 개인차가 큽니다(±10회/분 이상). RPE와 <b>대화 가능 여부</b>를 참고해 주세요.</div>
     <div class="zi-warn" style="margin-top:6px">중강도(65~75%)와 고강도(76~96%) 경계는 ACSM 기준입니다. <b>Zone 3과 4를 나누는 85%는 고강도 구간을 둘로 나눈 편의상 값</b>이며 학술 표준이 아닙니다.</div>
-    <div class="zi-src">최대심박 추정 ${srcLine('hrmax')}<br>강도 분류 ${srcLine('intensity')}</div>
+    <div class="zi-src">최대심박 추정 ${srcLine('hrmax')}<br>강도 분류와 RPE ${srcLine('intensity')}</div>
   </div>`;
   m.innerHTML=`<div class="eqmodal-card" style="max-width:360px;text-align:left"><button class="eqmodal-x" onclick="closeYM()" aria-label="닫기">✕</button><div class="zi-title">심박존 안내</div><div class="zi-sub">운동 강도를 심박수로 나눈 5단계예요. 낮을수록 초록, 높을수록 빨강.</div>${bar}<div class="zi-list">${rows}</div>${foot}</div>`;
   m.classList.remove('hidden');
@@ -1919,7 +1921,7 @@ function safetyBox(){
   const TRI='<svg class="warn-tri" viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path d="M12 3.4 L22 20 H2 Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M12 9.5 V13.6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="16.7" r="1.15" fill="currentColor"/></svg>';
   const list = rules.map(r=>`<li>${TRI}<span class="sl-tx">${periodLines(r)}</span></li>`).join('');
   return `<div class="card safety"><div class="safety-h">🛡️ ${title}</div><ul class="safety-list">${list}</ul>
-    <div class="safety-note">${['위 플랜은 회원님이 입력한 정보(경험, 목표, 부상, 지병 등)를 바탕으로 AI가 자동으로 구성한 거예요.','실제 몸 상태는 사람마다 다를 수 있으니 통증이 있거나 걱정되는 부분이 있으면 무리하지 말고, 필요하면 의사나 물리치료사 등 전문가와 상담한 뒤 진행해주세요.'].map(s=>`<div class="sn-line"><span class="sn-dot">·</span><span class="sl-tx">${periodLines(s)}</span></div>`).join('')}</div></div>`;
+    <div class="safety-note">${['위 플랜은 회원님이 입력한 정보(경험, 목표, 부상, 지병 등)를 바탕으로 AI가 자동으로 구성한 거예요.','실제 몸 상태는 사람마다 다를 수 있으니 통증이 있거나 걱정되는 부분이 있으면 무리하지 말고, 필요하면 의사나 물리치료사 등 전문가와 상담한 뒤 진행해주세요.'].map(s=>`<div class="sn-line"><span class="sn-dot">-</span><span class="sl-tx">${periodLines(s)}</span></div>`).join('')}</div></div>`;
 }
 function renderToday(){
   const t=planDate||todayStr();
@@ -2345,7 +2347,7 @@ function renderSetup(){
       : '이 플랜은 일반적인 안전 원칙을 따릅니다. 통증이나 지병이 있다면 새 운동을 시작하기 전 의사나 물리치료사와 상의하세요.',
     '식단이 병행되어야 체중 감량 효과가 큽니다. (약한 칼로리 적자 + 충분한 단백질)'
   ];
-  html+=`<div class="info" style="margin:16px 4px 0;color:var(--faint)"><b style="font-weight:700;color:var(--muted)">참고</b><div class="safety-note" style="margin-top:7px">${_notes.map(s=>`<div class="sn-line"><span class="sn-dot">·</span><span class="sl-tx">${periodLines(s)}</span></div>`).join('')}</div></div>`;
+  html+=`<div class="info" style="margin:16px 4px 0;color:var(--faint)"><b style="font-weight:700;color:var(--muted)">참고</b><div class="safety-note" style="margin-top:7px">${_notes.map(s=>`<div class="sn-line"><span class="sn-dot">-</span><span class="sl-tx">${periodLines(s)}</span></div>`).join('')}</div></div>`;
   $('view-setup').innerHTML=html;
 }
 

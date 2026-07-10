@@ -1266,16 +1266,56 @@ function renderSetLog(slot,r,dateStr,oi,nSets){
 
 /* 동작별 reps 우선 — 유지형(월 싯 등)은 슬롯의 횟수 대신 자기 시간을 씀 */
 function defReps(slot,r){ return (r&&r.reps)||slot.reps; }
+
+/* 사용자가 고른 운동 목표 → 세트/횟수/유산소 비중 가중치.
+   목표는 복수 선택이므로 배타 분기가 아니라 곱셈으로 합성한다
+   (근육+다이어트를 함께 고르면 자연스럽게 중간값이 됨). */
+function goalMods(){
+  const g=(state.profile&&state.profile.goals)||[];
+  const hyper=g.includes('근육 만들기');        // 근비대 — 세트↑ 반복↓ 유산소↓
+  const diet=g.includes('다이어트(체중감량)');   // 대사 소모 — 반복↑ 휴식↓ 유산소↑
+  const endur=g.includes('체력 향상');           // 심폐 지구력 — 유산소↑↑ (반복·휴식은 보통)
+  const posture=g.includes('자세교정');          // 교정 계열 슬롯만 세트↑
+  /* 유산소는 감량·체력이 겹쳐도 합산하지 않고 더 큰 쪽을 쓴다 (1.3×1.4=1.82는 과함) */
+  const burnCardio=Math.max(diet?1.3:1, endur?1.4:1);
+  const rest = hyper ? '60초에서 90초'
+             : diet  ? '30초에서 60초'
+             : endur ? '45초에서 75초'
+             : '60초에서 90초';
+  return {
+    hyper, diet, endur, posture,
+    setDelta: hyper?1:0,
+    repsMul: (hyper?0.85:1)*(diet?1.2:1),
+    cardioMul:(hyper?0.85:1)*burnCardio,
+    rest
+  };
+}
+/* '12회','10회/측' 같은 횟수형만 조정. 유지형(초)·범위형(20–30초)은 건드리지 않음 */
+function goalReps(base){
+  const m=goalMods().repsMul;
+  if(Math.abs(m-1)<0.03) return base;
+  return String(base).replace(/^(\d+)회(\/측)?$/, (s,n,side)=>
+    Math.max(8,Math.min(20,Math.round(+n*m)))+'회'+(side||''));
+}
+/* 추천 횟수 = 동작별 기본값에 목표 가중치를 반영한 값 */
+function recReps(slot,r){ return goalReps(defReps(slot,r)); }
+
+/* 자세교정이 목표면 교정 계열 슬롯의 세트를 1 늘림 */
+const _POSTURE_ROLE=/자세교정|거북목|흉추|페이스 풀|후면 삼각/;
 function effVol(si,oi,slot,r){
   const c=state.slotCustom&&state.slotCustom[si+':'+oi];
   const beginner=state.profile&&state.profile.liftingExp===false;
-  const base=beginner?Math.max(2,slot.sets-1):slot.sets;
+  const gm=goalMods();
+  let base=beginner?Math.max(2,slot.sets-1):slot.sets;
+  let delta=gm.setDelta;
+  if(gm.posture && _POSTURE_ROLE.test(slot.role)) delta+=1;
+  base=Math.max(2,Math.min(5,base+delta));
   const sets=(c&&c.sets)?c.sets:base;
-  const reps=(c&&c.reps!=null&&c.reps!=='')?c.reps:defReps(slot,r);
+  const reps=(c&&c.reps!=null&&c.reps!=='')?c.reps:recReps(slot,r);
   return {sets, reps, customized:!!c};
 }
 function volEditor(si,oi,slot,v,r){
-  const dr=defReps(slot,r);
+  const dr=recReps(slot,r);
   return `<div class="voledit">
     <button class="stp" onclick="chgSets(${si},${oi},-1,${slot.sets})">−</button>
     <span class="volnum">${v.sets}세트</span>
@@ -1570,6 +1610,9 @@ function sessionTimes(s, kept, si){
   let cool=Math.max(4,Math.min(8,Math.round(T*0.10)));
   const cf=/유산소/.test(s.title||'');
   let cardio=cf?Math.round(T*0.32):Math.max(4,Math.round(T*0.12));
+  /* 목표 반영: 감량/체력이면 유산소↑, 근육 만들기면 유산소↓ (본 운동 시간 확보) */
+  cardio=Math.max(3,Math.min(Math.round(T*0.5),Math.round(cardio*goalMods().cardioMul)));
+  const cardioTarget=cardio;
   let main=T-warm-cool-cardio;
   const need=kept.length*3;
   if(main<need){ let d=need-main; const a=Math.min(d,cardio-3);cardio-=a;d-=a;main+=a; if(d>0){const b=Math.min(d,warm-4);warm-=b;d-=b;main+=b;} if(d>0){const c=Math.min(d,cool-3);cool-=c;d-=c;main+=c;} }
@@ -1578,6 +1621,8 @@ function sessionTimes(s, kept, si){
   let ex=setsArr.map(st=>Math.max(3,Math.round(main*st/tot)));
   let sum=warm+cool+cardio+ex.reduce((a,b)=>a+b,0);
   cardio+=(T-sum);
+  /* 반올림·최소 3분 보정에 유산소가 먹히지 않게, 목표치까지는 본 운동에서 되돌려 받음 */
+  while(cardio<cardioTarget){ const mi=ex.indexOf(Math.max(...ex)); if(ex[mi]<=3) break; ex[mi]--; cardio++; }
   if(cardio<3){ let def=3-cardio;cardio=3; while(def>0){const mi=ex.indexOf(Math.max(...ex)); if(ex[mi]<=3)break; ex[mi]--;def--;} }
   const cardioAuto=cardio;
   const ov=state.cardioMin&&state.cardioMin[si];
@@ -1757,7 +1802,7 @@ function safetyBox(){
   const p=state.profile;
   const rules=[
     '모든 동작은 허리를 곧게(중립) 유지하고, 통증이 느껴지면 즉시 멈춰주세요.',
-    '무게보다 정확한 자세와 호흡(힘 줄 때 내쉬기)을 우선하고, 세트 사이에는 60초에서 90초 정도 쉬어주세요.'
+    '무게보다 정확한 자세와 호흡(힘 줄 때 내쉬기)을 우선하고, 세트 사이에는 '+goalMods().rest+' 정도 쉬어주세요.'
   ];
   const comp=compoundsInPlan();
   if(comp.length){
@@ -1926,7 +1971,7 @@ function planDayRow(k,t){
   if(open && !e.rest){
     const s=SESSIONS[e.session]; const steps=(state.steps&&state.steps[k])||{}; let ex='';
     sessionExercises(s, e.session).forEach(x=>{ const exDone=!!steps[x.id];
-      ex+=`<div class="mini-ex ${exDone?'done':''}"><span class="mini-fig">${exFig(x.r,x.sl.role)}</span><span class="mn">${x.r.name}</span>${exDone?'<span class="mini-done">✓</span>':''}<span class="mv">${x.sl.sets}×${defReps(x.sl,x.r)}</span></div>`; });
+      ex+=`<div class="mini-ex ${exDone?'done':''}"><span class="mini-fig">${exFig(x.r,x.sl.role)}</span><span class="mn">${x.r.name}</span>${exDone?'<span class="mini-done">✓</span>':''}<span class="mv">${x.sl.sets}×${recReps(x.sl,x.r)}</span></div>`; });
     ex+=`<div class="mini-ex ${steps['cardio']?'done':''}"><span class="mn">${s.cardio.label}</span>${steps['cardio']?'<span class="mini-done">✓</span>':''}<span class="mv">${zoneTxt(cardioDetail(s.cardio.detail).replace(s.cardio.label,'').trim())}</span></div>`;
     html+=`<div class="day-expand">${ex}`;
     let tools='';

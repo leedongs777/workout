@@ -374,10 +374,16 @@
   .zi-bar span{flex:1;}
   .zi-barlab{display:flex; justify-content:space-between; font-size:11px; color:var(--faint); margin:5px 0 16px;}
   .zi-list{display:flex; flex-direction:column; gap:11px;}
+  .zi-foot{margin-top:16px; padding-top:12px; border-top:1px solid var(--line-2);}
+  .zi-formula{font-size:12.5px; color:var(--ink); margin-bottom:6px;}
+  .zi-warn{font-size:12px; color:var(--muted); line-height:1.6; word-break:keep-all;}
+  .zi-src{margin-top:8px; font-size:11px; color:var(--faint); line-height:1.6; word-break:keep-all;}
+  .src-link{color:var(--muted); text-decoration:underline;}
   .zi-row{display:flex; align-items:center; gap:9px;}
   .zi-row .cz-badge{flex:none;}
   .zi-hr{flex:none; min-width:64px; font-size:12px; font-weight:700; color:var(--ink); font-variant-numeric:tabular-nums;}
-  .zi-d{flex:1; min-width:0; font-size:12px; color:var(--muted);}
+  .zi-d{flex:1; min-width:0; font-size:12px; color:var(--muted); line-height:1.5;}
+  .zi-talk{font-size:11px; color:var(--faint);}
 
   /* ---- auth gate / consent overlay ---- */
   .gate{position:fixed; inset:0; z-index:200; background:var(--bg); display:flex; flex-direction:column; overflow-y:auto;}
@@ -923,7 +929,7 @@ const SESSIONS=[
      {name:'밴드 팔로프 프레스', eq:['band'], cue:'밴드 저항으로 회전을 버티며 앞으로 밀기'},
    ], fb:{name:'데드버그', cue:'허리를 바닥에 붙인 채 반대쪽 팔·다리 뻗기'}},
   ],
-  cardio:{label:'유산소', detail:'존2 강도 · 대화 가능한 숨참'},
+  cardio:{label:'유산소', detail:'존2 강도'},
   cool:[{n:'앞허벅지 스트레칭',a:'좌/우 각각 30초',d:'서서 한 발등을 잡아 발뒤꿈치를 엉덩이 쪽으로 당기기'},{n:'뒤허벅지 스트레칭',a:'좌/우 각각 30초',d:'다리를 펴고 상체를 앞으로 숙여 발끝을 향하기'},{n:'엉덩이 스트레칭',a:'좌/우 각각 30초',d:'누워 한 발목을 반대 무릎에 올리고 허벅지를 가슴으로 당기기',floor:true,alt:{n:'엉덩이 스트레칭',a:'좌/우 각각 30초',d:'앉아서 한 발목을 반대 무릎에 올리고 상체를 앞으로 숙이기'}},{n:'종아리 스트레칭',a:'좌/우 각각 30초',d:'벽·기둥 등을 밀며 뒷다리를 쭉 펴고 뒤꿈치는 바닥에'}],
  },
  { // S1
@@ -1436,23 +1442,88 @@ function relDay(t){ const d=Math.round((parse(t)-parse(todayStr()))/86400000); r
 function cardioDetail(d){ return String(d).replace(/\s\d+(?:[–-]\d+)?분(?=\s*—)/,''); }
 /* 심박존: 나이→최대심박(220-나이), 존별 %범위 → 심박수. 색상은 팬톤(존1 그린 → 존5 레드) */
 function userAge(){ const b=state.profile&&state.profile.birth; if(!b) return null; const by=+String(b).slice(0,4); if(!by) return null; const a=parse(todayStr()).getFullYear()-by; return (a>0&&a<120)?a:null; }
-const ZONE_PCT={1:[50,60],2:[60,70],3:[70,80],4:[80,90],5:[90,100]};
-function hrZone(z){ const p=ZONE_PCT[z]||[60,70]; const a=userAge(); if(!a) return {abs:false, plo:p[0], phi:p[1]}; const mhr=220-a; return {abs:true, lo:Math.round(mhr*p[0]/100), hi:Math.round(mhr*p[1]/100)}; }
+/* ────────────────────────────────────────────────────────────────
+   근거 출처(SRC) — 앱이 사용자에게 제시하는 수치·권고의 1차 출처.
+   새 수치를 넣을 때는 반드시 여기에 근거를 함께 남길 것.
+   근거가 없는 수치는 "일반 정보"임을 화면에 밝힐 것.
+   ──────────────────────────────────────────────────────────────── */
+const SRC={
+  hrmax:{
+    label:'Tanaka 외, 2001 (J Am Coll Cardiol)',
+    note:'최대심박 추정식 208 − 0.7 × 나이. 351개 연구 메타분석.',
+    url:'https://doi.org/10.1016/S0735-1097(00)01054-8'
+  },
+  intensity:{
+    label:'ACSM, Tips for Monitoring Aerobic Exercise Intensity',
+    note:'중강도 = 최대심박의 65~75%, 고강도 = 76~96%.',
+    url:'https://acsm.org/wp-content/uploads/2025/02/Exercise-intensity-infographic-PDF.pdf'
+  }
+};
+function srcLine(key){ const s=SRC[key]; return s?`<a class="src-link" href="${s.url}" target="_blank" rel="noopener">${s.label}</a>`:''; }
+
+/* 존 경계는 ACSM 강도 분류에서 유도한다.
+   ACSM: 중강도 = 65~75 %HRmax, 고강도 = 76~96 %HRmax.
+   → Zone1/2 경계(65%)와 Zone2/3 경계(76%)는 ACSM 문서에서 직접 나온 값.
+   → Zone3/4 경계(85%)는 고강도 구간을 둘로 나눈 편의상 값이며 학술 표준이 아니다(화면에 명시).
+   5개로 나누는 것 자체는 지구력 실무자 47%가 쓰는 최다 관행일 뿐, 국제 합의는 없다. */
+const ZONE_PCT={1:[50,64],2:[65,75],3:[76,85],4:[86,96],5:[96,100]};
+/* 심박수보다 신뢰도가 높은 판단 기준(대화 검사·RPE)을 함께 제시한다 — 추정식 오차가 크기 때문 */
+const ZONE_INFO={
+  1:{acsm:'저강도', talk:'노래도 부를 수 있어요',   rpe:'1~2'},
+  2:{acsm:'중강도', talk:'대화가 편하게 이어져요',  rpe:'3~4'},
+  3:{acsm:'고강도', talk:'몇 마디만 겨우 해요',     rpe:'5~6'},
+  4:{acsm:'고강도', talk:'말하기 힘들어요',         rpe:'7~8'},
+  5:{acsm:'최대',   talk:'말을 못 해요',            rpe:'9~10'}
+};
+/* 최대심박 추정: 208 − 0.7 × 나이 (Tanaka 2001).
+   과거의 220 − 나이(Fox 1971)는 젊은 층은 과대, 고령층은 과소 추정한다. */
+function hrMax(age){ return Math.round(208 - 0.7*age); }
+function hrZone(z){ const p=ZONE_PCT[z]||[60,70]; const a=userAge(); if(!a) return {abs:false, plo:p[0], phi:p[1]}; const mhr=hrMax(a); return {abs:true, lo:Math.round(mhr*p[0]/100), hi:Math.round(mhr*p[1]/100)}; }
 function zoneTxt(s){ return String(s).replace(/존\s*([1-5])\s*강도?/g,'Zone $1'); }
+/* 고강도(Zone 3+) 인터벌은 기본 처방에서 제외한다.
+   ACSM 기준 Zone 3은 이미 "고강도"이므로, 초보자·고령자에게 기본값으로 주지 않는다.
+   체력 향상이나 근육 만들기를 고른 사용자만 고강도 인터벌을 받는다. */
+function cardioDetail(s){
+  const d=String((s.cardio&&s.cardio.detail)||'');
+  const zm=d.match(/존\s*([1-5])/);
+  if(!zm || +zm[1]<3) return d;
+  const gm=goalMods();
+  if(gm.endur||gm.hyper) return d;
+  return '존2 강도, 꾸준한 속도로, 저충격';
+}
 function cardioGuide(detail){
   detail=String(detail);
   const zm=detail.match(/존\s*([1-5])/); const z=zm?+zm[1]:2;
   const hr=hrZone(z);
   const hrTxt = hr.abs ? `심박수 ${hr.lo}~${hr.hi}` : `최대심박의 ${hr.plo}~${hr.phi}%`;
-  let note=detail.replace(/존\s*[1-5]\s*강도?/,'').replace(/^\s*·\s*/,'').trim();
+  let note=detail.replace(/존\s*[1-5]\s*강도?/,'').replace(/^\s*[·,]\s*/,'').trim();
+  /* 심박수는 추정치이므로 대화 검사를 함께 제시 */
+  const talk=ZONE_INFO[z]?ZONE_INFO[z].talk:'';
+  if(talk) note = note ? (talk+' · '+note) : talk;
   return `<div class="cz"><button class="cz-badge cz${z} cz-tap" onclick="showZoneInfo()">Zone ${z}<svg class="cz-i" viewBox="0 0 20 20" width="13" height="13" aria-hidden="true"><circle cx="10" cy="10" r="8.4" fill="none" stroke="currentColor" stroke-width="1.7"/><circle cx="10" cy="6.3" r="1.15" fill="currentColor"/><path d="M10 9.3v4.6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button><span class="cz-hr"><span class="cz-heart">♥</span> ${hrTxt}</span>${note?`<span class="vdiv"></span><span class="cz-note">${note}</span>`:''}</div>`;
 }
 function showZoneInfo(){
   const m=document.getElementById('ympick'); if(!m) return;
-  const ZD={1:'아주 가벼움, 워밍업과 회복',2:'가벼움, 지방 연소와 기초 체력',3:'중간 강도, 유산소 능력 향상',4:'힘듦, 심폐 지구력 향상',5:'최대, 짧고 강하게'};
-  const rows=[1,2,3,4,5].map(z=>{ const hr=hrZone(z); const hrt=hr.abs?`${hr.lo}~${hr.hi}`:`${hr.plo}~${hr.phi}%`; return `<div class="zi-row"><span class="cz-badge cz${z}">Zone ${z}</span><span class="zi-hr">♥ ${hrt}</span><span class="zi-d">${ZD[z]}</span></div>`; }).join('');
+  const rows=[1,2,3,4,5].map(z=>{
+    const hr=hrZone(z); const zi=ZONE_INFO[z];
+    const hrt=hr.abs?`${hr.lo}~${hr.hi}`:`${hr.plo}~${hr.phi}%`;
+    const pct=ZONE_PCT[z];
+    return `<div class="zi-row"><span class="cz-badge cz${z}">Zone ${z}</span>
+      <span class="zi-hr">♥ ${hrt}</span>
+      <span class="zi-d"><b>${zi.acsm}</b> · ${pct[0]}~${pct[1]}%<br><span class="zi-talk">${zi.talk} · RPE ${zi.rpe}</span></span></div>`;
+  }).join('');
   const bar=`<div class="zi-bar"><span class="cz1"></span><span class="cz2"></span><span class="cz3"></span><span class="cz4"></span><span class="cz5"></span></div><div class="zi-barlab"><span>낮은 강도</span><span>높은 강도</span></div>`;
-  m.innerHTML=`<div class="eqmodal-card" style="max-width:360px;text-align:left"><button class="eqmodal-x" onclick="closeYM()" aria-label="닫기">✕</button><div class="zi-title">심박존 안내</div><div class="zi-sub">운동 강도를 심박수로 나눈 5단계예요. 낮을수록 초록, 높을수록 빨강.</div>${bar}<div class="zi-list">${rows}</div></div>`;
+  const a=userAge();
+  const formula = a
+    ? `최대심박 추정 <b>${hrMax(a)}회/분</b> = 208 − 0.7 × ${a}세`
+    : `최대심박 추정 = 208 − 0.7 × 나이`;
+  const foot=`<div class="zi-foot">
+    <div class="zi-formula">${formula}</div>
+    <div class="zi-warn">심박수는 <b>추정치</b>라 개인차가 큽니다(±10회/분 이상). 숫자보다 <b>대화 가능 여부</b>를 먼저 믿으세요.</div>
+    <div class="zi-warn" style="margin-top:6px">중강도(65~75%)와 고강도(76~96%) 경계는 ACSM 기준입니다. <b>Zone 3과 4를 나누는 85%는 고강도 구간을 둘로 나눈 편의상 값</b>이며 학술 표준이 아닙니다.</div>
+    <div class="zi-src">최대심박 추정 ${srcLine('hrmax')}<br>강도 분류 ${srcLine('intensity')}</div>
+  </div>`;
+  m.innerHTML=`<div class="eqmodal-card" style="max-width:360px;text-align:left"><button class="eqmodal-x" onclick="closeYM()" aria-label="닫기">✕</button><div class="zi-title">심박존 안내</div><div class="zi-sub">운동 강도를 심박수로 나눈 5단계예요. 낮을수록 초록, 높을수록 빨강.</div>${bar}<div class="zi-list">${rows}</div>${foot}</div>`;
   m.classList.remove('hidden');
 }
 function listBody(arr){
@@ -1696,7 +1767,7 @@ function renderSessionCard(s,dateStr,si){
   });
 
   // cardio
-  html+=stepShell(STEP_SVG.cardio,'', `약 ${tm.cardio}분`, `<div class="step-title">${s.cardio.label}</div>`, `${cardioGuide(s.cardio.detail)}${cardioMinCtrl(si,tm.cardio)}${cardioChips()}`, 'cardio', dateStr, activeId==='cardio', !!completed['cardio']);
+  html+=stepShell(STEP_SVG.cardio,'', `약 ${tm.cardio}분`, `<div class="step-title">${s.cardio.label}</div>`, `${cardioGuide(cardioDetail(s))}${cardioMinCtrl(si,tm.cardio)}${cardioChips()}`, 'cardio', dateStr, activeId==='cardio', !!completed['cardio']);
 
   // cooldown
   if(wuP && wuP.phase==='cool' && wuP.dateStr===dateStr) html+=wuPlayerCard();

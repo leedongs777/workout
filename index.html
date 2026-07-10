@@ -1508,7 +1508,7 @@ const SRC={
   },
   htn:{
     label:'ACSM, 고혈압 운동 처방',
-    note:'안정시 혈압 180/110 이상이면 운동 시작 전 의사 상담. 저항 운동 중 숨 참기(발살바) 금지.',
+    note:'안정시 혈압 180/110 이상이면 운동 시작 전 의사 상담. 저항 운동 중 숨을 참은 채 힘주기(발살바) 금지.',
     url:'https://acsm.org/exercise-for-the-prevention-and-treatment-of-hypertension/'
   }
 };
@@ -1896,7 +1896,7 @@ function profileBanner(){
   const cond=(p.conditions&&p.conditions.has)?((p.conditions.list||[]).concat(p.conditions.other?[p.conditions.other]:[])):[];
   let caution='';
   if(inj.length) caution+=warnNote('부상 및 수술 이력 반영', `${inj.join(', ')} 관련 동작은 자동으로 제외·완화됐어요. 통증 시 즉시 중단하고 전문의와 상담하세요.`);
-  if(cond.length) caution+=warnNote('건강 주의', `${cond.join(', ')} 이력이 있어요. 무거운 중량에서 숨 참기(발살바)를 피하고, 세트 사이 충분히 쉬며 어지럼이나 통증 시 중단하세요.`);
+  if(cond.length) caution+=warnNote('건강 주의', `${cond.join(', ')} 이력이 있어요. 무거운 중량에서 숨을 참은 채 힘주기(발살바)를 피하고, 세트 사이 충분히 쉬며 어지럼이나 통증 시 중단하세요.`);
   if(!chips.length && !caution) return '';
   return `<div class="card" style="margin:0 0 4px; padding:16px"><div class="pbanner-h">🤖 내 프로필 기반 맞춤 조정</div>${chips.length?`<div class="pbanner-chips">${chips.map(c=>`<span class="pchip">${c}</span>`).join('')}</div>`:''}${caution}</div>`;
 }
@@ -1959,7 +1959,7 @@ function safetyBox(){
     });
     cond.forEach(x=>{
       if(/고혈압|심장/.test(x)){
-        rules.push(x+'이 있으니 힘을 줄 때 숨을 참지 말고 내쉬어 주세요. 숨을 참으면(발살바) 혈압이 크게 올라 어지럼이나 실신이 올 수 있어요.');
+        rules.push(x+'이 있으니 힘을 줄 때 숨을 참지 말고 내쉬어 주세요. 숨을 참은 채 힘주기(발살바)를 하면 혈압이 크게 올라 어지럼이나 실신이 올 수 있어요.');
         rules.push('안정시 혈압이 180/110mmHg 이상이면 운동을 시작하기 전에 먼저 의사와 상의해 혈압을 조절해 주세요.');
       }
       else if(/당뇨/.test(x)) rules.push('당뇨가 있으니 저혈당에 주의하고, 필요하면 간단한 당분을 미리 준비해주세요.');

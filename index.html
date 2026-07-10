@@ -855,10 +855,10 @@ const PAT_ICON={
 };
 const ROLE_PAT={
   '메인 하체':'squat','대퇴사두':'legext','햄스트링/둔근':'legcurl','둔근 메인':'hipthrust','코어 (안티 익스텐션)':'deadbug',
-  '수직 당기기':'latpull','수평 당기기 (가슴 지지)':'row','이두 (팔 굽히기)':'biceps','자세교정 (말린 어깨)':'facepull','후면 삼각/능형근':'reardelt','페이스 풀':'facepull','거북목 교정':'chintuck','흉추 신전':'stretch',
+  '수직 당기기':'latpull','수평 당기기':'row','이두 (팔 굽히기)':'biceps','자세교정 (말린 어깨)':'facepull','후면 삼각/능형근':'reardelt','페이스 풀':'facepull','거북목 교정':'chintuck','흉추 신전':'stretch',
   '전신 (스텝)':'stepup','코어 안티 로테이션':'pallof','코어 (버드독)':'birddog',
   '편측 하체':'splitsquat','중둔근':'abduction','둔근 편측':'hipthrust','내전근 균형':'adduction','사이드 플랭크 (맥길)':'sideplank',
-  '수평 밀기':'chestpress','어깨 (안전 범위)':'shoulderpress','가슴 보조':'fly','삼두':'triceps','자세교정 (하부 승모)':'ytw',
+  '수평 밀기':'chestpress','수직 밀기 (어깨)':'shoulderpress','가슴 보조':'fly','삼두':'triceps','자세교정 (하부 승모)':'ytw',
   '코어 (안티 익스텐션)':'deadbug','코어 (안정화)':'birddog','코어 (측면)':'sideplank','자세교정 종합':'facepull',
 };
 function eqWrap(inner){return `<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">${inner}</svg>`;}
@@ -875,7 +875,9 @@ function patIcon(role){const pat=ROLE_PAT[role]||'strength'; const svg=(typeof P
 function exFig(r,role){ if(r && !r.bw && r.eq && r.eq.length) return eqIcon(r.eq[0]); return patIcon(role); }
 
 /* ---------------- Session templates (6-day rotation) ----------------
-   Back-safe (post lumbar surgery) · posture correction · fat loss · moderate hypertrophy.
+   ⚠ 현재 템플릿은 척추 축부하를 배제한 "보수적(back-safe)" 구성으로 고정되어 있음.
+   특정 개인이 아니라 모든 사용자에게 동일 적용되므로, 사용자가 고른 목표/경험에 따라
+   구성이 달라지도록 만들려면 이 템플릿부터 분기해야 함.
    Each slot: role, sets, reps, options[{name,eq,cue}], fb(fallback){name,cue}                   */
 const CARDIO_OPTS=[
   {name:'리컴번트 바이크', eq:['recumbent_bike']},
@@ -891,23 +893,30 @@ const SESSIONS=[
   warm:[{cardio:true},{n:'무릎 높이 마칭',a:'20걸음',d:'제자리에서 무릎을 배꼽 높이까지 번갈아 올리기'},{n:'다리 앞뒤로 흔들기',a:'좌/우 각각 12회',d:'벽·기둥 등을 잡고 한 다리를 앞뒤로 크게 흔들기'},{n:'맨몸 스쿼트',a:'15회',d:'발을 어깨너비로, 엉덩이를 뒤로 빼며 앉았다 서기'},{n:'첫 하체 운동 가볍게 예열',a:'12회',d:'본 무게의 절반 정도로 1세트 먼저 감 잡기'}],
   slots:[
    {role:'메인 하체', sets:4, reps:'12회', options:[
+     {name:'바벨 백 스쿼트', eq:['barbell'], cue:'랙에서 바를 승모근 위에 얹고 엉덩이를 뒤로 빼며 허벅지가 수평이 될 때까지 앉기 · 배에 힘을 주어 허리 중립을 유지하고 무릎은 발끝 방향으로'},
      {name:'레그프레스', eq:['leg_press'], cue:'발을 플랫폼 위쪽에 두어 둔근·햄스트링 강조 · 허리를 시트에 밀착해 중립 유지하고, 무릎이 가슴에 눌릴 만큼 깊게 내리지 않기'},
      {name:'핵 스쿼트', eq:['hack_squat'], cue:'등판에 허리 완전 밀착, 무릎은 발끝 방향, 패러렐(허벅지 수평)까지만'},
      {name:'스미스 박스 스쿼트', eq:['smith','box'], cue:'박스에 살짝 닿는 높이까지만 · 가슴 세우고 허리 중립'},
      {name:'고블릿 박스 스쿼트', eq:['dumbbell','box'], cue:'덤벨을 가슴 앞에 세워 들고 박스까지 앉았다 일어서기 · 허리 중립'},
-   ], fb:{name:'의자 박스 스쿼트 (맨몸)', cue:'의자에 살짝 닿았다 일어서기 · 반동 없이'}},
+     {name:'체어 스쿼트', eq:['bench'], cue:'벤치에 엉덩이가 살짝 닿는 높이까지 앉았다 일어서기 · 반동 없이 가슴 세우고 허리 중립'},
+   ], fb:{name:'맨몸 스플릿 스쿼트', reps:'10회/측', cue:'앞뒤로 다리를 벌려 서서 뒷무릎을 바닥 가까이 내렸다 올라오기 · 상체를 세우고 허리 중립 유지 · 균형이 흔들리면 벽을 짚기'},
+    alts:[{name:'싱글 레그 루마니안 데드리프트', reps:'10회/측', cue:'한 다리로 서서 엉덩이를 뒤로 보내며 상체를 숙이기 · 무릎을 거의 굽히지 않아 무릎 부담이 적음 · 균형이 흔들리면 벽을 짚기'}]},
    {role:'대퇴사두', sets:3, reps:'15회', options:[
      {name:'레그 익스텐션', eq:['leg_extension'], cue:'반동 없이, 정점에서 1초 정지 후 천천히'},
-   ], fb:{name:'월 싯 (벽 스쿼트 버티기)', cue:'허벅지 90도, 30–45초 유지'}},
+   ], fb:{name:'월 싯 (벽 스쿼트 버티기)', reps:'30–45초', cue:'벽에 등을 대고 허벅지가 바닥과 수평이 될 때까지 앉아 버티기 · 허리는 벽에 밀착하고 무릎은 발끝을 넘지 않게'},
+    alts:[{name:'스트레이트 레그 레이즈', reps:'15회/측', cue:'누워서 한 다리를 곧게 편 채 30도까지 들었다 천천히 내리기 · 무릎을 굽히지 않아 무릎 부담 없이 대퇴사두 사용'}]},
    {role:'햄스트링/둔근', sets:3, reps:'12회', options:[
+     {name:'바벨 루마니안 데드리프트', eq:['barbell'], cue:'무릎을 살짝 굽힌 채 엉덩이를 뒤로 보내며 바를 정강이 가까이 내리기 · 등을 곧게 편 상태를 유지하고 햄스트링이 당기는 지점까지만'},
+     {name:'컨벤셔널 데드리프트', eq:['barbell'], cue:'바를 발 중앙 위에 두고 가슴을 세운 채 다리로 밀며 일으키기 · 허리를 말지 말고 배에 힘을 준 중립 자세 유지'},
      {name:'라잉 레그 컬', eq:['lying_leg_curl'], cue:'엎드려 골반을 패드에 밀착 · 반동 없이 천천히 내리고, 허리가 뜨지 않게'},
      {name:'레그 컬', eq:['leg_curl'], cue:'골반이 뜨지 않게, 내릴 때 천천히'},
-   ], fb:{name:'밴드 레그 컬 (엎드려)', cue:'밴드 저항으로 무릎 굽히기'}},
+   ], fb:{name:'싱글 레그 루마니안 데드리프트', reps:'10회/측', cue:'한 다리로 서서 엉덩이를 뒤로 보내며 상체를 숙이기 · 허리는 곧게 유지하고 햄스트링이 당기는 지점까지만 · 균형이 흔들리면 벽이나 의자를 짚기'},
+    alts:[{name:'싱글 레그 글루트 브릿지', reps:'12회/측', cue:'누워서 한 발로 바닥을 밀며 골반 올리기 · 허리로 젖히지 말고 둔근과 햄스트링으로 밀어 올리기'}]},
    {role:'둔근 메인', sets:3, reps:'15회', options:[
      {name:'힙 쓰러스트', eq:['smith','bench'], cue:'견갑만 벤치에 걸치고 갈비뼈 닫기 · 허리로 젖히지 말고 둔근으로 밀어 골반만 올리기'},
      {name:'힙 쓰러스트 (바벨)', eq:['barbell','bench'], cue:'견갑만 벤치에 걸치고 갈비뼈 닫기 · 둔근으로 골반만 올리기'},
      {name:'케이블 킥백', eq:['cable'], cue:'허리 중립 고정, 다리만 뒤로 · 정점에서 둔근 수축 1초'},
-   ], fb:{name:'글루트 브릿지', cue:'바닥에서 골반 올리기, 정점 1초 · 밴드를 무릎에 걸면 강도 증가'}},
+   ], fb:{name:'글루트 브릿지', cue:'바닥에 누워 발로 밀며 골반 올리기, 정점에서 1초 멈추기 · 허리로 젖히지 말고 둔근으로 밀어 올리기'}},
    {role:'코어 (안티 익스텐션)', sets:3, reps:'10회/측', options:[
      {name:'데드버그', eq:['mat'], cue:'허리를 바닥에 붙인 채 반대쪽 팔·다리 뻗기 · 허리가 뜨면 범위를 줄이기'},
      {name:'케이블 팔로프 프레스', eq:['cable'], cue:'옆에서 오는 케이블을 몸 중앙에서 앞으로 밀며 몸통 회전을 버티기'},
@@ -924,28 +933,35 @@ const SESSIONS=[
    {role:'수직 당기기', sets:4, reps:'12회', options:[
      {name:'랫풀다운', eq:['lat_pulldown'], cue:'견갑을 먼저 아래로 내리고 당기기 · 반동·상체 뒤로 젖힘 금지, 허리 중립'},
      {name:'어시스트 풀업', eq:['assisted_pullup'], cue:'가슴을 바 쪽으로, 견갑 하강부터'},
-   ], fb:{name:'밴드 랫풀다운', eq:['band'], cue:'머리 위 고정점 없으면 무릎 꿇고 양손으로 아래로 당기기'}},
-   {role:'수평 당기기 (가슴 지지)', sets:3, reps:'12회', options:[
+     {name:'밴드 랫풀다운', eq:['band'], cue:'머리 위 고정점 없으면 무릎 꿇고 양손으로 아래로 당기기'},
+   ], fb:{name:'타월 랫 풀다운', cue:'수건 양끝을 잡고 머리 위로 올린 뒤 한쪽 손으로 저항을 주며 반대쪽으로 끌어내리기 · 견갑을 먼저 아래로 내리고 허리 중립 유지'}},
+   {role:'수평 당기기', sets:3, reps:'12회', options:[
+     {name:'바벨 벤트오버 로우', eq:['barbell'], cue:'무릎을 살짝 굽히고 상체를 45도로 숙여 배꼽 쪽으로 당기기 · 등을 곧게 편 채 반동 없이, 견갑을 모으며'},
      {name:'체스트서포트 시티드 로우', eq:['seated_row'], cue:'가슴 패드에 기대 허리 부담 최소화 · 견갑을 모으며 당기기'},
      {name:'체스트서포트 로우 머신', eq:['chest_supported_row'], cue:'패드에 가슴 지지, 견갑 모으기'},
      {name:'체스트서포트 덤벨 로우', eq:['dumbbell','bench'], cue:'인클라인 벤치에 가슴을 대고 엎드려 로우 · 허리 부담 없음'},
-   ], fb:{name:'밴드 시티드 로우', eq:['band'], cue:'앉아서 발에 밴드 걸고 견갑 모으며 당기기'}},
+     {name:'밴드 시티드 로우', eq:['band'], cue:'앉아서 발에 밴드 걸고 견갑 모으며 당기기'},
+   ], fb:{name:'인버티드 로우', cue:'튼튼한 책상 아래 누워 모서리를 잡고 가슴을 끌어당기기 · 몸통을 일직선으로 유지하고 허리가 꺾이지 않게 · 힘들면 무릎을 세워 난이도 낮추기'}},
    {role:'이두 (팔 굽히기)', sets:3, reps:'12회', options:[
      {name:'인클라인 컬 머신', eq:['bicep_curl'], cue:'등받이에 기대 팔꿈치를 고정하고 반동 없이 굽혔다 천천히 펴기 · 등받이가 있어 허리 부담 없음'},
      {name:'인클라인 덤벨 컬', eq:['dumbbell','bench'], cue:'인클라인 벤치에 기대 팔을 아래로 늘어뜨린 채 컬 · 이두를 충분히 늘렸다 굽히기'},
      {name:'케이블 컬', eq:['cable'], cue:'팔꿈치를 옆구리에 고정하고 케이블로 굽히기'},
-   ], fb:{name:'밴드 컬', eq:['band'], cue:'밴드를 밟고 서서 팔꿈치 고정, 반동 없이 굽히기'}},
+     {name:'밴드 컬', eq:['band'], cue:'밴드를 밟고 서서 팔꿈치 고정, 반동 없이 굽히기'},
+   ], fb:{name:'타월 컬', cue:'수건 가운데를 한 발로 밟고 양끝을 잡아 위로 당기기 · 팔꿈치를 옆구리에 붙여 고정하고 반동 없이 천천히'}},
    {role:'자세교정 (말린 어깨)', sets:3, reps:'15회', options:[
      {name:'페이스풀 (케이블)', eq:['cable'], cue:'로프를 얼굴 쪽으로, 팔꿈치를 높게 유지하며 외회전 · 말린 어깨 교정 핵심'},
-   ], fb:{name:'밴드 페이스풀', eq:['band'], cue:'밴드를 눈높이 고정, 얼굴 쪽으로 당기며 외회전'}},
+     {name:'밴드 페이스풀', eq:['band'], cue:'밴드를 눈높이 고정, 얼굴 쪽으로 당기며 외회전'},
+   ], fb:{name:'월 슬라이드', cue:'벽에 등과 팔꿈치를 붙인 채 팔을 위아래로 미끄러뜨리기 · 허리가 벽에서 뜨지 않게 갈비뼈를 닫고 유지'}},
    {role:'후면 삼각/능형근', sets:3, reps:'15회', options:[
      {name:'리버스 펙덱', eq:['reverse_pec_deck'], cue:'팔을 뒤로 벌리며 견갑 모으기'},
      {name:'리어 델트 플라이 (가슴 지지)', eq:['dumbbell','bench'], cue:'인클라인 벤치에 가슴 대고 엎드려 양옆으로'},
-   ], fb:{name:'밴드 풀어파트', eq:['band'], cue:'팔을 펴서 밴드를 좌우로 벌리며 견갑 모으기'}},
+     {name:'밴드 풀어파트', eq:['band'], cue:'팔을 펴서 밴드를 좌우로 벌리며 견갑 모으기'},
+   ], fb:{name:'프론 T 레이즈', cue:'엎드려 엄지를 위로 향한 채 양팔을 T자로 들어올리기 · 목은 중립으로 두고 견갑을 모으며 2초 유지'}},
    {role:'페이스 풀', sets:2, reps:'15회', options:[
      {name:'케이블 페이스 풀', eq:['cable'], cue:'케이블을 얼굴 높이로 당기며 팔꿈치를 뒤로 벌리기 · 후면 어깨·자세교정'},
-   ], fb:{name:'밴드 페이스 풀', eq:['band'], cue:'밴드를 얼굴 높이로 당기며 팔꿈치를 뒤로 벌리기'}},
-   {role:'거북목 교정', sets:2, reps:'12회', options:[], fb:{name:'친 턱', cue:'턱을 목 쪽으로 당겨 뒤통수를 위로 밀어내듯 5초 유지'}},
+     {name:'밴드 페이스 풀', eq:['band'], cue:'밴드를 얼굴 높이로 당기며 팔꿈치를 뒤로 벌리기'},
+   ], fb:{name:'프론 W 레이즈', cue:'엎드려 팔꿈치를 굽혀 W자를 만들고 견갑을 모으며 들어올리기 · 목은 중립, 어깨를 귀에서 멀리'}},
+   {role:'거북목 교정', sets:2, reps:'12회', options:[], fb:{name:'턱 당기기', cue:'턱을 목 쪽으로 당겨 뒤통수를 위로 밀어내듯 5초 유지'}},
    {role:'흉추 신전', sets:2, reps:'10회', options:[{name:'폼롤러 흉추 신전', eq:['foam_roller'], cue:'폼롤러를 등 위쪽(날개뼈 아래)에 대고 누워 상체를 뒤로 젖혀 등을 펴기'}], fb:{name:'흉추 신전 (앉아서)', cue:'의자 등받이에 등 위쪽을 대고 상체를 뒤로 젖혀 가슴을 펴기'}},
   ],
   cardio:{label:'유산소', detail:'존2 강도'},
@@ -960,7 +976,8 @@ const SESSIONS=[
    ], fb:{name:'제자리 마칭', cue:'무릎을 배꼽 높이까지 번갈아 높이 들며 제자리 걷기'}},
    {role:'코어 안티 로테이션', sets:3, reps:'12회/측', options:[
      {name:'케이블 팔로프 프레스', eq:['cable'], cue:'옆에서 오는 케이블을 몸 중앙에서 앞으로 밀기 · 몸통이 돌아가지 않게 버티기'},
-   ], fb:{name:'밴드 팔로프 프레스', eq:['band'], cue:'옆 고정점 밴드를 앞으로 밀며 회전 저항'}},
+     {name:'밴드 팔로프 프레스', eq:['band'], cue:'옆 고정점 밴드를 앞으로 밀며 회전 저항'},
+   ], fb:{name:'플랭크 숄더 탭', cue:'플랭크 자세에서 한 손으로 반대쪽 어깨를 가볍게 두드리기 · 골반이 좌우로 흔들리지 않게 버티고 허리 중립 유지'}},
    {role:'코어 (버드독)', sets:3, reps:'8회/측', options:[], fb:{name:'버드독', cue:'네발 자세에서 반대쪽 팔·다리를 뻗어 몸통 흔들림 없이 유지 · 맥길 코어 안정화'}},
   ],
   cardio:{label:'메인 유산소', detail:'존2 강도 · 저충격'},
@@ -973,10 +990,12 @@ const SESSIONS=[
    {role:'편측 하체', sets:3, reps:'10회/측', options:[
      {name:'불가리안 스플릿 스쿼트', eq:['dumbbell','bench'], cue:'상체 세우고 허리 중립, 앞무릎이 발끝을 크게 넘지 않게 · 균형 목적이라 가볍게, 좌우 동일 횟수로 불균형 교정'},
      {name:'덤벨 스텝업', eq:['dumbbell','step_box'], cue:'박스에 올라서며 둔근으로 밀기 · 좌우 동일하게'},
-   ], fb:{name:'맨몸 스플릿 스쿼트', cue:'앞뒤로 다리 벌려 상하로 · 필요시 벽 지지'}},
+   ], fb:{name:'맨몸 스플릿 스쿼트', cue:'앞뒤로 다리 벌려 상하로 · 필요시 벽 지지'},
+    alts:[{name:'싱글 레그 루마니안 데드리프트', cue:'한 다리로 서서 엉덩이를 뒤로 보내며 상체를 숙이기 · 무릎을 거의 굽히지 않아 무릎 부담이 적음 · 균형이 흔들리면 벽을 짚기'}]},
    {role:'중둔근', sets:3, reps:'15회', options:[
      {name:'힙 어브덕션 머신', eq:['hip_abduction'], cue:'상체 고정, 다리를 바깥으로 벌려 엉덩이 옆 자극'},
-   ], fb:{name:'사이드 라잉 힙 어브덕션', eq:['band'], cue:'옆으로 누워 위 다리 들어올리기 · 밴드로 강도 추가'}},
+     {name:'사이드 라잉 힙 어브덕션', eq:['band'], cue:'옆으로 누워 위 다리 들어올리기 · 밴드로 강도 추가'},
+   ], fb:{name:'클램셸', reps:'15회/측', cue:'옆으로 누워 무릎을 굽힌 채 위 무릎만 조개처럼 벌리기 · 골반이 뒤로 넘어가지 않게 고정하고 둔근으로 벌리기'}},
    {role:'둔근 편측', sets:3, reps:'12회/측', options:[
      {name:'싱글 레그 힙 쓰러스트', eq:['bench'], cue:'한 다리로 골반 올리기, 골반 수평 유지'},
    ], fb:{name:'싱글 레그 글루트 브릿지', cue:'바닥에서 한 다리로 골반 올리기, 좌우 균등'}},
@@ -985,7 +1004,8 @@ const SESSIONS=[
    ], fb:{name:'사이드 라잉 내전근 레이즈', cue:'옆으로 누워 아래 다리 들어올리기'}},
    {role:'코어 안티 로테이션', sets:3, reps:'12회/측', options:[
      {name:'케이블 팔로프 프레스', eq:['cable'], cue:'몸통 회전 저항하며 앞으로 밀기'},
-   ], fb:{name:'밴드 팔로프 프레스', eq:['band'], cue:'밴드 회전 저항'}},
+     {name:'밴드 팔로프 프레스', eq:['band'], cue:'밴드 회전 저항'},
+   ], fb:{name:'플랭크 숄더 탭', cue:'플랭크 자세에서 한 손으로 반대쪽 어깨를 가볍게 두드리기 · 골반이 좌우로 흔들리지 않게 버티고 허리 중립 유지'}},
    {role:'사이드 플랭크 (맥길)', sets:3, reps:'20–30초/측', options:[], fb:{name:'사이드 플랭크', cue:'옆구리·중둔근 안정화 · 힘들면 무릎 대고 · 좌우 시간 동일하게'}},
   ],
   cardio:{label:'유산소', detail:'존2 강도'},
@@ -996,24 +1016,29 @@ const SESSIONS=[
   warm:[{cardio:true},{n:'팔 크게 돌리기',a:'앞/뒤 각 10회',d:'양팔로 큰 원을 그리며 앞으로 10회, 뒤로 10회'},{n:'어깨 바깥으로 돌리기',a:'좌/우 각각 12회',d:'팔꿈치를 옆구리에 붙인 채 손만 바깥쪽으로 돌리기'},{n:'밴드 어깨 뒤로 벌리기',a:'15회 ×2',d:'밴드를 가슴 앞에서 잡고 양옆으로 당겨 벌리기',eq:['band'],alt:{n:'팔 뒤로 모으기',a:'15회 ×2',d:'양 팔꿈치를 뒤로 당겨 날개뼈를 모으기'}},{n:'벽 팔굽혀펴기',a:'10회',d:'벽·기둥을 짚고 가슴을 벽 쪽으로 가볍게 내렸다 밀기'}],
   slots:[
    {role:'수평 밀기', sets:4, reps:'12회', options:[
+     {name:'바벨 벤치 프레스', eq:['barbell','bench'], cue:'견갑을 모아 벤치에 고정하고 바를 가슴 아래쪽으로 내렸다 밀기 · 허리 과도한 아치 없이, 손목은 곧게'},
      {name:'체스트 프레스 머신', eq:['chest_press'], cue:'견갑을 안정시키고 허리 과도한 아치 없이 · 등받이에 기대 요추 보호'},
      {name:'덤벨 벤치 프레스', eq:['dumbbell','bench'], cue:'벤치에 누워 견갑 고정, 허리 과신전 금지'},
    ], fb:{name:'경사 푸시업', cue:'벤치·벽에 손 대고 각도 조절 · 몸통 일직선'}},
-   {role:'어깨 (안전 범위)', sets:3, reps:'12회', options:[
-     {name:'숄더 프레스 머신', eq:['shoulder_press'], cue:'등받이에 허리 지지, 통증·불편 없는 범위까지만 · 무거운 스탠딩 오버헤드는 지양'},
+   {role:'수직 밀기 (어깨)', sets:3, reps:'12회', options:[
+     {name:'바벨 오버헤드 프레스', eq:['barbell'], cue:'서서 바를 쇄골 앞에서 머리 위로 곧게 밀어 올리기 · 갈비뼈를 닫고 배에 힘을 주어 허리가 젖혀지지 않게'},
+     {name:'숄더 프레스 머신', eq:['shoulder_press'], cue:'등받이에 허리 지지, 통증·불편 없는 범위까지만'},
      {name:'시티드 덤벨 숄더 프레스', eq:['dumbbell','bench'], cue:'등받이 있는 벤치에 앉아, 허리 지지 상태로 · 가볍게'},
-   ], fb:{name:'밴드 오버헤드 프레스', eq:['band'], cue:'밴드를 밟고 머리 위로 · 허리 중립'}},
+     {name:'밴드 오버헤드 프레스', eq:['band'], cue:'밴드를 밟고 머리 위로 · 허리 중립'},
+   ], fb:{name:'파이크 푸시업', cue:'엉덩이를 높이 들어 A자를 만들고 정수리를 바닥 쪽으로 내렸다 밀어 올리기 · 허리를 젖히지 말고 힘들면 무릎을 대기'}},
    {role:'가슴 보조', sets:3, reps:'15회', options:[
      {name:'펙덱 플라이', eq:['pec_deck'], cue:'팔을 모으며 가슴 수축'},
      {name:'케이블 플라이', eq:['cable'], cue:'양팔을 앞으로 모으기, 허리 중립'},
-   ], fb:{name:'덤벨 플로어 플라이', eq:['dumbbell'], cue:'바닥에 누워 플라이 — 바닥이 어깨 과신전을 막아 안전'}},
+     {name:'덤벨 플로어 플라이', eq:['dumbbell'], cue:'바닥에 누워 플라이 — 바닥이 어깨 과신전을 막아 안전'},
+   ], fb:{name:'와이드 경사 푸시업', cue:'벽이나 튼튼한 탁자를 짚고 손을 어깨보다 넓게 벌려 가슴을 내렸다 밀기 · 몸통 일직선, 팔꿈치를 너무 벌리지 않기'}},
    {role:'삼두', sets:3, reps:'15회', options:[
      {name:'케이블 푸시다운', eq:['cable'], cue:'팔꿈치 고정, 팔뚝만 펴기'},
-   ], fb:{name:'밴드 푸시다운', eq:['band'], cue:'높은 고정점 밴드를 아래로 밀기'}},
+     {name:'밴드 푸시다운', eq:['band'], cue:'높은 고정점 밴드를 아래로 밀기'},
+   ], fb:{name:'내로우 경사 푸시업', cue:'벽이나 탁자를 짚고 양손을 어깨너비보다 좁게 모아 내렸다 밀기 · 팔꿈치를 몸통에 붙여 삼두에 집중'}},
    {role:'자세교정 (하부 승모)', sets:2, reps:'12회', options:[
      {name:'프론 Y-T-W 레이즈', eq:['mat'], cue:'엎드려 팔을 Y·T·W 모양으로 들어 하부 승모근·능형근 활성화', floor:true},
-   ], fb:{name:'프론 Y-T-W', cue:'엎드려 엄지 위로, 팔을 Y·T·W 모양으로 들어 견갑 모으기'}},
-   {role:'거북목 교정', sets:2, reps:'12회', options:[], fb:{name:'친 턱', cue:'턱을 목 쪽으로 당겨 5초 유지'}},
+   ], fb:{name:'프론 Y-T-W 레이즈', cue:'엎드려 엄지 위로, 팔을 Y·T·W 모양으로 들어 견갑 모으기'}},
+   {role:'거북목 교정', sets:2, reps:'12회', options:[], fb:{name:'턱 당기기', cue:'턱을 목 쪽으로 당겨 5초 유지'}},
   ],
   cardio:{label:'유산소', detail:'존2 강도'},
   cool:[{n:'가슴 스트레칭',a:'좌/우 각각 30초',d:'벽·기둥·문틀 등에 팔을 대고 몸을 앞으로 기울여 가슴을 펴기'},{n:'어깨 앞쪽 스트레칭',a:'좌/우 각각 30초',d:'한 팔을 몸 앞으로 가로질러 반대 팔로 몸쪽으로 당기기'},{n:'목 옆 스트레칭',a:'좌/우 각각 30초',d:'한 손으로 반대쪽 머리를 지그시 당겨 목 옆을 늘이기'}],
@@ -1031,7 +1056,8 @@ const SESSIONS=[
    {role:'코어 (측면)', sets:2, reps:'20–30초/측', options:[], fb:{name:'사이드 플랭크', cue:'옆구리 안정화, 좌우 동일 시간'}},
    {role:'자세교정 종합', sets:3, reps:'15회', options:[
      {name:'케이블 페이스 풀', eq:['cable'], cue:'케이블을 얼굴 높이로 당기며 팔꿈치를 뒤로 벌려 말린 어깨 교정'},
-   ], fb:{name:'밴드 풀 어파트', eq:['band'], cue:'밴드를 가슴 앞에서 양옆으로 당겨 벌리며 후면 견갑 활성화'}},
+     {name:'밴드 풀 어파트', eq:['band'], cue:'밴드를 가슴 앞에서 양옆으로 당겨 벌리며 후면 견갑 활성화'},
+   ], fb:{name:'프론 Y-T-W 레이즈', cue:'엎드려 엄지 위로, 팔을 Y·T·W 모양으로 순서대로 들어 견갑 모으기 · 목은 중립으로 두고 반동 없이'}},
   ],
   cardio:{label:'메인 유산소', detail:'존3 강도 · 가벼운 인터벌(빠르게 1분 / 보통 3분 반복), 저충격'},
   cool:[{n:'가슴 스트레칭',a:'40초',d:'벽·기둥·문틀 등에 팔을 대고 몸을 앞으로 기울여 가슴을 펴기'},{n:'어깨·목 스트레칭',a:'좌/우 각각 40초',d:'어깨를 아래로 내리며 반대쪽으로 목을 기울이기'},{n:'앞허벅지 스트레칭',a:'좌/우 각각 40초',d:'서서 한 발등을 잡아 발뒤꿈치를 엉덩이 쪽으로 당기기'},{n:'무릎 끌어안기',a:'40초',d:'누워 양 무릎을 가슴으로 당겨 허리·엉덩이 늘이기',floor:true,alt:{n:'앉아 무릎 끌어안기',a:'40초',d:'앉아서 한 무릎씩 가슴으로 당기기'}}],
@@ -1135,23 +1161,54 @@ function has(eq){ return eq.every(e=>state.equipment.includes(e)); }
 function isBW(eq){ return (eq||[]).every(e=>e==='mat'); } // only a floor mat is treated as no-equipment; other tools must be selected
 /* profile-driven contraindications: skip movements that stress an injured joint */
 const INJ_JOINT={'무릎':'knee','어깨':'shoulder','허리 (디스크/수술)':'lower_back','허리':'lower_back','발목':'ankle','손목':'wrist','목/거북목':'neck','목':'neck'};
-const CONTRA_ROLE={'메인 하체':['knee'],'대퇴사두':['knee'],'편측 하체':['knee'],'전신 (스텝)':['knee','ankle'],'어깨 (안전 범위)':['shoulder'],'수평 밀기':['shoulder'],'가슴 보조':['shoulder']};
+/* 운동별 금기 관절 — 부상 부위와 겹치는 운동만 제외되고, 같은 슬롯의 안전한 대체 동작이 대신 선택됨.
+   (예전엔 슬롯을 통째로 삭제해서 부상자는 그 부위 운동 자체가 사라졌음) */
+const CONTRA_EX={
+  /* 무릎 — 무릎 굽힘 부하·개방사슬 신전 */
+  '레그 익스텐션':['knee'], '핵 스쿼트':['knee'], '고블릿 박스 스쿼트':['knee'],
+  '체어 스쿼트':['knee'], '맨몸 스플릿 스쿼트':['knee'], '불가리안 스플릿 스쿼트':['knee'],
+  '월 싯 (벽 스쿼트 버티기)':['knee'],
+  '스미스 박스 스쿼트':['knee','lower_back'],
+  '스텝박스 스텝업':['knee','ankle'], '덤벨 스텝업':['knee','ankle'],
+  /* 허리 — 척추 축부하·힙힌지 굴곡·과신전. 허리를 고른 사용자만 이 운동들이 빠지고
+     등받이 지지 머신 등 보수적 대안이 대신 선택됨 */
+  '바벨 백 스쿼트':['lower_back','knee'],
+  '컨벤셔널 데드리프트':['lower_back'],
+  '바벨 루마니안 데드리프트':['lower_back'],
+  '바벨 벤트오버 로우':['lower_back'],
+  '바벨 오버헤드 프레스':['lower_back','shoulder'],
+  '바벨 벤치 프레스':['shoulder'],
+  '싱글 레그 루마니안 데드리프트':['lower_back'],
+  '힙 쓰러스트 (바벨)':['lower_back'],
+  '케이블 킥백':['lower_back'],
+  '밴드 오버헤드 프레스':['lower_back','shoulder'],
+  /* 어깨 — 오버헤드·수평 밀기·플라이 */
+  '숄더 프레스 머신':['shoulder'], '시티드 덤벨 숄더 프레스':['shoulder'],
+  '체스트 프레스 머신':['shoulder'], '덤벨 벤치 프레스':['shoulder'],
+  '펙덱 플라이':['shoulder'], '케이블 플라이':['shoulder'], '덤벨 플로어 플라이':['shoulder'],
+  '어시스트 풀업':['shoulder'],
+  /* 인클라인 푸시업(벽·탁자)은 어깨/손목 부담이 낮아 금기에서 제외 — 부상자의 최후 대안 */
+  /* 손목 — 손바닥으로 체중을 받는 동작 */
+  '파이크 푸시업':['shoulder','wrist','neck'],
+  '플랭크 숄더 탭':['wrist'],
+};
 function avoidJoints(){ const s=new Set(); const p=state.profile; if(p&&p.injuries&&p.injuries.has){(p.injuries.list||[]).forEach(x=>{const j=INJ_JOINT[x]; if(j)s.add(j);});} return s; }
-function isFloorMove(name){ return /데드버그|버드독|플랭크|브릿지|브리지|클램셸|캣카우|캣 카우|프론|누워|엎드려|90\/90|글루트/.test(name); }
+function isFloorMove(name){ return /데드버그|버드독|플랭크|브릿지|브리지|클램셸|캣카우|캣 카우|프론|누워|엎드려|90\/90|글루트|파이크|스트레이트 레그 레이즈/.test(name); }
 function slotCands(slot){
   const avoid=avoidJoints();
-  const rc=CONTRA_ROLE[slot.role]||[];
-  if(rc.some(j=>avoid.has(j))) return []; // injured joint → skip this movement (safety)
-  const all=[...slot.options, {name:slot.fb.name, eq:(slot.fb.eq||[]), cue:slot.fb.cue}];
+  const contra=n=>(CONTRA_EX[n]||[]).some(j=>avoid.has(j));
+  /* 순서 = 기구 옵션 → 기본 맨몸(fb) → 부상 시에만 쓰이는 안전 대안(alts) */
+  const all=[...slot.options, {name:slot.fb.name, eq:(slot.fb.eq||[]), cue:slot.fb.cue, reps:slot.fb.reps}, ...(slot.alts||[])];
   const out=[]; const seen=new Set();
   for(const c of all){
     if(seen.has(c.name)) continue;
+    if(contra(c.name)) continue; // 부상 부위에 금기인 운동만 제외 (슬롯은 유지)
     if(isBW(c.eq)){
       if(!state.includeBodyweight) continue;
       if(isFloorMove(c.name) && !state.includeFloor) continue; // floor move but floor not allowed
-      seen.add(c.name); out.push({name:c.name, eq:c.eq, cue:c.cue, bw:true});
+      seen.add(c.name); out.push({name:c.name, eq:c.eq, cue:c.cue, reps:c.reps, bw:true});
     } else if(has(c.eq)){
-      seen.add(c.name); out.push({name:c.name, eq:c.eq, cue:c.cue, bw:false});
+      seen.add(c.name); out.push({name:c.name, eq:c.eq, cue:c.cue, reps:c.reps, bw:false});
     }
   }
   return out;
@@ -1207,21 +1264,24 @@ function renderSetLog(slot,r,dateStr,oi,nSets){
   return `<div class="setlog">${hint}<div class="setrow" style="justify-content:center">${cells}</div></div>`;
 }
 
-function effVol(si,oi,slot){
+/* 동작별 reps 우선 — 유지형(월 싯 등)은 슬롯의 횟수 대신 자기 시간을 씀 */
+function defReps(slot,r){ return (r&&r.reps)||slot.reps; }
+function effVol(si,oi,slot,r){
   const c=state.slotCustom&&state.slotCustom[si+':'+oi];
   const beginner=state.profile&&state.profile.liftingExp===false;
   const base=beginner?Math.max(2,slot.sets-1):slot.sets;
   const sets=(c&&c.sets)?c.sets:base;
-  const reps=(c&&c.reps!=null&&c.reps!=='')?c.reps:slot.reps;
+  const reps=(c&&c.reps!=null&&c.reps!=='')?c.reps:defReps(slot,r);
   return {sets, reps, customized:!!c};
 }
-function volEditor(si,oi,slot,v){
+function volEditor(si,oi,slot,v,r){
+  const dr=defReps(slot,r);
   return `<div class="voledit">
     <button class="stp" onclick="chgSets(${si},${oi},-1,${slot.sets})">−</button>
     <span class="volnum">${v.sets}세트</span>
     <button class="stp" onclick="chgSets(${si},${oi},1,${slot.sets})">+</button>
     <span class="voltimes">×</span>
-    <input class="repin" value="${v.reps}" onchange="setReps(${si},${oi},this.value,'${slot.reps}')" aria-label="세트당 반복">
+    <input class="repin" value="${v.reps}" onchange="setReps(${si},${oi},this.value,'${dr}')" aria-label="세트당 반복">
     ${v.customized?`<button class="volreset" onclick="resetVol(${si},${oi})">추천값으로</button>`:''}
   </div>`;
 }
@@ -1513,7 +1573,7 @@ function sessionTimes(s, kept, si){
   let main=T-warm-cool-cardio;
   const need=kept.length*3;
   if(main<need){ let d=need-main; const a=Math.min(d,cardio-3);cardio-=a;d-=a;main+=a; if(d>0){const b=Math.min(d,warm-4);warm-=b;d-=b;main+=b;} if(d>0){const c=Math.min(d,cool-3);cool-=c;d-=c;main+=c;} }
-  const setsArr=kept.map(x=>effVol(si,x.key!=null?x.key:x.oi,x.sl).sets);
+  const setsArr=kept.map(x=>effVol(si,x.key!=null?x.key:x.oi,x.sl,x.r).sets);
   const tot=setsArr.reduce((a,b)=>a+b,0)||1;
   let ex=setsArr.map(st=>Math.max(3,Math.round(main*st/tot)));
   let sum=warm+cool+cardio+ex.reduce((a,b)=>a+b,0);
@@ -1570,7 +1630,7 @@ function renderSessionCard(s,dateStr,si){
   // main exercises
   kept.forEach((x,idx)=>{
     const id=x.id, active=activeId===id, done=!!completed[id];
-    const v=effVol(si,x.key,x.sl);
+    const v=effVol(si,x.key,x.sl,x.r);
     const title=`<div class="step-title">${x.sl.role}</div><div class="step-name">${x.r.name}</div>`;
     let body = v.customized ? `<div class="ex-meta" style="margin-top:6px"><span class="vol-tag">직접 설정</span></div>` : '';
     if(x.eqCands.length){
@@ -1581,7 +1641,7 @@ function renderSessionCard(s,dateStr,si){
     } else {
       body+=`<div class="ex-meta" style="margin-top:6px"><span class="ex-eq">맨몸 운동</span></div>`;
     }
-    body+=volEditor(si,x.key,x.sl,v);
+    body+=volEditor(si,x.key,x.sl,v,x.r);
     if(x.r.cue) body+=`<div class="step-cue">${fmtCue(x.r.cue)}</div>`;
     body+=renderSetLog(x.sl,x.r,dateStr,x.key,v.sets);
     html+=stepShell(exFig(x.r,x.sl.role),'', `운동 ${idx+1} / ${kept.length} (약 ${tm.ex[idx]}분)`, title, body, id, dateStr, active, done, howtoLinks(x.r.name));
@@ -1667,12 +1727,48 @@ function profileBanner(){
   if(!chips.length && !caution) return '';
   return `<div class="card" style="margin:0 0 4px; padding:16px"><div class="pbanner-h">🤖 내 프로필 기반 맞춤 조정</div>${chips.length?`<div class="pbanner-chips">${chips.map(c=>`<span class="pchip">${c}</span>`).join('')}</div>`:''}${caution}</div>`;
 }
+/* 부상 때문에 실제로 플랜에서 빠진 동작들 (보유 장비로 할 수 있었던 것만) */
+function excludedByInjury(){
+  const avoid=avoidJoints();
+  if(!avoid.size) return [];
+  const out=[], seen=new Set();
+  SESSIONS.forEach(s=>s.slots.forEach(sl=>{
+    [...sl.options, sl.fb, ...(sl.alts||[])].forEach(o=>{
+      if(!o||!o.name||seen.has(o.name)) return;
+      const c=CONTRA_EX[o.name]||[];
+      if(!c.some(j=>avoid.has(j))) return;
+      const eq=o.eq||[];
+      if(!(isBW(eq)?state.includeBodyweight:has(eq))) return; // 애초에 못 하던 운동은 제외 안내에서 뺌
+      seen.add(o.name); out.push(o.name);
+    });
+  }));
+  return out;
+}
+/* 플랜에 실제로 선택된(1순위) 바벨 컴파운드 목록 */
+const _RACKED=['바벨 백 스쿼트','바벨 벤치 프레스','바벨 오버헤드 프레스']; // 눌릴 위험 → 안전바/보조자
+const _HINGE=['컨벤셔널 데드리프트','바벨 루마니안 데드리프트','바벨 벤트오버 로우']; // 허리 말림 주의
+function compoundsInPlan(){
+  const all=_RACKED.concat(_HINGE), found=new Set();
+  SESSIONS.forEach(s=>s.slots.forEach(sl=>{ const c=slotCands(sl);
+    if(c.length && all.includes(c[0].name)) found.add(c[0].name); }));
+  return [...found];
+}
 function safetyBox(){
   const p=state.profile;
   const rules=[
     '모든 동작은 허리를 곧게(중립) 유지하고, 통증이 느껴지면 즉시 멈춰주세요.',
     '무게보다 정확한 자세와 호흡(힘 줄 때 내쉬기)을 우선하고, 세트 사이에는 60초에서 90초 정도 쉬어주세요.'
   ];
+  const comp=compoundsInPlan();
+  if(comp.length){
+    rules.push('바벨 운동은 가벼운 무게로 워밍업 세트를 먼저 하고, 마지막 반복에 1~2회 여유를 남겨주세요.');
+    const racked=comp.filter(n=>_RACKED.includes(n));
+    if(racked.length) rules.push(racked.join(', ')+'는 랙의 안전바를 몸에 맞게 맞추거나, 보조해 줄 사람과 함께 해주세요.');
+    const hinge=comp.filter(n=>_HINGE.includes(n));
+    if(hinge.length) rules.push(hinge.join(', ')+'는 등을 곧게 편 상태를 끝까지 유지하고, 허리가 말리기 시작하면 무게를 줄여주세요.');
+  } else if(!state.equipment.length){
+    rules.push('맨몸 운동은 무게 대신 동작을 더 천천히 하거나 반복을 늘려 강도를 올려주세요.');
+  }
   let personalized=false;
   if(p){
     const inj=(p.injuries&&p.injuries.has)?((p.injuries.list||[]).concat(p.injuries.other?[p.injuries.other]:[])):[];
@@ -1693,6 +1789,11 @@ function safetyBox(){
       else if(/천식/.test(x)) rules.push('천식이 있으니 흡입기를 가까이 두고, 호흡이 가빠지면 강도를 낮춰주세요.');
       else rules.push(x+' 이력이 있으니 무리한 강도는 피하고, 몸 상태를 자주 살펴주세요.');
     });
+    const ex=excludedByInjury();
+    if(ex.length){
+      const head=ex.slice(0,3).join(', ');
+      rules.push('입력하신 부상 이력에 맞춰 '+head+(ex.length>3?(' 등 '+ex.length+'개 동작'):' 동작')+'은 플랜에서 빼고, 부담이 적은 대체 동작으로 바꿨어요.');
+    }
   }
   const title = personalized?'나를 위한 맞춤 안전 원칙':'안전 원칙';
   const TRI='<svg class="warn-tri" viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path d="M12 3.4 L22 20 H2 Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M12 9.5 V13.6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="16.7" r="1.15" fill="currentColor"/></svg>';
@@ -1825,7 +1926,7 @@ function planDayRow(k,t){
   if(open && !e.rest){
     const s=SESSIONS[e.session]; const steps=(state.steps&&state.steps[k])||{}; let ex='';
     sessionExercises(s, e.session).forEach(x=>{ const exDone=!!steps[x.id];
-      ex+=`<div class="mini-ex ${exDone?'done':''}"><span class="mini-fig">${exFig(x.r,x.sl.role)}</span><span class="mn">${x.r.name}</span>${exDone?'<span class="mini-done">✓</span>':''}<span class="mv">${x.sl.sets}×${x.sl.reps}</span></div>`; });
+      ex+=`<div class="mini-ex ${exDone?'done':''}"><span class="mini-fig">${exFig(x.r,x.sl.role)}</span><span class="mn">${x.r.name}</span>${exDone?'<span class="mini-done">✓</span>':''}<span class="mv">${x.sl.sets}×${defReps(x.sl,x.r)}</span></div>`; });
     ex+=`<div class="mini-ex ${steps['cardio']?'done':''}"><span class="mn">${s.cardio.label}</span>${steps['cardio']?'<span class="mini-done">✓</span>':''}<span class="mv">${zoneTxt(cardioDetail(s.cardio.detail).replace(s.cardio.label,'').trim())}</span></div>`;
     html+=`<div class="day-expand">${ex}`;
     let tools='';
@@ -2115,7 +2216,16 @@ function renderSetup(){
     <button class="btn ghost" onclick="resetAll()">전체 초기화 (기구 포함)</button>
   </div>`;
 
-  html+=`<div class="info" style="margin:16px 4px 0;color:var(--faint)"><b style="font-weight:700;color:var(--muted)">참고</b><div class="safety-note" style="margin-top:7px">${['이 플랜은 일반적인 안전 원칙을 따르지만, 허리 수술 이력이 있으시니 새 운동을 시작하기 전 담당 의사나 물리치료사와 한 번 상의하시길 권합니다.','식단이 병행되어야 체중 감량 효과가 큽니다. (약한 칼로리 적자 + 충분한 단백질)'].map(s=>`<div class="sn-line"><span class="sn-dot">·</span><span class="sl-tx">${periodLines(s)}</span></div>`).join('')}</div></div>`;
+  /* 부상/지병을 입력한 사용자에게만 의료 상담 문구를 강하게 안내 */
+  const _p=state.profile;
+  const _hasCond=!!(_p && ((_p.injuries&&_p.injuries.has) || (_p.conditions&&_p.conditions.has)));
+  const _notes=[
+    _hasCond
+      ? '이 플랜은 일반적인 안전 원칙을 따르지만, 입력하신 부상이나 지병이 있으니 새 운동을 시작하기 전 담당 의사나 물리치료사와 한 번 상의하시길 권합니다.'
+      : '이 플랜은 일반적인 안전 원칙을 따릅니다. 통증이나 지병이 있다면 새 운동을 시작하기 전 의사나 물리치료사와 상의하세요.',
+    '식단이 병행되어야 체중 감량 효과가 큽니다. (약한 칼로리 적자 + 충분한 단백질)'
+  ];
+  html+=`<div class="info" style="margin:16px 4px 0;color:var(--faint)"><b style="font-weight:700;color:var(--muted)">참고</b><div class="safety-note" style="margin-top:7px">${_notes.map(s=>`<div class="sn-line"><span class="sn-dot">·</span><span class="sl-tx">${periodLines(s)}</span></div>`).join('')}</div></div>`;
   $('view-setup').innerHTML=html;
 }
 
@@ -2152,10 +2262,19 @@ function toggleDone(k){
 function toggleEquip(id){
   const i=state.equipment.indexOf(id);
   if(i>=0) state.equipment.splice(i,1); else state.equipment.push(id);
+  /* 기구를 모두 해제하면 맨몸 운동을 자동으로 켬 — 안 그러면 플랜이 빈다 */
+  if(!state.equipment.length && !state.includeBodyweight){
+    state.includeBodyweight=true;
+    toast('기구가 없어서 맨몸 운동을 자동으로 켰어요');
+  }
   touch(); renderSetup();
 }
 
 function toggleBodyweight(){
+  if(state.includeBodyweight && !state.equipment.length){
+    toast('기구가 하나도 없으면 맨몸 운동은 끌 수 없어요');
+    return;
+  }
   state.includeBodyweight=!state.includeBodyweight;
   touch(); renderSetup();
   toast(state.includeBodyweight?'맨몸 운동을 플랜에 포함했어요':'맨몸 운동을 플랜에서 뺐어요');
@@ -2608,10 +2727,11 @@ const Onboard=(()=>{
     toggleCondEtc:()=>{ readStep2(); ob.condEtc=!ob.condEtc; render(2); },
     next2:()=>{ readStep2(); if(!ob.heightCm||!ob.weightKg){toast('키와 현재 몸무게를 입력해 주세요');return;} if(ob.lifting===null){toast('근력 운동 경험을 선택해 주세요');return;} if(ob.running===null){toast('러닝 경험을 선택해 주세요');return;} render(3); box().scrollTop=0; },
     back2:()=>{ render(2); box().scrollTop=0; },
-    toggleEq:(id)=>{ const i=ob.equipment.indexOf(id); if(i>=0)ob.equipment.splice(i,1); else ob.equipment.push(id); render(3); },
+    toggleEq:(id)=>{ const i=ob.equipment.indexOf(id); if(i>=0)ob.equipment.splice(i,1); else ob.equipment.push(id);
+      if(!ob.equipment.length && !ob.obBw){ ob.obBw=true; toast('기구가 없어서 맨몸 운동을 자동으로 켰어요'); } render(3); },
     toggleDay:(i)=>{ const j=ob.workoutDays.indexOf(i); if(j>=0)ob.workoutDays.splice(j,1); else ob.workoutDays.push(i); render(3); },
     setMin:(m)=>{ ob.sessionMinutes=m; render(3); },
-    obBwT:()=>{ ob.obBw=!ob.obBw; render(3); },
+    obBwT:()=>{ if(ob.obBw && !ob.equipment.length){ toast('기구가 하나도 없으면 맨몸 운동은 끌 수 없어요'); return; } ob.obBw=!ob.obBw; render(3); },
     obFloorT:()=>{ ob.obFloor=!ob.obFloor; render(3); },
     finish:()=>{
       if(!ob.heightCm||!ob.weightKg||ob.lifting===null||ob.running===null){ toast('이전 단계 정보를 확인해 주세요'); render(2); return; }

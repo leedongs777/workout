@@ -73,10 +73,19 @@ jobs:
       - name: Pages 설정
         uses: actions/configure-pages@v5
 
-      - name: 사이트 파일 업로드(저장소 전체)
+      # 저장소 전체를 올리면 CLAUDE.md·배포.bat 등 사이트와 무관한 파일까지 공개된다.
+      # 사이트에 필요한 파일만 _site 로 모아서 그것만 업로드한다.
+      - name: 배포할 파일만 _site 로 복사
+        run: |
+          mkdir -p _site
+          cp index.html _site/
+          echo "--- _site 내용"
+          ls -la _site
+
+      - name: 사이트 파일 업로드(_site 만)
         uses: actions/upload-pages-artifact@v3
         with:
-          path: '.'
+          path: '_site'
 
       - name: GitHub Pages 배포
         id: deployment

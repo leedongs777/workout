@@ -374,6 +374,15 @@
   .cz-tap{border:none; font-family:inherit; cursor:pointer;}
   .zi-title{font-size:17px; font-weight:800; color:var(--ink);}
   .zi-sub{font-size:12px; color:var(--muted); margin:5px 0 14px; line-height:1.5;}
+  .zi-caption{font-size:10px; font-weight:700; color:var(--faint); letter-spacing:.02em; margin-bottom:4px;}
+  .zi-acsm{display:flex; height:20px; border-radius:6px; overflow:hidden; font-size:10px; font-weight:800; letter-spacing:-.03em;}
+  .zi-acsm span{display:flex; align-items:center; justify-content:center;}
+  .zi-a-low{background:#E1F0EA; color:#0F6E56;}
+  .zi-a-mod{background:#EAF3DE; color:#3B6D11;}
+  .zi-a-vig{background:#FAEEDA; color:#854F0B;}
+  .zi-a-max{background:#FCEBEB; color:#A32D2D;}
+  .zi-conn{position:relative; height:9px;}
+  .zi-conn i{position:absolute; top:0; bottom:0; border-left:1px dashed var(--muted); transform:translateX(-0.5px);}
   .zi-bar{display:flex; height:12px; border-radius:6px; overflow:hidden;}
   .zi-bar span{flex:1;}
   .zi-barlab{display:flex; justify-content:space-between; font-size:11px; color:var(--faint); margin:5px 0 16px;}
@@ -1565,7 +1574,11 @@ function showZoneInfo(){
       <span class="zi-hr">♥ ${hrt}<br><span class="zi-rpe">RPE ${zi.rpe}</span></span>
       <span class="zi-d"><b>${zi.acsm}</b> (${pct[0]}~${pct[1]}%)<br><span class="zi-talk">${zi.talk}</span></span></div>`;
   }).join('');
-  const bar=`<div class="zi-bar"><span class="cz1"></span><span class="cz2"></span><span class="cz3"></span><span class="cz4"></span><span class="cz5"></span></div><div class="zi-barlab"><span>낮은 강도</span><span>높은 강도</span></div>`;
+  const bar=`<div class="zi-caption">ACSM 강도 분류</div>
+    <div class="zi-acsm"><span class="zi-a-low" style="flex:1">저강도</span><span class="zi-a-mod" style="flex:1">중강도</span><span class="zi-a-vig" style="flex:2">고강도</span><span class="zi-a-max" style="flex:1">최대</span></div>
+    <div class="zi-conn"><i style="left:20%"></i><i style="left:40%"></i><i style="left:80%"></i></div>
+    <div class="zi-bar"><span class="cz1"></span><span class="cz2"></span><span class="cz3"></span><span class="cz4"></span><span class="cz5"></span></div>
+    <div class="zi-barlab"><span>낮은 강도</span><span>높은 강도</span></div>`;
   const a=userAge();
   const formula = a
     ? `최대심박 추정 <b>${hrMax(a)}회/분</b> = 208 − 0.7 × ${a}세`

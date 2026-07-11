@@ -228,6 +228,7 @@
   .wtb:active{background:var(--accent-soft); color:var(--accent);}
   .wtmid{flex:1 1 0; min-width:0; display:flex; align-items:center; gap:3px; padding:0 8px; border-left:1px solid var(--line-2); border-right:1px solid var(--line-2);}
   .wt{flex:1 1 0; width:0; min-width:0; border:none; background:none; color:var(--ink); font-family:inherit; font-size:16px; font-weight:700; text-align:right; padding:0; font-variant-numeric:tabular-nums; outline:none; -moz-appearance:textfield;}
+  .wt.pre{color:var(--faint); font-weight:600;} /* 저장 전 기본값 제안은 흐리게 */
   .wt::-webkit-outer-spin-button,.wt::-webkit-inner-spin-button{-webkit-appearance:none; margin:0;}
   .unit{font-size:11px; color:var(--faint); font-weight:600; flex:none;}
   .setrow.dots{gap:7px;}
@@ -403,6 +404,15 @@
   .zi-warn{font-size:12px; color:var(--muted); line-height:1.6; word-break:keep-all;}
   .zi-src{margin-top:8px; font-size:11px; color:var(--faint); line-height:1.6; word-break:keep-all;}
   .src-link{color:var(--muted); text-decoration:underline;}
+  .wdef-list{display:flex; flex-direction:column; gap:11px;}
+  .wdef-row{display:flex; align-items:center; gap:10px;}
+  .wdef-info{flex:1; min-width:0;}
+  .wdef-name{font-size:13.5px; font-weight:650; color:var(--ink);}
+  .wdef-ex{font-size:11px; color:var(--faint); margin-top:1px; word-break:keep-all;}
+  .wstep-mini{flex:none; display:flex; align-items:center; height:34px; border:1px solid var(--line); border-radius:9px; background:var(--surface-2); overflow:hidden;}
+  .wstep-mini .wtb{width:30px; height:100%;}
+  .wdef-val{min-width:52px; text-align:center; font-size:15px; font-weight:700; color:var(--ink); border-left:1px solid var(--line-2); border-right:1px solid var(--line-2); padding:0 6px; height:100%; display:flex; align-items:center; justify-content:center; gap:2px;}
+  .wdef-val .unit{font-size:10px;}
   .src-list{display:flex; flex-direction:column; gap:10px;}
   .src-item{padding-left:10px; border-left:2px solid var(--line-2);}
   .src-item .src-link{font-size:12.5px; font-weight:650; color:var(--accent-ink);}
@@ -1186,7 +1196,7 @@ function buildCD(s){
 }
 SESSIONS.forEach(s=>{ s.warm=buildWU(s); s.cool=buildCD(s); });
 /* ---------------- App state ---------------- */
-let state={ equipment:[...DEFAULT_EQUIP], includeBodyweight:true, includeFloor:true, workoutDays:[0,2,3,4,5,6], sessionMinutes:60, startDate:todayStr(), restDays:[], doneDays:[], log:{}, steps:{}, slotCustom:{}, authPassed:false, authProvider:null, consent:null, profile:null, onboarded:true };
+let state={ equipment:[...DEFAULT_EQUIP], includeBodyweight:true, includeFloor:true, workoutDays:[0,2,3,4,5,6], sessionMinutes:60, startDate:todayStr(), restDays:[], doneDays:[], log:{}, steps:{}, slotCustom:{}, wDefaults:null, setInc:1, authPassed:false, authProvider:null, consent:null, profile:null, onboarded:true };
 let activeTab='home';
 let openDays={}; // schedule expand state
 
@@ -1336,6 +1346,48 @@ function lastLog(dateStr,oi){
   return null;
 }
 function cellBasis(n){ const per=Math.ceil(n/Math.ceil(n/4)); return `flex:0 0 calc((100% - ${(per-1)*7}px) / ${per})`; }
+/* 세트 칸 배치(브릭): 1~3세트는 한 줄, 4+는 두 줄로 균형(4→2+2,5→3+2,6→3+3,7→4+3,8→4+4) */
+function setCols(n){ return n<=3?n:Math.ceil(n/2); }
+function setBasis(n){ const per=setCols(n); return `flex:0 0 calc((100% - ${(per-1)*7}px) / ${per})`; }
+
+/* ── 무게 기본값(시작 무게 제안) ─────────────────────────────
+   ⚠️ 아래 숫자는 의학적 근거가 아니라 "편하게 시작할 만한 추정치"다.
+   성별·근력 경험으로 스케일하고, 사용자가 설정에서 직접 바꾼다(state.wDefaults).
+   운동을 5개 카테고리로 나눠 카테고리별 기본값을 둔다. */
+const WCAT=[
+  ['lower_big','하체 복합','스쿼트·레그프레스·데드리프트·힙 쓰러스트'],
+  ['lower_iso','하체 머신','레그 익스텐션·컬·힙 어브/어덕션'],
+  ['push','상체 밀기','벤치·체스트/숄더 프레스'],
+  ['pull','상체 당기기','랫풀다운·로우'],
+  ['small','소근육·보조','컬·푸시다운·플라이·자세교정']
+];
+/* 남성·경험자 기준 시작 무게(kg) */
+const WBASE={lower_big:60, lower_iso:35, push:40, pull:40, small:12};
+function exCat(name,eq){
+  name=name||'';
+  if(/팔로프|플랭크|데드버그|버드독|월 슬라이드|스트레이트 레그 레이즈/.test(name)) return 'small';
+  if(/스쿼트|레그프레스|데드리프트|힙 쓰러스트|글루트|스텝업|월 싯|런지/.test(name)) return 'lower_big';
+  if(/레그 익스텐션|레그 컬|어브덕션|어덕션|내전근|클램셸|힙 어브|힙 어덕/.test(name)) return 'lower_iso';
+  if(/풀다운|로우|풀업|당기기|랫/.test(name)) return 'pull';
+  if(/벤치 프레스|체스트 프레스|숄더 프레스|오버헤드 프레스|푸시업|파이크/.test(name)) return 'push';
+  return 'small';
+}
+function wMult(){ const p=state.profile||{}; let m=1; if(p.gender==='여') m*=0.65; if(p.liftingExp===false) m*=0.6; return m; }
+/* 카테고리 기본 무게 — 사용자 설정값 우선, 없으면 성별·경험으로 계산 */
+function baseFor(cat){
+  if(state.wDefaults && state.wDefaults[cat]!=null) return state.wDefaults[cat];
+  return Math.max(0, Math.round((WBASE[cat]||0)*wMult()));
+}
+/* 특정 운동·세트의 기본 무게 = 카테고리 기본값 + (세트-1)×세트당 증량. step 배수로 정렬 */
+function defaultWeight(ex,k){
+  const step=weightStep(ex.eq);
+  let base=baseFor(exCat(ex.name,ex.eq));
+  if((ex.eq||[]).includes('dumbbell')) base=base*0.4; // 덤벨은 한 손 기준이라 낮춤
+  const units=(state.setInc!=null?state.setInc:1);
+  let v=base + k*units*step;
+  v=Math.round(v/step)*step;
+  return Math.max(0, Math.round(v*10)/10);
+}
 /* 기구별 증량 단위(kg) — 실제 헬스장 무게가 올라가는 최소 간격
    덤벨 0.5(조절식 기준) / 바벨·스미스·핵 스쿼트 2.5(원판 1.25 한 쌍) / 케틀벨 4 / 핀 스택 머신·케이블 5 */
 function weightStep(eq){
@@ -1359,7 +1411,7 @@ function adjWeight(btn,date,oi,k,dir,step){
   if(isNaN(v)){ v=seedWeight(date,oi,k); if(dir>0&&v===0) v=step; } // 첫 누름은 이전 무게를 채움
   else { v=v+step*dir; }
   v=Math.max(0,Math.round(v*10)/10);
-  inp.value=v; logWeight(date,oi,k,v);
+  inp.value=v; inp.classList.remove('pre'); logWeight(date,oi,k,v);
 }
 /* 길게 누르면 연속 증가 — 처음엔 천천히, 점점 빠르게(멀리 갈 때 편하게) */
 let _wtHold=null;
@@ -1372,11 +1424,14 @@ function wtHold(btn,date,oi,k,dir,step,ev){
   const stop=()=>{ if(_wtHold){clearTimeout(_wtHold);_wtHold=null;} window.removeEventListener('pointerup',stop); window.removeEventListener('pointercancel',stop); btn.removeEventListener('pointerleave',stop); };
   window.addEventListener('pointerup',stop); window.addEventListener('pointercancel',stop); btn.addEventListener('pointerleave',stop);
 }
-/* 무게 한 칸 = [−][ 숫자 kg ][+] (탭 = 1회, 길게 = 연속) */
-function wtCell(date,oi,k,label,step){
-  const sv=getLog(date,oi); const v=(typeof sv[k]==='number')?sv[k]:'';
+/* 무게 한 칸 = [−][ 숫자 kg ][+] (탭 = 1회, 길게 = 연속)
+   dv = 기본값 프리필(저장된 기록이 없을 때 흐리게 미리 채움), basis = 브릭 배치 flex 스타일 */
+function wtCell(date,oi,k,label,step,dv,basis){
+  const sv=getLog(date,oi); const saved=(typeof sv[k]==='number');
+  const v = saved ? sv[k] : (dv>0?dv:'');
+  const pre = (!saved && dv>0) ? ' pre' : '';
   const a=`this,'${date}','${oi}',${k}`;
-  return `<div class="setcell wtc">${label?`<span class="sn">${label}</span>`:''}<div class="wtstep"><button class="wtb" tabindex="-1" aria-label="무게 줄이기" onpointerdown="wtHold(${a},-1,${step},event)">−</button><span class="wtmid"><input class="wt" type="number" inputmode="decimal" min="0" step="${step}" value="${v}" placeholder="–" onchange="logWeight('${date}','${oi}',${k},this.value)"><span class="unit">kg</span></span><button class="wtb" tabindex="-1" aria-label="무게 늘리기" onpointerdown="wtHold(${a},1,${step},event)">+</button></div></div>`;
+  return `<div class="setcell wtc" style="${basis||''}">${label?`<span class="sn">${label}</span>`:''}<div class="wtstep"><button class="wtb" tabindex="-1" aria-label="무게 줄이기" onpointerdown="wtHold(${a},-1,${step},event)">−</button><span class="wtmid"><input class="wt${pre}" type="number" inputmode="decimal" min="0" step="${step}" value="${v}" placeholder="–" oninput="this.classList.remove('pre')" onchange="logWeight('${date}','${oi}',${k},this.value)"><span class="unit">kg</span></span><button class="wtb" tabindex="-1" aria-label="무게 늘리기" onpointerdown="wtHold(${a},1,${step},event)">+</button></div></div>`;
 }
 function renderSetLog(slot,r,dateStr,oi,nSets){
   const saved=getLog(dateStr,oi);
@@ -1386,10 +1441,11 @@ function renderSetLog(slot,r,dateStr,oi,nSets){
     for(let k=0;k<n;k++){ dots+=`<button class="setdot ${saved[k]?'on':''}" style="${cb}" onclick="toggleSetDone('${dateStr}',${oi},${k})">${k+1}</button>`; }
     return `<div class="setlog"><div class="setrow dots" style="justify-content:center">${dots}</div></div>`;
   }
+  const bs=setBasis(n);
   if(/측/.test(String(slot.reps||''))){ // 측면당 → 좌/우 각각 무게 입력
-    const num=Array.from({length:n},(_,k)=>`<span class="ss-num" style="${cb}">${k+1}세트</span>`).join('');
+    const num=Array.from({length:n},(_,k)=>`<span class="ss-num" style="${bs}">${k+1}세트</span>`).join('');
     const wstep=weightStep(r.eq);
-    const mkRow=(side,label)=>{ let c=''; for(let k=0;k<n;k++){ c+=wtCell(dateStr, oi+side, k, '', wstep); } return `<div class="ss-row"><span class="ss-lab">${label}</span><div class="ss-cells" style="justify-content:center">${c}</div></div>`; };
+    const mkRow=(side,label)=>{ let c=''; for(let k=0;k<n;k++){ c+=wtCell(dateStr, oi+side, k, '', wstep, defaultWeight(r,k), bs); } return `<div class="ss-row"><span class="ss-lab">${label}</span><div class="ss-cells" style="justify-content:center">${c}</div></div>`; };
     return `<div class="setlog"><div class="ss-row ss-head"><span class="ss-lab"></span><div class="ss-cells">${num}</div></div>${mkRow('L','좌')}${mkRow('R','우')}</div>`;
   }
   const last=lastLog(dateStr,oi);
@@ -1397,7 +1453,7 @@ function renderSetLog(slot,r,dateStr,oi,nSets){
   if(last){ const md=last.date.slice(5).replace('-','/'); const parts=last.w.slice(0,n).map(x=>(typeof x==='number'&&x>0)?(''+x):'–'); hint=`<div class="lastw">지난 기록 <b>${md}</b><span class="vdiv"></span>${parts.join(', ')} kg</div>`; }
   const wstep=weightStep(r.eq);
   let cells='';
-  for(let k=0;k<n;k++){ cells+=wtCell(dateStr, String(oi), k, (k+1)+'세트', wstep); }
+  for(let k=0;k<n;k++){ cells+=wtCell(dateStr, String(oi), k, (k+1)+'세트', wstep, defaultWeight(r,k), bs); }
   return `<div class="setlog">${hint}<div class="setrow" style="justify-content:center">${cells}</div></div>`;
 }
 
@@ -2499,6 +2555,22 @@ function renderSetup(){
     <button class="btn ghost" onclick="resetAll()">전체 초기화 (기구 포함)</button>
   </div>`;
 
+  /* 무게 기본값 — 카테고리별 시작 무게와 세트당 증량을 사용자가 직접 조절 */
+  html+=`<div class="sec-label">무게 기본값</div>
+    <div class="card" style="padding:14px 16px">
+      <p class="info" style="margin:0 0 12px">운동을 처음 열 때 <b>세트마다 미리 채워지는 시작 무게</b>예요. 성별과 근력 경험으로 자동 설정되며, 아래에서 직접 조절할 수 있어요. (실제 무게는 몸 상태에 맞게 바꿔 주세요)</p>
+      <div class="wdef-list">${WCAT.map(([cat,name,ex])=>`
+        <div class="wdef-row">
+          <div class="wdef-info"><div class="wdef-name">${name}</div><div class="wdef-ex">${ex}</div></div>
+          <div class="wstep-mini"><button class="wtb" onclick="setWDefault('${cat}',-1)">−</button><span class="wdef-val">${baseFor(cat)}<span class="unit">kg</span></span><button class="wtb" onclick="setWDefault('${cat}',1)">+</button></div>
+        </div>`).join('')}</div>
+      <div class="wdef-row" style="border-top:1px solid var(--line-2); margin-top:6px; padding-top:12px">
+        <div class="wdef-info"><div class="wdef-name">세트당 증량</div><div class="wdef-ex">세트가 올라갈 때마다 더할 양</div></div>
+        <div class="wstep-mini"><button class="wtb" onclick="setSetInc(-1)">−</button><span class="wdef-val">${state.setInc===0?'없음':('×'+state.setInc)}</span><button class="wtb" onclick="setSetInc(1)">+</button></div>
+      </div>
+      <p class="info" style="margin:10px 0 0;color:var(--faint)">세트당 증량은 기구 단위(바벨 2.5kg, 덤벨 0.5kg 등)의 배수예요. 예: ×1이면 다음 세트마다 그만큼 올라가요.</p>
+    </div>`;
+
   /* 앱이 제시하는 수치·권고의 근거를 사용자가 직접 확인할 수 있게 노출 */
   html+=`<div class="sec-label">근거와 출처</div>
     <div class="card" style="padding:14px 16px">
@@ -2626,8 +2698,20 @@ function resetSchedule(){
   state.restDays=[]; state.doneDays=[]; state.startDate=todayStr(); openDays={};
   touch(); toast('휴식/완료 기록을 초기화했어요'); refresh();
 }
+/* 카테고리 기본 무게 조절 — 처음 누르면 현재 계산값을 채운 뒤 5kg 단위로 증감 */
+function setWDefault(cat,dir){
+  if(!state.wDefaults) state.wDefaults={};
+  const cur=(state.wDefaults[cat]!=null)?state.wDefaults[cat]:baseFor(cat);
+  state.wDefaults[cat]=Math.max(0, cur+dir*5);
+  touch(); renderSetup();
+}
+function setSetInc(dir){
+  const cur=(state.setInc!=null?state.setInc:1);
+  state.setInc=Math.max(0, Math.min(3, cur+dir));
+  touch(); renderSetup();
+}
 function resetAll(){
-  state={ equipment:[...DEFAULT_EQUIP], includeBodyweight:true, includeFloor:true, workoutDays:[0,2,3,4,5,6], sessionMinutes:60, startDate:todayStr(), restDays:[], doneDays:[], log:{}, steps:{}, slotCustom:{}, authPassed:false, authProvider:null, consent:null, profile:null, onboarded:true };
+  state={ equipment:[...DEFAULT_EQUIP], includeBodyweight:true, includeFloor:true, workoutDays:[0,2,3,4,5,6], sessionMinutes:60, startDate:todayStr(), restDays:[], doneDays:[], log:{}, steps:{}, slotCustom:{}, wDefaults:null, setInc:1, authPassed:false, authProvider:null, consent:null, profile:null, onboarded:true };
   openDays={}; touch(); toast('전체 초기화 완료'); if(typeof Auth!=='undefined') Auth.show(); refresh();
 }
 

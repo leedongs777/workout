@@ -250,7 +250,9 @@
   .step-hrow{display:flex; align-items:flex-start; gap:8px;}
   .step-hmain{flex:1; min-width:0;}
   .step-kicker{flex:none; font-size:11px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; color:var(--faint); white-space:nowrap; padding-top:2px;}
-  .step-title{font-weight:700; font-size:15px;}
+  .step-title{font-weight:700; font-size:15px; display:flex; align-items:center; gap:6px;}
+  .role-q{flex:none; width:16px; height:16px; border-radius:50%; border:1px solid var(--line); background:var(--surface-2); color:var(--muted); font-size:10px; font-weight:800; line-height:1; cursor:pointer; font-family:inherit; padding:0; display:inline-flex; align-items:center; justify-content:center;}
+  .role-q:hover{border-color:var(--accent); color:var(--accent);}
   .step-name{font-weight:800; font-size:16px; color:var(--accent-ink); margin-top:1px;}
   .step-list{margin:9px 0 2px; padding:0; list-style:none;}
   .step-list li{position:relative; padding:5px 0 5px 20px; font-size:13.5px; color:var(--ink); border-top:1px dashed var(--line-2);}
@@ -877,6 +879,44 @@ const PAT_ICON={
   cardio:'<circle cx="27" cy="9" r="3.2"/><path d="M27 12l-3 10"/><path d="M24 22l6 5M24 22l-6 6"/><path d="M25 15l6 3M25 15l-5 5"/>',
   stretch:'<circle cx="24" cy="10" r="3.2"/><path d="M24 13v13"/><path d="M24 16l-7-4M24 16l7-4"/><path d="M24 26l-3 11M24 26l3 11"/>',
 };
+/* 역할명(운동 카드 제목)을 일반 표현으로 바꾸고, 어려운 용어는 ⓘ로 뜻을 보여준다.
+   ⚠️ 여기 키는 내부 role 문자열이다(ROLE_PAT·자세교정 판정이 이 문자열에 걸려 있으니 절대 바꾸지 말 것).
+   name = 카드에 보일 쉬운 이름(없으면 role 그대로), desc = ⓘ 눌렀을 때 설명(전문 용어는 괄호로 남겨 학습 가능). */
+const ROLE_INFO={
+  '코어 (안티 익스텐션)':{name:'코어 (허리 안정)', desc:'허리가 뒤로 젖혀지지 않게 버티는 코어 힘이에요. 데드버그가 대표 동작이에요. (전문 용어로 안티 익스텐션)'},
+  '코어 안티 로테이션':{name:'코어 (비틀림 버티기)', desc:'몸통이 옆으로 돌아가지 않게 버티는 코어 힘이에요. (전문 용어로 안티 로테이션)'},
+  '코어 (안정화)':{name:'코어 (몸통 안정)', desc:'네발 자세에서 몸통이 흔들리지 않게 잡는 운동이에요. 버드독이 대표예요.'},
+  '코어 (측면)':{name:'코어 (옆구리)', desc:'옆구리 근육으로 몸통을 지탱하는 운동이에요. 사이드 플랭크예요.'},
+  '코어 (버드독)':{name:'코어 (버드독)', desc:'네발 자세에서 반대쪽 팔다리를 뻗어 몸통을 고정하는 코어 운동이에요.'},
+  '사이드 플랭크 (맥길)':{name:'사이드 플랭크', desc:'옆으로 누워 몸통을 지탱하는 코어 운동이에요. (맥길은 이 방식을 정립한 척추 연구자 이름)'},
+  '자세교정 (말린 어깨)':{desc:'앞으로 말린(굽은) 어깨를 펴주는 교정 운동이에요.'},
+  '자세교정 (하부 승모)':{name:'자세교정 (어깨뼈 안정)', desc:'어깨뼈를 아래로 잡아주는 근육을 키워 굽은 등을 교정해요. (전문 용어로 하부 승모근)'},
+  '자세교정 종합':{desc:'여러 자세 교정 동작을 묶은 마무리예요.'},
+  '후면 삼각/능형근':{name:'어깨 뒤 / 등 위쪽', desc:'어깨 뒤쪽(후면 삼각근)과 등 위쪽(능형근) 근육이에요. 자세 교정에 중요해요.'},
+  '흉추 신전':{name:'등 위쪽 펴기', desc:'굽은 등 위쪽(흉추)을 펴는 동작이에요.'},
+  '거북목 교정':{desc:'턱을 당겨 앞으로 나온 목을 제자리로 되돌리는 운동이에요.'},
+  '수직 당기기':{desc:'위에서 아래로 당기는 등 운동이에요. 랫풀다운, 풀업이 대표예요.'},
+  '수평 당기기':{desc:'앞에서 몸쪽으로 당기는 등 운동이에요. 로우가 대표예요.'},
+  '수평 밀기':{desc:'앞으로 미는 가슴 운동이에요. 벤치프레스, 푸시업이 대표예요.'},
+  '수직 밀기 (어깨)':{desc:'머리 위로 미는 어깨 운동이에요. 오버헤드 프레스가 대표예요.'},
+  '전신 (스텝)':{desc:'제자리 걷기나 스텝으로 온몸을 데우며 움직이는 유산소성 동작이에요.'},
+  '편측 하체':{desc:'한 다리씩 하는 하체 운동이에요. 좌우 균형을 잡아줘요.'},
+  '둔근 편측':{desc:'한 다리씩 하는 엉덩이 운동이에요.'},
+  '내전근 균형':{desc:'허벅지 안쪽(내전근) 근육이에요. 골반 안정에 도움돼요.'},
+  '중둔근':{desc:'엉덩이 옆쪽 근육이에요. 골반이 흔들리지 않게 잡아줘요.'}
+};
+function roleName(role){ const i=ROLE_INFO[role]; return (i&&i.name)||role; }
+function roleTitle(role){
+  const i=ROLE_INFO[role];
+  const q=(i&&i.desc)?`<button class="role-q" onclick="event.stopPropagation();showRoleInfo('${role.replace(/'/g,"\\'")}')" aria-label="용어 설명">?</button>`:'';
+  return `<span class="rt-name">${roleName(role)}</span>${q}`;
+}
+function showRoleInfo(role){
+  const i=ROLE_INFO[role]; if(!i) return;
+  const m=document.getElementById('ympick'); if(!m) return;
+  m.innerHTML=`<div class="eqmodal-card" style="max-width:320px"><button class="eqmodal-x" onclick="closeYM()" aria-label="닫기">✕</button><div class="eqmodal-name">${roleName(role)}</div><div class="eqmodal-desc">${i.desc}</div></div>`;
+  m.classList.remove('hidden');
+}
 const ROLE_PAT={
   '메인 하체':'squat','대퇴사두':'legext','햄스트링/둔근':'legcurl','둔근 메인':'hipthrust','코어 (안티 익스텐션)':'deadbug',
   '수직 당기기':'latpull','수평 당기기':'row','이두 (팔 굽히기)':'biceps','자세교정 (말린 어깨)':'facepull','후면 삼각/능형근':'reardelt','페이스 풀':'facepull','거북목 교정':'chintuck','흉추 신전':'stretch',
@@ -1817,7 +1857,7 @@ function renderSessionCard(s,dateStr,si){
   kept.forEach((x,idx)=>{
     const id=x.id, active=activeId===id, done=!!completed[id];
     const v=effVol(si,x.key,x.sl,x.r);
-    const title=`<div class="step-title">${x.sl.role}</div><div class="step-name">${x.r.name}</div>`;
+    const title=`<div class="step-title">${roleTitle(x.sl.role)}</div><div class="step-name">${x.r.name}</div>`;
     let body = v.customized ? `<div class="ex-meta" style="margin-top:6px"><span class="vol-tag">직접 설정</span></div>` : '';
     if(x.eqCands.length){
       const eqLabel=c=>{ const ids=c.eq||[]; return EQ_COMBO_LABEL[ids.join(',')] || ids.map(e=>EQ_SHORT[e]||EQ_LABEL[e]||e).join('/'); };

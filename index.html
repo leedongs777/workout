@@ -216,11 +216,20 @@
   .setrow:not(.dots) .setcell{flex:1 1 0; min-width:0;}
   .setrow:not(.dots).q4 .setcell{flex:0 0 calc((100% - 21px)/4);}
   .setcell .sn{font-size:10.5px; color:var(--muted); font-weight:600; text-align:center;}
-  .wtwrap{display:flex; align-items:center; border:1px solid var(--line); border-radius:9px; background:var(--surface-2); padding-right:7px;}
-  .wtwrap:focus-within{border-color:var(--accent);}
-  .wt{flex:1 1 0; width:0; min-width:0; border:none; background:none; color:var(--ink); font-family:inherit; font-size:14px; font-weight:700; text-align:right; padding:7px 2px 7px 8px; font-variant-numeric:tabular-nums; outline:none; -moz-appearance:textfield;}
+  /* 무게 입력 = −/+ 스텝퍼 (직접 타이핑도 가능). 입력 폰트 16px여야 iOS가 자동 확대 안 함 */
+  .wtstep{display:flex; align-items:stretch; height:40px; border:1px solid var(--line); border-radius:9px; background:var(--surface-2); overflow:hidden;}
+  .wtstep:focus-within{border-color:var(--accent);}
+  .setrow:not(.dots) .setcell.wtc{flex:1 1 118px; min-width:0;}
+  /* 좌/우 무게는 위 세트 번호 헤더(고정 칸수)에 맞춰 줄바꿈 없이 균등 분할 */
+  .ss-cells .setcell.wtc{flex:1 1 0; min-width:0;}
+  .ss-cells .wtb{width:26px;}
+  .ss-cells .wtmid{padding:0 4px;}
+  .wtb{flex:none; width:28px; border:none; background:transparent; color:var(--muted); font-size:19px; font-weight:700; line-height:1; cursor:pointer; font-family:inherit; padding:0; -webkit-tap-highlight-color:transparent;}
+  .wtb:active{background:var(--accent-soft); color:var(--accent);}
+  .wtmid{flex:1 1 0; min-width:0; display:flex; align-items:center; gap:3px; padding:0 8px; border-left:1px solid var(--line-2); border-right:1px solid var(--line-2);}
+  .wt{flex:1 1 0; width:0; min-width:0; border:none; background:none; color:var(--ink); font-family:inherit; font-size:16px; font-weight:700; text-align:right; padding:0; font-variant-numeric:tabular-nums; outline:none; -moz-appearance:textfield;}
   .wt::-webkit-outer-spin-button,.wt::-webkit-inner-spin-button{-webkit-appearance:none; margin:0;}
-  .unit{font-size:11px; color:var(--faint); font-weight:600;}
+  .unit{font-size:11px; color:var(--faint); font-weight:600; flex:none;}
   .setrow.dots{gap:7px;}
   /* 측면당(좌/우) 무게 입력 */
   .ss-row{display:flex; align-items:center; gap:8px; margin-top:6px;}
@@ -1327,6 +1336,31 @@ function lastLog(dateStr,oi){
   return null;
 }
 function cellBasis(n){ const per=Math.ceil(n/Math.ceil(n/4)); return `flex:0 0 calc((100% - ${(per-1)*7}px) / ${per})`; }
+/* 무게 스텝 간격(kg). 원판 최소 증가분(1.25kg 한 쌍)이 2.5kg이라 이걸 기본으로 */
+const WSTEP=2.5;
+/* 빈 칸에서 스텝을 누르면 이전 세트 무게(없으면 지난 기록)를 먼저 채워준다 — 매번 처음부터 안 눌러도 되게 */
+function seedWeight(date,oi,k){
+  const sv=getLog(date,oi);
+  for(let j=k-1;j>=0;j--){ if(typeof sv[j]==='number'&&sv[j]>0) return sv[j]; }
+  const last=lastLog(date,oi);
+  if(last&&typeof last.w[k]==='number'&&last.w[k]>0) return last.w[k];
+  return 0;
+}
+function adjWeight(btn,date,oi,k,dir){
+  const inp=btn.parentElement.querySelector('.wt');
+  let v=parseFloat(inp.value);
+  if(isNaN(v)){ v=seedWeight(date,oi,k); if(dir>0&&v===0) v=WSTEP; } // 첫 누름은 이전 무게를 채움
+  else { v=v+WSTEP*dir; }
+  v=Math.max(0,Math.round(v*10)/10);
+  inp.value=v; logWeight(date,oi,k,v);
+}
+/* 무게 한 칸 = [−][ 숫자 kg ][+] */
+function wtCell(date,oi,k,cb,label){
+  const sv=getLog(date,oi); const v=(typeof sv[k]==='number')?sv[k]:'';
+  const a=`this,'${date}','${oi}',${k}`;
+  /* 스텝퍼가 들어가야 하니 최소 너비를 줘서 좁으면 자동으로 줄바꿈(보통 3칸씩) */
+  return `<div class="setcell wtc">${label?`<span class="sn">${label}</span>`:''}<div class="wtstep"><button class="wtb" tabindex="-1" aria-label="무게 줄이기" onclick="adjWeight(${a},-1)">−</button><span class="wtmid"><input class="wt" type="number" inputmode="decimal" min="0" step="0.5" value="${v}" placeholder="–" onchange="logWeight('${date}','${oi}',${k},this.value)"><span class="unit">kg</span></span><button class="wtb" tabindex="-1" aria-label="무게 늘리기" onclick="adjWeight(${a},1)">+</button></div></div>`;
+}
 function renderSetLog(slot,r,dateStr,oi,nSets){
   const saved=getLog(dateStr,oi);
   const n=nSets; const cb=cellBasis(n);
@@ -1337,14 +1371,14 @@ function renderSetLog(slot,r,dateStr,oi,nSets){
   }
   if(/측/.test(String(slot.reps||''))){ // 측면당 → 좌/우 각각 무게 입력
     const num=Array.from({length:n},(_,k)=>`<span class="ss-num" style="${cb}">${k+1}세트</span>`).join('');
-    const mkRow=(side,label)=>{ const sv=getLog(dateStr,oi+side); let c=''; for(let k=0;k<n;k++){ const v=(typeof sv[k]==='number')?sv[k]:''; c+=`<label class="setcell" style="${cb}"><span class="wtwrap"><input class="wt" type="number" inputmode="decimal" min="0" step="0.5" value="${v}" placeholder="–" onchange="logWeight('${dateStr}','${oi}${side}',${k},this.value)"><span class="unit">kg</span></span></label>`; } return `<div class="ss-row"><span class="ss-lab">${label}</span><div class="ss-cells" style="justify-content:center">${c}</div></div>`; };
+    const mkRow=(side,label)=>{ let c=''; for(let k=0;k<n;k++){ c+=wtCell(dateStr, oi+side, k, cb, ''); } return `<div class="ss-row"><span class="ss-lab">${label}</span><div class="ss-cells" style="justify-content:center">${c}</div></div>`; };
     return `<div class="setlog"><div class="ss-row ss-head"><span class="ss-lab"></span><div class="ss-cells">${num}</div></div>${mkRow('L','좌')}${mkRow('R','우')}</div>`;
   }
   const last=lastLog(dateStr,oi);
   let hint='';
   if(last){ const md=last.date.slice(5).replace('-','/'); const parts=last.w.slice(0,n).map(x=>(typeof x==='number'&&x>0)?(''+x):'–'); hint=`<div class="lastw">지난 기록 <b>${md}</b><span class="vdiv"></span>${parts.join(', ')} kg</div>`; }
   let cells='';
-  for(let k=0;k<n;k++){ const v=(typeof saved[k]==='number')?saved[k]:''; cells+=`<label class="setcell" style="${cb}"><span class="sn">${k+1}세트</span><span class="wtwrap"><input class="wt" type="number" inputmode="decimal" min="0" step="0.5" value="${v}" placeholder="–" onchange="logWeight('${dateStr}',${oi},${k},this.value)"><span class="unit">kg</span></span></label>`; }
+  for(let k=0;k<n;k++){ cells+=wtCell(dateStr, String(oi), k, cb, (k+1)+'세트'); }
   return `<div class="setlog">${hint}<div class="setrow" style="justify-content:center">${cells}</div></div>`;
 }
 

@@ -185,6 +185,8 @@
 ### 4.7 본운동 단계별 타이머
 - `stepShell`: 시작/완료 타이머. 미시작→[시작 →](`startStep`) → 진행중→[완료 · live-timer](doneStep이 stepMs 기록) → 완료→"✓ 완료 · N분 M초" + 다시 열기(`resetStep`).
 - 전역 `setInterval(1s)`가 `.live-timer`(data-start) 갱신. `fmtDur(ms)`→"N분 M초".
+- **세트 무게 입력 = −/+ 스텝퍼**(`wtCell`/`adjWeight`, 간격 `WSTEP`=2.5kg). 직접 타이핑도 되지만 폰트는 **반드시 16px 이상**이어야 iOS가 입력 포커스 시 화면을 자동 확대하지 않는다(과거 14px이라 확대 불편 있었음). 빈 칸에서 +를 누르면 `seedWeight`가 이전 세트(없으면 지난 기록) 무게를 먼저 채운다.
+  - 일반: `.setcell.wtc{flex:1 1 118px}`로 폭이 좁으면 자동 줄바꿈(폰에서 보통 2칸씩). 좌/우(측면당): 헤더 칸수에 맞춰 `flex:1 1 0`로 줄바꿈 없이 균등 분할.
 - **완료된 운동에 취소선(line-through) 금지** — 색만 muted 처리.
 
 ### 4.8 아이콘 (전부 운영자 소유 AI 생성 이미지)

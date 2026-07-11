@@ -542,6 +542,7 @@
   .ob-title{font-size:21px; font-weight:800; letter-spacing:-.02em; margin-bottom:4px;}
   .ob-sub{font-size:13px; color:var(--muted); margin-bottom:6px;}
   .ob-sec{font-size:13px; font-weight:800; color:var(--ink); margin:20px 0 9px;}
+  .ob-sub2{font-size:12.5px; font-weight:700; color:var(--muted); margin:12px 0 8px;}
   .ob-sec .opt{font-size:11px; font-weight:700; color:var(--faint); margin-left:6px;}
   .obchips{display:flex; flex-wrap:wrap; gap:8px;}
   .obchips:not(.seg) .chip{flex:1 1 0; min-width:0; text-align:center; padding-left:4px; padding-right:4px;}
@@ -1005,6 +1006,7 @@ const SESSIONS=[
      {name:'케이블 팔로프 프레스', eq:['cable'], cue:'옆에서 오는 케이블을 몸 중앙에서 앞으로 밀며 몸통 회전을 버티기'},
      {name:'밴드 팔로프 프레스', eq:['band'], cue:'밴드 저항으로 회전을 버티며 앞으로 밀기'},
    ], fb:{name:'데드버그', cue:'허리를 바닥에 붙인 채 반대쪽 팔·다리 뻗기'}},
+   {role:'골반 정렬 (전방경사 교정)', opt:'posture:pelvis', sets:3, reps:'12회', options:[], fb:{name:'글루트 브릿지 (골반 후방경사)', cue:'바닥에 누워 갈비뼈를 닫고 배에 힘을 준 채 골반을 살짝 말아 올리며 둔근으로 밀기 · 허리를 젖히지 말고 골반 전방경사를 되돌리는 느낌으로'}},
   ],
   cardio:{label:'유산소', detail:'존2 강도'},
   cool:[{n:'앞허벅지 스트레칭',a:'좌/우 각각 30초',d:'서서 한 발등을 잡아 발뒤꿈치를 엉덩이 쪽으로 당기기'},{n:'뒤허벅지 스트레칭',a:'좌/우 각각 30초',d:'다리를 펴고 상체를 앞으로 숙여 발끝을 향하기'},{n:'엉덩이 스트레칭',a:'좌/우 각각 30초',d:'누워 한 발목을 반대 무릎에 올리고 허벅지를 가슴으로 당기기',floor:true,alt:{n:'엉덩이 스트레칭',a:'좌/우 각각 30초',d:'앉아서 한 발목을 반대 무릎에 올리고 상체를 앞으로 숙이기'}},{n:'종아리 스트레칭',a:'좌/우 각각 30초',d:'벽·기둥 등을 밀며 뒷다리를 쭉 펴고 뒤꿈치는 바닥에'}],
@@ -1040,8 +1042,8 @@ const SESSIONS=[
      {name:'리어 델트 플라이 (가슴 지지)', eq:['dumbbell','bench'], cue:'인클라인 벤치에 가슴 대고 엎드려 양옆으로'},
      {name:'밴드 풀어파트', eq:['band'], cue:'팔을 펴서 밴드를 좌우로 벌리며 견갑 모으기'},
    ], fb:{name:'프론 T 레이즈', cue:'엎드려 엄지를 위로 향한 채 양팔을 T자로 들어올리기 · 목은 중립으로 두고 견갑을 모으며 2초 유지'}},
-   {role:'거북목 교정', opt:'posture', sets:2, reps:'12회', options:[], fb:{name:'턱 당기기', cue:'턱을 목 쪽으로 당겨 뒤통수를 위로 밀어내듯 5초 유지'}},
-   {role:'흉추 신전', opt:'posture', sets:2, reps:'10회', options:[{name:'폼롤러 흉추 신전', eq:['foam_roller'], cue:'폼롤러를 등 위쪽(날개뼈 아래)에 대고 누워 상체를 뒤로 젖혀 등을 펴기'}], fb:{name:'흉추 신전 (앉아서)', cue:'의자 등받이에 등 위쪽을 대고 상체를 뒤로 젖혀 가슴을 펴기'}},
+   {role:'거북목 교정', opt:'posture:upper', sets:2, reps:'12회', options:[], fb:{name:'턱 당기기', cue:'턱을 목 쪽으로 당겨 뒤통수를 위로 밀어내듯 5초 유지'}},
+   {role:'흉추 신전', opt:'posture:upper', sets:2, reps:'10회', options:[{name:'폼롤러 흉추 신전', eq:['foam_roller'], cue:'폼롤러를 등 위쪽(날개뼈 아래)에 대고 누워 상체를 뒤로 젖혀 등을 펴기'}], fb:{name:'흉추 신전 (앉아서)', cue:'의자 등받이에 등 위쪽을 대고 상체를 뒤로 젖혀 가슴을 펴기'}},
   ],
   cardio:{label:'유산소', detail:'존2 강도'},
   cool:[{n:'가슴 스트레칭',a:'좌/우 각각 30초',d:'벽·기둥·문틀 등에 팔을 대고 몸을 앞으로 기울여 가슴을 펴기'},{n:'목 옆 스트레칭',a:'좌/우 각각 30초',d:'한 손으로 반대쪽 머리를 지그시 당겨 목 옆을 늘이기'},{n:'옆구리·등 스트레칭',a:'좌/우 각각 30초',d:'한 팔을 위로 뻗어 반대쪽으로 상체를 기울이기'}],
@@ -1086,9 +1088,10 @@ const SESSIONS=[
      {name:'밴드 팔로프 프레스', eq:['band'], cue:'밴드 회전 저항'},
    ], fb:{name:'플랭크 숄더 탭', cue:'플랭크 자세에서 한 손으로 반대쪽 어깨를 가볍게 두드리기 · 골반이 좌우로 흔들리지 않게 버티고 허리 중립 유지'}},
    {role:'사이드 플랭크 (맥길)', sets:3, reps:'20–30초/측', options:[], fb:{name:'사이드 플랭크', cue:'옆구리·중둔근 안정화 · 힘들면 무릎 대고 · 좌우 시간 동일하게'}},
+   {role:'골반 정렬 (전방경사 교정)', opt:'posture:pelvis', sets:2, reps:'10회/측', options:[], fb:{name:'싱글 레그 글루트 브릿지', cue:'누워서 한 발로 바닥을 밀며 골반을 올리되 갈비뼈를 닫고 배에 힘을 유지 · 좌우 골반 높이를 맞추며 둔근으로 밀기'}},
   ],
   cardio:{label:'유산소', detail:'존2 강도'},
-  cool:[{n:'옆구리 스트레칭',a:'좌/우 각각 30초',d:'한 팔을 위로 뻗어 반대쪽으로 상체를 기울이기'},{n:'앞허벅지 스트레칭',a:'좌/우 각각 30초',d:'서서 한 발등을 잡아 발뒤꿈치를 엉덩이 쪽으로 당기기'},{n:'엉덩이 스트레칭',a:'좌/우 각각 30초',d:'앉아서 한 발목을 반대 무릎에 올리고 상체를 앞으로 숙이기'}],
+  cool:[{n:'고관절 굴곡근 스트레칭',a:'좌/우 각각 30초',d:'한쪽 무릎을 바닥에 대고 골반을 앞으로 밀어 앞쪽 고관절을 늘이기 · 골반 전방경사 완화',floor:true,alt:{n:'선 고관절 스트레칭',a:'좌/우 각각 30초',d:'선 자세로 한 다리를 뒤로 빼고 골반을 앞으로 밀어 앞쪽 고관절을 늘이기'}},{n:'옆구리 스트레칭',a:'좌/우 각각 30초',d:'한 팔을 위로 뻗어 반대쪽으로 상체를 기울이기'},{n:'앞허벅지 스트레칭',a:'좌/우 각각 30초',d:'서서 한 발등을 잡아 발뒤꿈치를 엉덩이 쪽으로 당기기'},{n:'엉덩이 스트레칭',a:'좌/우 각각 30초',d:'앉아서 한 발목을 반대 무릎에 올리고 상체를 앞으로 숙이기'}],
  },
  { // S4
   title:'상체 밀기 · 자세교정', focus:['가슴','어깨','자세교정','체중감량'], est:'45–55분',
@@ -1117,7 +1120,7 @@ const SESSIONS=[
    {role:'자세교정 (하부 승모)', sets:2, reps:'12회', options:[
      {name:'프론 Y-T-W 레이즈', eq:['mat'], cue:'엎드려 팔을 Y·T·W 모양으로 들어 하부 승모근·능형근 활성화', floor:true},
    ], fb:{name:'프론 Y-T-W 레이즈', cue:'엎드려 엄지 위로, 팔을 Y·T·W 모양으로 들어 견갑 모으기'}},
-   {role:'거북목 교정', opt:'posture', sets:2, reps:'12회', options:[], fb:{name:'턱 당기기', cue:'턱을 목 쪽으로 당겨 5초 유지'}},
+   {role:'거북목 교정', opt:'posture:upper', sets:2, reps:'12회', options:[], fb:{name:'턱 당기기', cue:'턱을 목 쪽으로 당겨 5초 유지'}},
   ],
   cardio:{label:'유산소', detail:'존2 강도'},
   cool:[{n:'가슴 스트레칭',a:'좌/우 각각 30초',d:'벽·기둥·문틀 등에 팔을 대고 몸을 앞으로 기울여 가슴을 펴기'},{n:'어깨 앞쪽 스트레칭',a:'좌/우 각각 30초',d:'한 팔을 몸 앞으로 가로질러 반대 팔로 몸쪽으로 당기기'},{n:'목 옆 스트레칭',a:'좌/우 각각 30초',d:'한 손으로 반대쪽 머리를 지그시 당겨 목 옆을 늘이기'}],
@@ -1133,7 +1136,7 @@ const SESSIONS=[
    ], fb:{name:'데드버그', cue:'허리를 바닥에 붙인 채 반대쪽 팔·다리 뻗기'}},
    {role:'코어 (안정화)', sets:3, reps:'8회/측', options:[], fb:{name:'버드독', cue:'네발 자세에서 반대쪽 팔·다리 뻗어 유지'}},
    {role:'코어 (측면)', sets:2, reps:'20–30초/측', options:[], fb:{name:'사이드 플랭크', cue:'옆구리 안정화, 좌우 동일 시간'}},
-   {role:'자세교정 종합', opt:'posture', sets:3, reps:'15회', options:[
+   {role:'자세교정 종합', opt:'posture:upper', sets:3, reps:'15회', options:[
      {name:'케이블 페이스 풀', eq:['cable'], cue:'케이블을 얼굴 높이로 당기며 팔꿈치를 뒤로 벌려 말린 어깨 교정'},
      {name:'밴드 풀 어파트', eq:['band'], cue:'밴드를 가슴 앞에서 양옆으로 당겨 벌리며 후면 견갑 활성화'},
    ], fb:{name:'프론 Y-T-W 레이즈', cue:'엎드려 엄지 위로, 팔을 Y·T·W 모양으로 순서대로 들어 견갑 모으기 · 목은 중립으로 두고 반동 없이'}},
@@ -1378,7 +1381,7 @@ const WBASE={
   barbell:20,         // 올림픽 바 빈 봉
   smith:15,           // 스미스 봉(대체로 가벼움)
   dumbbell:{m:5,f:3},
-  kettlebell:{m:5,f:3}
+  kettlebell:{m:4,f:4}   // 케틀벨은 최소 4kg, 4kg 단위
 };
 /* 카테고리 기본 무게 — 사용자 설정값 우선, 없으면 정책값 */
 function baseFor(cat){
@@ -1496,7 +1499,7 @@ function goalReps(base){
 function recReps(slot,r){ return goalReps(defReps(slot,r)); }
 
 /* 자세교정이 목표면 교정 계열 슬롯의 세트를 1 늘림 */
-const _POSTURE_ROLE=/자세교정|거북목|흉추|페이스 풀|후면 삼각/;
+const _POSTURE_ROLE=/자세교정|거북목|흉추|페이스 풀|후면 삼각|골반 정렬/;
 function effVol(si,oi,slot,r){
   const c=state.slotCustom&&state.slotCustom[si+':'+oi];
   const beginner=state.profile&&state.profile.liftingExp===false;
@@ -1556,9 +1559,17 @@ function stepShell(figHtml,figCls,kicker,titleHtml,bodyHtml,id,dateStr,active,do
   </div>`;
 }
 /* 선택적 슬롯 — 해당 목표를 고르지 않은 사용자에겐 빼서 그날 구성을 목표에 맞춘다.
-   지금은 opt:'posture'(거북목 교정·흉추 신전·자세교정 종합)만 존재. */
+   지금은 opt:'posture:upper'(거북목 교정·흉추 신전·자세교정 종합)만 존재. */
+/* 사용자가 고른 자세교정 세부 유형. 자세교정 목표만 켜고 유형을 안 골랐으면 기본 상체(upper) */
+function ptypes(){
+  const p=state.profile||{};
+  const t=(p.postureTypes||[]).slice();
+  if(goalMods().posture && !t.length) return ['upper'];
+  return t;
+}
 function slotActive(sl){
-  if(sl.opt==='posture') return goalMods().posture;
+  if(sl.opt==='posture:upper')  return goalMods().posture && ptypes().includes('upper');
+  if(sl.opt==='posture:pelvis') return goalMods().posture && ptypes().includes('pelvis');
   return true;
 }
 function sessionExercises(s, si){
@@ -3047,6 +3058,13 @@ const Onboard=(()=>{
       <div class="ob-sec">운동 목표 <span class="opt">(여러 개 선택 가능)</span></div>
       <div class="obgrid">${GOALS.map(g=>chip(g,ob.goals.includes(g),`Onboard.toggleGoal('${g}')`)).join('')}${chip('기타',!!ob.goalEtc,'Onboard.toggleGoalEtc()')}</div>
       ${ob.goalEtc?`<input class="ob-textin" id="ob-goalother" type="text" value="${ob.goalOther||''}" placeholder="목표를 직접 입력">`:''}
+      ${ob.goals.includes('자세교정')?`
+        <div class="ob-sub2">어떤 자세를 교정할까요? <span class="opt">(여러 개 선택 가능)</span></div>
+        <div class="obgrid">
+          ${chip('거북목·말린 어깨·굽은 등',(ob.postureTypes||[]).includes('upper'),"Onboard.togglePType('upper')")}
+          ${chip('골반 전방경사·허리 과신전',(ob.postureTypes||[]).includes('pelvis'),"Onboard.togglePType('pelvis')")}
+        </div>
+        <p class="ob-hint" style="margin-top:6px">근육 불균형에서 오는 일반적인 자세를 다뤄요. 척추측만 같은 구조적 변형이나 통증이 있으면 전문가와 상담하세요.</p>`:''}
       <div class="ob-sec">부상/수술 이력 <span class="opt">(선택)</span></div>
       <div class="obchips seg">${chip('없음',ob.injHas===false,'Onboard.setInj(false)')}${chip('있음',ob.injHas===true,'Onboard.setInj(true)')}</div>
       ${ob.injHas===true?`<div class="obgrid" style="margin-top:8px">${INJ.map(x=>chip(x,ob.injList.includes(x),`Onboard.toggleInj('${x}')`)).join('')}${chip('기타',!!ob.injEtc,'Onboard.toggleInjEtc()')}</div>${ob.injEtc?`<input class="ob-textin" id="ob-injother" type="text" value="${ob.injOther||''}" placeholder="직접 입력">`:''}`:''}
@@ -3058,7 +3076,7 @@ const Onboard=(()=>{
   }
   return {
     hide,
-    start:(cb)=>{ done=cb; ob={ nickname:'', gender:null, foreigner:null, verifyMethod:null, verified:false, lifting:null, running:null, goals:[], goalOther:'', injHas:null, injList:[], condHas:null, condList:[], equipment:[...DEFAULT_EQUIP], obBw:true, obFloor:true, workoutDays:[1,3,5,6], sessionMinutes:60 }; render(1); show(); },
+    start:(cb)=>{ done=cb; ob={ nickname:'', gender:null, foreigner:null, verifyMethod:null, verified:false, lifting:null, running:null, goals:[], goalOther:'', postureTypes:[], injHas:null, injList:[], condHas:null, condList:[], equipment:[...DEFAULT_EQUIP], obBw:true, obFloor:true, workoutDays:[1,3,5,6], sessionMinutes:60 }; render(1); show(); },
     openBirth:()=>{ readStep1(); const b=ob.birth?parse(ob.birth):new Date(2000,0,1); bdY=b.getFullYear(); bdM=b.getMonth(); bdStep='cal'; renderBirthCal(); document.getElementById('ympick').classList.remove('hidden'); },
     bdShift:(n)=>{ bdM+=n; if(bdM<0){bdM=11;bdY--;} else if(bdM>11){bdM=0;bdY++;} renderBirthCal(); },
     bdTo:(step)=>{ bdStep=step; renderBirthCal(); },
@@ -3073,7 +3091,7 @@ const Onboard=(()=>{
       ob={ name:p.name||'', nickname:p.nickname||'', birth:p.birth||'', gender:p.gender||null, foreigner:(p.foreigner===undefined?null:p.foreigner), verifyMethod:p.verifyMethod||null, verified:!!p.verified,
         heightCm:p.heightCm||'', weightKg:p.weightKg||'', targetWeightKg:p.targetWeightKg||'',
         lifting:(p.liftingExp===undefined?null:p.liftingExp), running:(p.running===undefined?null:p.running), paceMin:pMin, paceSec:pSec, maxKm:p.runMaxKm||'',
-        goals:(p.goals||[]).slice(), goalOther:p.goalOther||'', goalEtc:!!(p.goalOther),
+        goals:(p.goals||[]).slice(), goalOther:p.goalOther||'', goalEtc:!!(p.goalOther), postureTypes:(p.postureTypes||[]).slice(),
         injHas:(p.injuries?p.injuries.has:null), injList:((p.injuries&&p.injuries.list)||[]).slice(), injEtc:!!(p.injuries&&p.injuries.other), injOther:(p.injuries&&p.injuries.other)||'',
         condHas:(p.conditions?p.conditions.has:null), condList:((p.conditions&&p.conditions.list)||[]).slice(), condEtc:!!(p.conditions&&p.conditions.other), condOther:(p.conditions&&p.conditions.other)||'',
         equipment:[...(state.equipment||[])], obBw:!!state.includeBodyweight, obFloor:!!state.includeFloor,
@@ -3088,6 +3106,7 @@ const Onboard=(()=>{
     set2:(k,val)=>{ readStep2(); ob[k]=val; render(2); },
     setRunning:(b)=>{ readStep2(); ob.running=b; render(2); },
     toggleGoal:(g)=>{ readStep2(); const i=ob.goals.indexOf(g); if(i>=0)ob.goals.splice(i,1); else ob.goals.push(g); render(2); },
+    togglePType:(t)=>{ readStep2(); if(!ob.postureTypes)ob.postureTypes=[]; const i=ob.postureTypes.indexOf(t); if(i>=0)ob.postureTypes.splice(i,1); else ob.postureTypes.push(t); render(2); },
     toggleGoalEtc:()=>{ readStep2(); ob.goalEtc=!ob.goalEtc; render(2); },
     setInj:(b)=>{ readStep2(); ob.injHas=b; render(2); },
     toggleInj:(x)=>{ readStep2(); const i=ob.injList.indexOf(x); if(i>=0)ob.injList.splice(i,1); else ob.injList.push(x); render(2); },
@@ -3113,7 +3132,7 @@ const Onboard=(()=>{
         liftingExp:ob.lifting, running:ob.running,
         runPace:(ob.running&&ob.paceMin!=null&&ob.paceSec!=null)?(ob.paceMin+':'+String(ob.paceSec).padStart(2,'0')):null,
         runMaxKm:ob.running?ob.maxKm:null,
-        goals:ob.goals.slice(), goalOther:ob.goalEtc?(ob.goalOther||''):'',
+        goals:ob.goals.slice(), goalOther:ob.goalEtc?(ob.goalOther||''):'', postureTypes:ob.goals.includes('자세교정')?((ob.postureTypes||[]).slice()):[],
         injuries:{has:ob.injHas===true, list:ob.injHas===true?ob.injList.slice():[], other:(ob.injHas===true&&ob.injEtc)?(ob.injOther||''):''},
         conditions:{has:ob.condHas===true, list:ob.condHas===true?ob.condList.slice():[], other:(ob.condHas===true&&ob.condEtc)?(ob.condOther||''):''},
         ts:Date.now()

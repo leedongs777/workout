@@ -1336,8 +1336,15 @@ function lastLog(dateStr,oi){
   return null;
 }
 function cellBasis(n){ const per=Math.ceil(n/Math.ceil(n/4)); return `flex:0 0 calc((100% - ${(per-1)*7}px) / ${per})`; }
-/* 무게 스텝 간격(kg). 원판 최소 증가분(1.25kg 한 쌍)이 2.5kg이라 이걸 기본으로 */
-const WSTEP=2.5;
+/* 기구별 증량 단위(kg) — 실제 헬스장 무게가 올라가는 최소 간격
+   덤벨 0.5(조절식 기준) / 바벨·스미스·핵 스쿼트 2.5(원판 1.25 한 쌍) / 케틀벨 4 / 핀 스택 머신·케이블 5 */
+function weightStep(eq){
+  eq=eq||[];
+  if(eq.includes('dumbbell')) return 0.5;
+  if(eq.includes('kettlebell')) return 4;
+  if(eq.includes('barbell')||eq.includes('smith')||eq.includes('hack_squat')) return 2.5;
+  return 5; // 핀 스택 머신·케이블 등
+}
 /* 빈 칸에서 스텝을 누르면 이전 세트 무게(없으면 지난 기록)를 먼저 채워준다 — 매번 처음부터 안 눌러도 되게 */
 function seedWeight(date,oi,k){
   const sv=getLog(date,oi);
@@ -1346,20 +1353,30 @@ function seedWeight(date,oi,k){
   if(last&&typeof last.w[k]==='number'&&last.w[k]>0) return last.w[k];
   return 0;
 }
-function adjWeight(btn,date,oi,k,dir){
+function adjWeight(btn,date,oi,k,dir,step){
   const inp=btn.parentElement.querySelector('.wt');
   let v=parseFloat(inp.value);
-  if(isNaN(v)){ v=seedWeight(date,oi,k); if(dir>0&&v===0) v=WSTEP; } // 첫 누름은 이전 무게를 채움
-  else { v=v+WSTEP*dir; }
+  if(isNaN(v)){ v=seedWeight(date,oi,k); if(dir>0&&v===0) v=step; } // 첫 누름은 이전 무게를 채움
+  else { v=v+step*dir; }
   v=Math.max(0,Math.round(v*10)/10);
   inp.value=v; logWeight(date,oi,k,v);
 }
-/* 무게 한 칸 = [−][ 숫자 kg ][+] */
-function wtCell(date,oi,k,cb,label){
+/* 길게 누르면 연속 증가 — 처음엔 천천히, 점점 빠르게(멀리 갈 때 편하게) */
+let _wtHold=null;
+function wtHold(btn,date,oi,k,dir,step,ev){
+  if(ev&&ev.preventDefault) ev.preventDefault();
+  adjWeight(btn,date,oi,k,dir,step); // 첫 누름 즉시 1회
+  let delay=420;
+  const tick=()=>{ adjWeight(btn,date,oi,k,dir,step); delay=Math.max(45,delay*0.6); _wtHold=setTimeout(tick,delay); };
+  _wtHold=setTimeout(tick,420);
+  const stop=()=>{ if(_wtHold){clearTimeout(_wtHold);_wtHold=null;} window.removeEventListener('pointerup',stop); window.removeEventListener('pointercancel',stop); btn.removeEventListener('pointerleave',stop); };
+  window.addEventListener('pointerup',stop); window.addEventListener('pointercancel',stop); btn.addEventListener('pointerleave',stop);
+}
+/* 무게 한 칸 = [−][ 숫자 kg ][+] (탭 = 1회, 길게 = 연속) */
+function wtCell(date,oi,k,label,step){
   const sv=getLog(date,oi); const v=(typeof sv[k]==='number')?sv[k]:'';
   const a=`this,'${date}','${oi}',${k}`;
-  /* 스텝퍼가 들어가야 하니 최소 너비를 줘서 좁으면 자동으로 줄바꿈(보통 3칸씩) */
-  return `<div class="setcell wtc">${label?`<span class="sn">${label}</span>`:''}<div class="wtstep"><button class="wtb" tabindex="-1" aria-label="무게 줄이기" onclick="adjWeight(${a},-1)">−</button><span class="wtmid"><input class="wt" type="number" inputmode="decimal" min="0" step="0.5" value="${v}" placeholder="–" onchange="logWeight('${date}','${oi}',${k},this.value)"><span class="unit">kg</span></span><button class="wtb" tabindex="-1" aria-label="무게 늘리기" onclick="adjWeight(${a},1)">+</button></div></div>`;
+  return `<div class="setcell wtc">${label?`<span class="sn">${label}</span>`:''}<div class="wtstep"><button class="wtb" tabindex="-1" aria-label="무게 줄이기" onpointerdown="wtHold(${a},-1,${step},event)">−</button><span class="wtmid"><input class="wt" type="number" inputmode="decimal" min="0" step="${step}" value="${v}" placeholder="–" onchange="logWeight('${date}','${oi}',${k},this.value)"><span class="unit">kg</span></span><button class="wtb" tabindex="-1" aria-label="무게 늘리기" onpointerdown="wtHold(${a},1,${step},event)">+</button></div></div>`;
 }
 function renderSetLog(slot,r,dateStr,oi,nSets){
   const saved=getLog(dateStr,oi);
@@ -1371,14 +1388,16 @@ function renderSetLog(slot,r,dateStr,oi,nSets){
   }
   if(/측/.test(String(slot.reps||''))){ // 측면당 → 좌/우 각각 무게 입력
     const num=Array.from({length:n},(_,k)=>`<span class="ss-num" style="${cb}">${k+1}세트</span>`).join('');
-    const mkRow=(side,label)=>{ let c=''; for(let k=0;k<n;k++){ c+=wtCell(dateStr, oi+side, k, cb, ''); } return `<div class="ss-row"><span class="ss-lab">${label}</span><div class="ss-cells" style="justify-content:center">${c}</div></div>`; };
+    const wstep=weightStep(r.eq);
+    const mkRow=(side,label)=>{ let c=''; for(let k=0;k<n;k++){ c+=wtCell(dateStr, oi+side, k, '', wstep); } return `<div class="ss-row"><span class="ss-lab">${label}</span><div class="ss-cells" style="justify-content:center">${c}</div></div>`; };
     return `<div class="setlog"><div class="ss-row ss-head"><span class="ss-lab"></span><div class="ss-cells">${num}</div></div>${mkRow('L','좌')}${mkRow('R','우')}</div>`;
   }
   const last=lastLog(dateStr,oi);
   let hint='';
   if(last){ const md=last.date.slice(5).replace('-','/'); const parts=last.w.slice(0,n).map(x=>(typeof x==='number'&&x>0)?(''+x):'–'); hint=`<div class="lastw">지난 기록 <b>${md}</b><span class="vdiv"></span>${parts.join(', ')} kg</div>`; }
+  const wstep=weightStep(r.eq);
   let cells='';
-  for(let k=0;k<n;k++){ cells+=wtCell(dateStr, String(oi), k, cb, (k+1)+'세트'); }
+  for(let k=0;k<n;k++){ cells+=wtCell(dateStr, String(oi), k, (k+1)+'세트', wstep); }
   return `<div class="setlog">${hint}<div class="setrow" style="justify-content:center">${cells}</div></div>`;
 }
 

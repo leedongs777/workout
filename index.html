@@ -224,13 +224,13 @@
   .ss-cells .setcell.wtc{flex:1 1 0; min-width:0;}
   .ss-cells .wtb{width:26px;}
   .ss-cells .wtmid{padding:0 4px;}
-  .wtb{flex:none; width:28px; border:none; background:transparent; color:var(--muted); font-size:19px; font-weight:700; line-height:1; cursor:pointer; font-family:inherit; padding:0; -webkit-tap-highlight-color:transparent;}
+  .wtb{flex:none; width:26px; border:none; background:transparent; color:var(--muted); font-size:18px; font-weight:700; line-height:1; cursor:pointer; font-family:inherit; padding:0; -webkit-tap-highlight-color:transparent;}
   .wtb:active{background:var(--accent-soft); color:var(--accent);}
-  .wtmid{flex:1 1 0; min-width:0; display:flex; align-items:center; gap:3px; padding:0 8px; border-left:1px solid var(--line-2); border-right:1px solid var(--line-2);}
-  .wt{flex:1 1 0; width:0; min-width:0; border:none; background:none; color:var(--ink); font-family:inherit; font-size:16px; font-weight:700; text-align:right; padding:0; font-variant-numeric:tabular-nums; outline:none; -moz-appearance:textfield;}
+  .wtmid{flex:1 1 0; min-width:0; display:flex; align-items:center; justify-content:center; padding:0 3px; border-left:1px solid var(--line-2); border-right:1px solid var(--line-2);}
+  .wt{flex:1 1 0; width:0; min-width:0; border:none; background:none; color:var(--ink); font-family:inherit; font-size:16px; font-weight:700; text-align:center; padding:0; font-variant-numeric:tabular-nums; outline:none; -moz-appearance:textfield;}
   .wt.pre{color:var(--faint); font-weight:600;} /* 저장 전 기본값 제안은 흐리게 */
   .wt::-webkit-outer-spin-button,.wt::-webkit-inner-spin-button{-webkit-appearance:none; margin:0;}
-  .unit{font-size:11px; color:var(--faint); font-weight:600; flex:none;}
+  .unit{font-size:10px; color:var(--faint); font-weight:600; flex:none;}
   .setrow.dots{gap:7px;}
   /* 측면당(좌/우) 무게 입력 */
   .ss-row{display:flex; align-items:center; gap:8px; margin-top:6px;}
@@ -1351,42 +1351,44 @@ function setCols(n){ return n<=3?n:Math.ceil(n/2); }
 function setBasis(n){ const per=setCols(n); return `flex:0 0 calc((100% - ${(per-1)*7}px) / ${per})`; }
 
 /* ── 무게 기본값(시작 무게 제안) ─────────────────────────────
-   ⚠️ 아래 숫자는 의학적 근거가 아니라 "편하게 시작할 만한 추정치"다.
-   성별·근력 경험으로 스케일하고, 사용자가 설정에서 직접 바꾼다(state.wDefaults).
-   운동을 5개 카테고리로 나눠 카테고리별 기본값을 둔다. */
+   기구의 "가장 가벼운 상태"를 시작값으로 제안한다. 무게는 사용자가 직접 올리는 게 맞다.
+   - 핀 스택 머신·케이블: 최소 스택 (보통 5kg)
+   - 바벨·스미스: 빈 봉 무게 (바벨 20kg, 스미스 봉은 더 가벼움)
+   - 덤벨·케틀벨: 남 5 / 여 3
+   사용자가 설정에서 카테고리별 기본값을 직접 바꿀 수 있다(state.wDefaults). */
 const WCAT=[
-  ['lower_big','하체 복합','스쿼트·레그프레스·데드리프트·힙 쓰러스트'],
-  ['lower_iso','하체 머신','레그 익스텐션·컬·힙 어브/어덕션'],
-  ['push','상체 밀기','벤치·체스트/숄더 프레스'],
-  ['pull','상체 당기기','랫풀다운·로우'],
-  ['small','소근육·보조','컬·푸시다운·플라이·자세교정']
+  ['machine','머신·케이블','핀 스택 최소 무게'],
+  ['barbell','바벨','빈 봉 무게'],
+  ['smith','스미스 머신','빈 봉 무게'],
+  ['dumbbell','덤벨','한 손 기준 시작 무게'],
+  ['kettlebell','케틀벨','시작 무게']
 ];
-/* 남성·경험자 기준 시작 무게(kg) */
-const WBASE={lower_big:60, lower_iso:35, push:40, pull:40, small:12};
 function exCat(name,eq){
-  name=name||'';
-  if(/팔로프|플랭크|데드버그|버드독|월 슬라이드|스트레이트 레그 레이즈/.test(name)) return 'small';
-  if(/스쿼트|레그프레스|데드리프트|힙 쓰러스트|글루트|스텝업|월 싯|런지/.test(name)) return 'lower_big';
-  if(/레그 익스텐션|레그 컬|어브덕션|어덕션|내전근|클램셸|힙 어브|힙 어덕/.test(name)) return 'lower_iso';
-  if(/풀다운|로우|풀업|당기기|랫/.test(name)) return 'pull';
-  if(/벤치 프레스|체스트 프레스|숄더 프레스|오버헤드 프레스|푸시업|파이크/.test(name)) return 'push';
-  return 'small';
+  eq=eq||[];
+  if(eq.includes('dumbbell')) return 'dumbbell';
+  if(eq.includes('kettlebell')) return 'kettlebell';
+  if(eq.includes('smith')) return 'smith';
+  if(eq.includes('barbell')||eq.includes('hack_squat')) return 'barbell';
+  return 'machine'; // 핀 스택 머신·케이블 등
 }
-function wMult(){ const p=state.profile||{}; let m=1; if(p.gender==='여') m*=0.65; if(p.liftingExp===false) m*=0.6; return m; }
-/* 카테고리 기본 무게 — 사용자 설정값 우선, 없으면 성별·경험으로 계산 */
+/* 성별에 따라 값이 갈리는 카테고리(덤벨·케틀벨)의 남/여 시작값 */
+function wByGender(base){ const p=state.profile||{}; return p.gender==='여'?base.f:base.m; }
+const WBASE={
+  machine:5,          // 핀 스택 최소
+  barbell:20,         // 올림픽 바 빈 봉
+  smith:15,           // 스미스 봉(대체로 가벼움)
+  dumbbell:{m:5,f:3},
+  kettlebell:{m:5,f:3}
+};
+/* 카테고리 기본 무게 — 사용자 설정값 우선, 없으면 정책값 */
 function baseFor(cat){
   if(state.wDefaults && state.wDefaults[cat]!=null) return state.wDefaults[cat];
-  return Math.max(0, Math.round((WBASE[cat]||0)*wMult()));
+  const b=WBASE[cat];
+  return (b&&typeof b==='object')?wByGender(b):(b||0);
 }
-/* 특정 운동·세트의 기본 무게 = 카테고리 기본값 + (세트-1)×세트당 증량. step 배수로 정렬 */
+/* 특정 운동·세트의 기본 무게 = 카테고리 기본값(모든 세트 동일, 자동 증량 없음) */
 function defaultWeight(ex,k){
-  const step=weightStep(ex.eq);
-  let base=baseFor(exCat(ex.name,ex.eq));
-  if((ex.eq||[]).includes('dumbbell')) base=base*0.4; // 덤벨은 한 손 기준이라 낮춤
-  const units=(state.setInc!=null?state.setInc:1);
-  let v=base + k*units*step;
-  v=Math.round(v/step)*step;
-  return Math.max(0, Math.round(v*10)/10);
+  return Math.max(0, baseFor(exCat(ex.name,ex.eq)));
 }
 /* 기구별 증량 단위(kg) — 실제 헬스장 무게가 올라가는 최소 간격
    덤벨 0.5(조절식 기준) / 바벨·스미스·핵 스쿼트 2.5(원판 1.25 한 쌍) / 케틀벨 4 / 핀 스택 머신·케이블 5 */
@@ -1431,7 +1433,7 @@ function wtCell(date,oi,k,label,step,dv,basis){
   const v = saved ? sv[k] : (dv>0?dv:'');
   const pre = (!saved && dv>0) ? ' pre' : '';
   const a=`this,'${date}','${oi}',${k}`;
-  return `<div class="setcell wtc" style="${basis||''}">${label?`<span class="sn">${label}</span>`:''}<div class="wtstep"><button class="wtb" tabindex="-1" aria-label="무게 줄이기" onpointerdown="wtHold(${a},-1,${step},event)">−</button><span class="wtmid"><input class="wt${pre}" type="number" inputmode="decimal" min="0" step="${step}" value="${v}" placeholder="–" oninput="this.classList.remove('pre')" onchange="logWeight('${date}','${oi}',${k},this.value)"><span class="unit">kg</span></span><button class="wtb" tabindex="-1" aria-label="무게 늘리기" onpointerdown="wtHold(${a},1,${step},event)">+</button></div></div>`;
+  return `<div class="setcell wtc" style="${basis||''}">${label?`<span class="sn">${label}</span>`:''}<div class="wtstep"><button class="wtb" tabindex="-1" aria-label="무게 줄이기" onpointerdown="wtHold(${a},-1,${step},event)">−</button><span class="wtmid"><input class="wt${pre}" type="number" inputmode="decimal" min="0" step="${step}" value="${v}" placeholder="–" aria-label="무게(kg)" oninput="this.classList.remove('pre')" onchange="logWeight('${date}','${oi}',${k},this.value)"></span><button class="wtb" tabindex="-1" aria-label="무게 늘리기" onpointerdown="wtHold(${a},1,${step},event)">+</button></div></div>`;
 }
 function renderSetLog(slot,r,dateStr,oi,nSets){
   const saved=getLog(dateStr,oi);
@@ -2558,17 +2560,13 @@ function renderSetup(){
   /* 무게 기본값 — 카테고리별 시작 무게와 세트당 증량을 사용자가 직접 조절 */
   html+=`<div class="sec-label">무게 기본값</div>
     <div class="card" style="padding:14px 16px">
-      <p class="info" style="margin:0 0 12px">운동을 처음 열 때 <b>세트마다 미리 채워지는 시작 무게</b>예요. 성별과 근력 경험으로 자동 설정되며, 아래에서 직접 조절할 수 있어요. (실제 무게는 몸 상태에 맞게 바꿔 주세요)</p>
+      <p class="info" style="margin:0 0 12px">운동을 처음 열 때 <b>모든 세트에 미리 채워지는 시작 무게</b>예요. 기구의 가장 가벼운 상태(머신 최소, 빈 봉 등)로 잡혀 있으니, 실제로는 여기서 몸에 맞게 <b>올려서</b> 쓰세요.</p>
       <div class="wdef-list">${WCAT.map(([cat,name,ex])=>`
         <div class="wdef-row">
           <div class="wdef-info"><div class="wdef-name">${name}</div><div class="wdef-ex">${ex}</div></div>
           <div class="wstep-mini"><button class="wtb" onclick="setWDefault('${cat}',-1)">−</button><span class="wdef-val">${baseFor(cat)}<span class="unit">kg</span></span><button class="wtb" onclick="setWDefault('${cat}',1)">+</button></div>
         </div>`).join('')}</div>
-      <div class="wdef-row" style="border-top:1px solid var(--line-2); margin-top:6px; padding-top:12px">
-        <div class="wdef-info"><div class="wdef-name">세트당 증량</div><div class="wdef-ex">세트가 올라갈 때마다 더할 양</div></div>
-        <div class="wstep-mini"><button class="wtb" onclick="setSetInc(-1)">−</button><span class="wdef-val">${state.setInc===0?'없음':('×'+state.setInc)}</span><button class="wtb" onclick="setSetInc(1)">+</button></div>
-      </div>
-      <p class="info" style="margin:10px 0 0;color:var(--faint)">세트당 증량은 기구 단위(바벨 2.5kg, 덤벨 0.5kg 등)의 배수예요. 예: ×1이면 다음 세트마다 그만큼 올라가요.</p>
+      <p class="info" style="margin:10px 0 0;color:var(--faint)">덤벨·케틀벨은 성별에 따라 다르게 시작해요(남 5kg, 여 3kg). 바벨은 빈 봉 20kg, 스미스는 15kg 기준이에요.</p>
     </div>`;
 
   /* 앱이 제시하는 수치·권고의 근거를 사용자가 직접 확인할 수 있게 노출 */
@@ -2698,16 +2696,13 @@ function resetSchedule(){
   state.restDays=[]; state.doneDays=[]; state.startDate=todayStr(); openDays={};
   touch(); toast('휴식/완료 기록을 초기화했어요'); refresh();
 }
-/* 카테고리 기본 무게 조절 — 처음 누르면 현재 계산값을 채운 뒤 5kg 단위로 증감 */
+/* 카테고리 기본 무게 조절 — 카테고리의 증량 단위만큼 증감 */
+const _WDEF_STEP={machine:5, barbell:2.5, smith:2.5, dumbbell:0.5, kettlebell:4};
 function setWDefault(cat,dir){
   if(!state.wDefaults) state.wDefaults={};
   const cur=(state.wDefaults[cat]!=null)?state.wDefaults[cat]:baseFor(cat);
-  state.wDefaults[cat]=Math.max(0, cur+dir*5);
-  touch(); renderSetup();
-}
-function setSetInc(dir){
-  const cur=(state.setInc!=null?state.setInc:1);
-  state.setInc=Math.max(0, Math.min(3, cur+dir));
+  const step=_WDEF_STEP[cat]||5;
+  state.wDefaults[cat]=Math.max(0, Math.round((cur+dir*step)*10)/10);
   touch(); renderSetup();
 }
 function resetAll(){

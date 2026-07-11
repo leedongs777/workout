@@ -548,6 +548,7 @@
   .obchips:not(.seg) .chip{flex:1 1 0; min-width:0; text-align:center; padding-left:4px; padding-right:4px;}
   .obchip{padding:9px 14px; border-radius:11px; border:1px solid var(--line); background:var(--surface-2); color:var(--muted); font-weight:600; font-size:14px; cursor:pointer; user-select:none;}
   .obchip.on{background:var(--accent); border-color:var(--accent); color:var(--on-accent);}
+  .rankbadge{display:inline-block; margin-left:5px; padding:1px 6px; border-radius:999px; background:var(--on-accent); color:var(--accent); font-size:10.5px; font-weight:800; vertical-align:middle;}
   .ob-half{display:flex; gap:10px;} .ob-half>.field{flex:1;}
   .pace{display:flex; align-items:center; gap:8px; flex-wrap:wrap;}
   .pace select,.ob-select{height:46px; border:1px solid var(--line); border-radius:11px; background:var(--surface-2); color:var(--ink); font-family:inherit; font-size:15px; padding:0 10px; outline:none;}
@@ -1042,8 +1043,8 @@ const SESSIONS=[
      {name:'리어 델트 플라이 (가슴 지지)', eq:['dumbbell','bench'], cue:'인클라인 벤치에 가슴 대고 엎드려 양옆으로'},
      {name:'밴드 풀어파트', eq:['band'], cue:'팔을 펴서 밴드를 좌우로 벌리며 견갑 모으기'},
    ], fb:{name:'프론 T 레이즈', cue:'엎드려 엄지를 위로 향한 채 양팔을 T자로 들어올리기 · 목은 중립으로 두고 견갑을 모으며 2초 유지'}},
-   {role:'거북목 교정', opt:'posture:upper', sets:2, reps:'12회', options:[], fb:{name:'턱 당기기', cue:'턱을 목 쪽으로 당겨 뒤통수를 위로 밀어내듯 5초 유지'}},
-   {role:'흉추 신전', opt:'posture:upper', sets:2, reps:'10회', options:[{name:'폼롤러 흉추 신전', eq:['foam_roller'], cue:'폼롤러를 등 위쪽(날개뼈 아래)에 대고 누워 상체를 뒤로 젖혀 등을 펴기'}], fb:{name:'흉추 신전 (앉아서)', cue:'의자 등받이에 등 위쪽을 대고 상체를 뒤로 젖혀 가슴을 펴기'}},
+   {role:'거북목 교정', opt:'posture:neck', sets:2, reps:'12회', options:[], fb:{name:'턱 당기기', cue:'턱을 목 쪽으로 당겨 뒤통수를 위로 밀어내듯 5초 유지'}},
+   {role:'흉추 신전', opt:'posture:back', sets:2, reps:'10회', options:[{name:'폼롤러 흉추 신전', eq:['foam_roller'], cue:'폼롤러를 등 위쪽(날개뼈 아래)에 대고 누워 상체를 뒤로 젖혀 등을 펴기'}], fb:{name:'흉추 신전 (앉아서)', cue:'의자 등받이에 등 위쪽을 대고 상체를 뒤로 젖혀 가슴을 펴기'}},
   ],
   cardio:{label:'유산소', detail:'존2 강도'},
   cool:[{n:'가슴 스트레칭',a:'좌/우 각각 30초',d:'벽·기둥·문틀 등에 팔을 대고 몸을 앞으로 기울여 가슴을 펴기'},{n:'목 옆 스트레칭',a:'좌/우 각각 30초',d:'한 손으로 반대쪽 머리를 지그시 당겨 목 옆을 늘이기'},{n:'옆구리·등 스트레칭',a:'좌/우 각각 30초',d:'한 팔을 위로 뻗어 반대쪽으로 상체를 기울이기'}],
@@ -1120,7 +1121,7 @@ const SESSIONS=[
    {role:'자세교정 (하부 승모)', sets:2, reps:'12회', options:[
      {name:'프론 Y-T-W 레이즈', eq:['mat'], cue:'엎드려 팔을 Y·T·W 모양으로 들어 하부 승모근·능형근 활성화', floor:true},
    ], fb:{name:'프론 Y-T-W 레이즈', cue:'엎드려 엄지 위로, 팔을 Y·T·W 모양으로 들어 견갑 모으기'}},
-   {role:'거북목 교정', opt:'posture:upper', sets:2, reps:'12회', options:[], fb:{name:'턱 당기기', cue:'턱을 목 쪽으로 당겨 5초 유지'}},
+   {role:'거북목 교정', opt:'posture:neck', sets:2, reps:'12회', options:[], fb:{name:'턱 당기기', cue:'턱을 목 쪽으로 당겨 5초 유지'}},
   ],
   cardio:{label:'유산소', detail:'존2 강도'},
   cool:[{n:'가슴 스트레칭',a:'좌/우 각각 30초',d:'벽·기둥·문틀 등에 팔을 대고 몸을 앞으로 기울여 가슴을 펴기'},{n:'어깨 앞쪽 스트레칭',a:'좌/우 각각 30초',d:'한 팔을 몸 앞으로 가로질러 반대 팔로 몸쪽으로 당기기'},{n:'목 옆 스트레칭',a:'좌/우 각각 30초',d:'한 손으로 반대쪽 머리를 지그시 당겨 목 옆을 늘이기'}],
@@ -1136,7 +1137,7 @@ const SESSIONS=[
    ], fb:{name:'데드버그', cue:'허리를 바닥에 붙인 채 반대쪽 팔·다리 뻗기'}},
    {role:'코어 (안정화)', sets:3, reps:'8회/측', options:[], fb:{name:'버드독', cue:'네발 자세에서 반대쪽 팔·다리 뻗어 유지'}},
    {role:'코어 (측면)', sets:2, reps:'20–30초/측', options:[], fb:{name:'사이드 플랭크', cue:'옆구리 안정화, 좌우 동일 시간'}},
-   {role:'자세교정 종합', opt:'posture:upper', sets:3, reps:'15회', options:[
+   {role:'자세교정 종합', opt:'posture:shoulder', sets:3, reps:'15회', options:[
      {name:'케이블 페이스 풀', eq:['cable'], cue:'케이블을 얼굴 높이로 당기며 팔꿈치를 뒤로 벌려 말린 어깨 교정'},
      {name:'밴드 풀 어파트', eq:['band'], cue:'밴드를 가슴 앞에서 양옆으로 당겨 벌리며 후면 견갑 활성화'},
    ], fb:{name:'프론 Y-T-W 레이즈', cue:'엎드려 엄지 위로, 팔을 Y·T·W 모양으로 순서대로 들어 견갑 모으기 · 목은 중립으로 두고 반동 없이'}},
@@ -1360,7 +1361,7 @@ function setBasis(n){ const per=setCols(n); return `flex:0 0 calc((100% - ${(per
    - 덤벨·케틀벨: 남 5 / 여 3
    사용자가 설정에서 카테고리별 기본값을 직접 바꿀 수 있다(state.wDefaults). */
 const WCAT=[
-  ['machine','머신·케이블','핀 스택 최소 무게'],
+  ['machine','머신/케이블','핀 스택 최소 무게'],
   ['barbell','바벨','빈 봉 무게'],
   ['smith','스미스 머신','빈 봉 무게'],
   ['dumbbell','덤벨','한 손 기준 시작 무게'],
@@ -1468,24 +1469,34 @@ function defReps(slot,r){ return (r&&r.reps)||slot.reps; }
 /* 사용자가 고른 운동 목표 → 세트/횟수/유산소 비중 가중치.
    목표는 복수 선택이므로 배타 분기가 아니라 곱셈으로 합성한다
    (근육+다이어트를 함께 고르면 자연스럽게 중간값이 됨). */
+/* 목표별 효과. 사용자는 1순위·2순위 두 개까지 고르고, 1순위를 더 강하게 반영한다. */
+const GOAL_FX={
+  '근육 만들기':      {set:1, reps:0.85, cardio:0.85, rest:'60초에서 90초'},
+  '다이어트(체중감량)':{set:0, reps:1.2,  cardio:1.3,  rest:'30초에서 60초'},
+  '체력 향상':        {set:0, reps:1.0,  cardio:1.4,  rest:'45초에서 75초'},
+  '자세교정':         {set:0, reps:1.0,  cardio:1.0,  rest:null, posture:true},
+  '현 상태 유지':     {set:0, reps:1.0,  cardio:1.0,  rest:null}
+};
+const GOAL_W=[1.0, 0.5]; // 1순위, 2순위 가중치
 function goalMods(){
-  const g=(state.profile&&state.profile.goals)||[];
-  const hyper=g.includes('근육 만들기');        // 근비대 — 세트↑ 반복↓ 유산소↓
-  const diet=g.includes('다이어트(체중감량)');   // 대사 소모 — 반복↑ 휴식↓ 유산소↑
-  const endur=g.includes('체력 향상');           // 심폐 지구력 — 유산소↑↑ (반복·휴식은 보통)
-  const posture=g.includes('자세교정');          // 교정 계열 슬롯만 세트↑
-  /* 유산소는 감량·체력이 겹쳐도 합산하지 않고 더 큰 쪽을 쓴다 (1.3×1.4=1.82는 과함) */
-  const burnCardio=Math.max(diet?1.3:1, endur?1.4:1);
-  const rest = hyper ? '60초에서 90초'
-             : diet  ? '30초에서 60초'
-             : endur ? '45초에서 75초'
-             : '60초에서 90초';
+  const g=((state.profile&&state.profile.goals)||[]).slice(0,2);
+  let repsMul=1, cardioMul=1, rest=null, posture=false, hyper=false, diet=false, endur=false;
+  g.forEach((name,i)=>{
+    const fx=GOAL_FX[name]; if(!fx) return;
+    const w=GOAL_W[i]||0;
+    repsMul   *= 1+(fx.reps-1)*w;    // 1순위는 그대로, 2순위는 절반만 반영
+    cardioMul *= 1+(fx.cardio-1)*w;
+    if(fx.posture) posture=true;
+    if(name==='근육 만들기') hyper=true;
+    if(name==='다이어트(체중감량)') diet=true;
+    if(name==='체력 향상') endur=true;
+    if(fx.rest && !rest) rest=fx.rest; // 우선순위 높은 목표의 휴식을 먼저 채택
+  });
   return {
     hyper, diet, endur, posture,
-    setDelta: hyper?1:0,
-    repsMul: (hyper?0.85:1)*(diet?1.2:1),
-    cardioMul:(hyper?0.85:1)*burnCardio,
-    rest
+    setDelta: g.includes('근육 만들기')?1:0,
+    repsMul, cardioMul,
+    rest: rest||'60초에서 90초'
   };
 }
 /* '12회','10회/측' 같은 횟수형만 조정. 유지형(초)·범위형(20–30초)은 건드리지 않음 */
@@ -1558,18 +1569,17 @@ function stepShell(figHtml,figCls,kicker,titleHtml,bodyHtml,id,dateStr,active,do
     ${btn}
   </div>`;
 }
-/* 선택적 슬롯 — 해당 목표를 고르지 않은 사용자에겐 빼서 그날 구성을 목표에 맞춘다.
-   지금은 opt:'posture:upper'(거북목 교정·흉추 신전·자세교정 종합)만 존재. */
-/* 사용자가 고른 자세교정 세부 유형. 자세교정 목표만 켜고 유형을 안 골랐으면 기본 상체(upper) */
+/* 선택적 슬롯 — 자세교정 세부 유형(opt:'posture:neck|shoulder|back|pelvis')에 맞을 때만 노출.
+   유형을 안 골랐으면 상체 3종(neck·shoulder·back)을 기본으로. */
 function ptypes(){
   const p=state.profile||{};
   const t=(p.postureTypes||[]).slice();
-  if(goalMods().posture && !t.length) return ['upper'];
+  if(goalMods().posture && !t.length) return ['neck','shoulder','back'];
   return t;
 }
 function slotActive(sl){
-  if(sl.opt==='posture:upper')  return goalMods().posture && ptypes().includes('upper');
-  if(sl.opt==='posture:pelvis') return goalMods().posture && ptypes().includes('pelvis');
+  const o=sl.opt||'';
+  if(o.indexOf('posture:')===0) return goalMods().posture && ptypes().includes(o.slice(8));
   return true;
 }
 function sessionExercises(s, si){
@@ -2064,13 +2074,13 @@ function profileBanner(){
   const p=state.profile; if(!p) return '';
   const chips=[];
   if(p.liftingExp===false) chips.push('근력 초보<span class="vdiv"></span>세트/무게 낮춰 시작');
-  if(p.goals&&p.goals.length) chips.push('목표: '+p.goals.join(', ')+(p.goalOther?(', '+p.goalOther):''));
+  if(p.goals&&p.goals.length) chips.push('목표: '+p.goals.slice(0,2).map((g,i)=>(i+1)+'순위 '+g).join('<span class="vdiv"></span>'));
   if(p.running&&p.runPace) chips.push('러닝 1km '+p.runPace+' 기준');
   if(p.targetWeightKg&&p.weightKg){ const d=(p.weightKg-p.targetWeightKg); if(d>0) chips.push('감량 목표 '+d.toFixed(1)+'kg'); }
   const inj=(p.injuries&&p.injuries.has)?((p.injuries.list||[]).concat(p.injuries.other?[p.injuries.other]:[])):[];
   const cond=(p.conditions&&p.conditions.has)?((p.conditions.list||[]).concat(p.conditions.other?[p.conditions.other]:[])):[];
   let caution='';
-  if(inj.length) caution+=warnNote('부상 및 수술 이력 반영', `${inj.join(', ')} 관련 동작은 자동으로 제외·완화됐어요. 통증 시 즉시 중단하고 전문의와 상담하세요.`);
+  if(inj.length) caution+=warnNote('부상 및 수술 이력 반영', `${inj.join(', ')} 관련 동작은 자동으로 제외하거나 완화했어요. 통증 시 즉시 중단하고 전문의와 상담하세요.`);
   if(cond.length) caution+=warnNote('건강 주의', `${cond.join(', ')} 이력이 있어요. 무거운 중량에서 숨을 참은 채 힘주기(발살바)를 피하고, 세트 사이 충분히 쉬며 어지럼이나 통증 시 중단하세요.`);
   if(!chips.length && !caution) return '';
   return `<div class="card" style="margin:0 0 4px; padding:16px"><div class="pbanner-h">🤖 내 프로필 기반 맞춤 조정</div>${chips.length?`<div class="pbanner-chips">${chips.map(c=>`<span class="pchip">${c}</span>`).join('')}</div>`:''}${caution}</div>`;
@@ -2434,7 +2444,7 @@ function showProfile(){
   if(p.targetWeightKg) rows.push(['목표 체중',p.targetWeightKg+' kg']);
   rows.push(['근력 경험',p.liftingExp?'있음':'없음']);
   rows.push(['러닝',p.running?('있음'+(p.runPace?(', 1km '+p.runPace):'')):'없음']);
-  if(p.goals&&p.goals.length) rows.push(['운동 목표',p.goals.join(', ')+(p.goalOther?(', '+p.goalOther):'')]);
+  if(p.goals&&p.goals.length) rows.push(['운동 목표',p.goals.slice(0,2).map((g,i)=>(i+1)+'순위 '+g).join(', ')]);
   if(p.injuries&&p.injuries.has) rows.push(['부상/수술',(p.injuries.list||[]).concat(p.injuries.other?[p.injuries.other]:[]).join(', ')||'있음']);
   if(p.conditions&&p.conditions.has) rows.push(['지병',(p.conditions.list||[]).concat(p.conditions.other?[p.conditions.other]:[]).join(', ')||'있음']);
   const body=rows.map(([k,v])=>`<div class="prow"><span class="pk">${k}</span><span class="pv">${v}</span></div>`).join('');
@@ -2495,7 +2505,7 @@ function renderSetup(){
   html+=equipSectionHTML();
   html+=`<div class="sec-label">플랜 정보</div>
   <div class="card pad info">
-    <b>목표</b><br>${(()=>{ const p=state.profile; const g=(p&&p.goals)?p.goals.slice():[]; if(p&&p.goalOther)g.push(p.goalOther); return g.length?periodLines(g.join(', ')):'회원 정보 수정에서 목표를 선택하면 여기에 표시돼요.'; })()}
+    <b>목표</b><br>${(()=>{ const p=state.profile; const g=(p&&p.goals)?p.goals.slice(0,2):[]; return g.length?periodLines(g.map((x,i)=>(i+1)+'순위 '+x).join(', ')):'회원 정보 수정에서 목표를 선택하면 여기에 표시돼요.'; })()}
     <div style="height:9px"></div>
     <b>구성</b><br>${periodLines('설정한 운동 요일에 따라 쉬는 날이 정해지고, 운동일은 아래 6일 순환을 반복해요')}
     <div class="divider"></div>
@@ -2577,7 +2587,7 @@ function renderSetup(){
           <div class="wdef-info"><div class="wdef-name">${name}</div><div class="wdef-ex">${ex}</div></div>
           <div class="wstep-mini"><button class="wtb" onclick="setWDefault('${cat}',-1)">−</button><span class="wdef-val">${baseFor(cat)}<span class="unit">kg</span></span><button class="wtb" onclick="setWDefault('${cat}',1)">+</button></div>
         </div>`).join('')}</div>
-      <p class="info" style="margin:10px 0 0;color:var(--faint)">덤벨·케틀벨은 성별에 따라 다르게 시작해요(남 5kg, 여 3kg). 바벨은 빈 봉 20kg, 스미스는 15kg 기준이에요.</p>
+      <p class="info" style="margin:10px 0 0;color:var(--faint)">덤벨과 케틀벨은 성별에 따라 다르게 시작해요(남 5kg, 여 3kg). 바벨은 빈 봉 20kg, 스미스는 15kg 기준이에요.</p>
     </div>`;
 
   /* 앱이 제시하는 수치·권고의 근거를 사용자가 직접 확인할 수 있게 노출 */
@@ -2988,7 +2998,7 @@ const Onboard=(()=>{
   function v(id){ const el=document.getElementById(id); return el?el.value.trim():''; }
   function numv(id){ const el=document.getElementById(id); if(!el||el.value==='')return null; const n=parseFloat(el.value); return isNaN(n)?null:n; }
   function readStep1(){ ob.name=v('ob-name'); ob.nickname=v('ob-nick'); }
-  function readStep2(){ ob.heightCm=numv('ob-h'); ob.weightKg=numv('ob-w'); ob.targetWeightKg=numv('ob-tw'); if(ob.running===true){ const pm=numv('ob-pmin'); if(pm!=null)ob.paceMin=pm; const ps=numv('ob-psec'); if(ps!=null)ob.paceSec=ps; ob.maxKm=numv('ob-maxkm'); } if(ob.goalEtc)ob.goalOther=v('ob-goalother'); if(ob.injEtc)ob.injOther=v('ob-injother'); if(ob.condEtc)ob.condOther=v('ob-condother'); }
+  function readStep2(){ ob.heightCm=numv('ob-h'); ob.weightKg=numv('ob-w'); ob.targetWeightKg=numv('ob-tw'); if(ob.running===true){ const pm=numv('ob-pmin'); if(pm!=null)ob.paceMin=pm; const ps=numv('ob-psec'); if(ps!=null)ob.paceSec=ps; ob.maxKm=numv('ob-maxkm'); } if(ob.injEtc)ob.injOther=v('ob-injother'); if(ob.condEtc)ob.condOther=v('ob-condother'); }
   function render(step){ box().innerHTML = step===1?step1():step===2?step2():step3(); }
   function step3(){
     const bw=ob.obBw, fl=ob.obFloor; const wd=ob.workoutDays||[]; const n=wd.length;
@@ -3055,14 +3065,16 @@ const Onboard=(()=>{
         <label style="display:block;font-size:12.5px;font-weight:700;color:var(--muted);margin:12px 0 6px">최장 달린 거리 (km)</label>
         <input id="ob-maxkm" type="number" inputmode="decimal" value="${ob.maxKm||''}" placeholder="예: 5" style="width:130px">
       </div>`:''}
-      <div class="ob-sec">운동 목표 <span class="opt">(여러 개 선택 가능)</span></div>
-      <div class="obgrid">${GOALS.map(g=>chip(g,ob.goals.includes(g),`Onboard.toggleGoal('${g}')`)).join('')}${chip('기타',!!ob.goalEtc,'Onboard.toggleGoalEtc()')}</div>
-      ${ob.goalEtc?`<input class="ob-textin" id="ob-goalother" type="text" value="${ob.goalOther||''}" placeholder="목표를 직접 입력">`:''}
-      ${ob.goals.includes('자세교정')?`
+      <div class="ob-sec">운동 목표 <span class="opt">(최대 2개, 먼저 고른 순서가 우선순위예요)</span></div>
+      <div class="obgrid">${GOALS.map(g=>{ const idx=(ob.goals||[]).indexOf(g); const on=idx>=0; return `<span class="obchip ${on?'on':''}" onclick="Onboard.toggleGoal('${g}')">${g}${on?` <span class="rankbadge">${idx+1}순위</span>`:''}</span>`; }).join('')}</div>
+      <p class="ob-hint">1순위 목표를 가장 많이 반영하고, 2순위는 보조로 반영해요.</p>
+      ${(ob.goals||[]).includes('자세교정')?`
         <div class="ob-sub2">어떤 자세를 교정할까요? <span class="opt">(여러 개 선택 가능)</span></div>
         <div class="obgrid">
-          ${chip('거북목·말린 어깨·굽은 등',(ob.postureTypes||[]).includes('upper'),"Onboard.togglePType('upper')")}
-          ${chip('골반 전방경사·허리 과신전',(ob.postureTypes||[]).includes('pelvis'),"Onboard.togglePType('pelvis')")}
+          ${chip('거북목',(ob.postureTypes||[]).includes('neck'),"Onboard.togglePType('neck')")}
+          ${chip('말린 어깨',(ob.postureTypes||[]).includes('shoulder'),"Onboard.togglePType('shoulder')")}
+          ${chip('굽은 등',(ob.postureTypes||[]).includes('back'),"Onboard.togglePType('back')")}
+          ${chip('골반 전방경사',(ob.postureTypes||[]).includes('pelvis'),"Onboard.togglePType('pelvis')")}
         </div>
         <p class="ob-hint" style="margin-top:6px">근육 불균형에서 오는 일반적인 자세를 다뤄요. 척추측만 같은 구조적 변형이나 통증이 있으면 전문가와 상담하세요.</p>`:''}
       <div class="ob-sec">부상/수술 이력 <span class="opt">(선택)</span></div>
@@ -3076,7 +3088,7 @@ const Onboard=(()=>{
   }
   return {
     hide,
-    start:(cb)=>{ done=cb; ob={ nickname:'', gender:null, foreigner:null, verifyMethod:null, verified:false, lifting:null, running:null, goals:[], goalOther:'', postureTypes:[], injHas:null, injList:[], condHas:null, condList:[], equipment:[...DEFAULT_EQUIP], obBw:true, obFloor:true, workoutDays:[1,3,5,6], sessionMinutes:60 }; render(1); show(); },
+    start:(cb)=>{ done=cb; ob={ nickname:'', gender:null, foreigner:null, verifyMethod:null, verified:false, lifting:null, running:null, goals:[], postureTypes:[], injHas:null, injList:[], condHas:null, condList:[], equipment:[...DEFAULT_EQUIP], obBw:true, obFloor:true, workoutDays:[1,3,5,6], sessionMinutes:60 }; render(1); show(); },
     openBirth:()=>{ readStep1(); const b=ob.birth?parse(ob.birth):new Date(2000,0,1); bdY=b.getFullYear(); bdM=b.getMonth(); bdStep='cal'; renderBirthCal(); document.getElementById('ympick').classList.remove('hidden'); },
     bdShift:(n)=>{ bdM+=n; if(bdM<0){bdM=11;bdY--;} else if(bdM>11){bdM=0;bdY++;} renderBirthCal(); },
     bdTo:(step)=>{ bdStep=step; renderBirthCal(); },
@@ -3091,7 +3103,7 @@ const Onboard=(()=>{
       ob={ name:p.name||'', nickname:p.nickname||'', birth:p.birth||'', gender:p.gender||null, foreigner:(p.foreigner===undefined?null:p.foreigner), verifyMethod:p.verifyMethod||null, verified:!!p.verified,
         heightCm:p.heightCm||'', weightKg:p.weightKg||'', targetWeightKg:p.targetWeightKg||'',
         lifting:(p.liftingExp===undefined?null:p.liftingExp), running:(p.running===undefined?null:p.running), paceMin:pMin, paceSec:pSec, maxKm:p.runMaxKm||'',
-        goals:(p.goals||[]).slice(), goalOther:p.goalOther||'', goalEtc:!!(p.goalOther), postureTypes:(p.postureTypes||[]).slice(),
+        goals:(p.goals||[]).slice(0,2), postureTypes:(p.postureTypes||[]).slice(),
         injHas:(p.injuries?p.injuries.has:null), injList:((p.injuries&&p.injuries.list)||[]).slice(), injEtc:!!(p.injuries&&p.injuries.other), injOther:(p.injuries&&p.injuries.other)||'',
         condHas:(p.conditions?p.conditions.has:null), condList:((p.conditions&&p.conditions.list)||[]).slice(), condEtc:!!(p.conditions&&p.conditions.other), condOther:(p.conditions&&p.conditions.other)||'',
         equipment:[...(state.equipment||[])], obBw:!!state.includeBodyweight, obFloor:!!state.includeFloor,
@@ -3105,9 +3117,8 @@ const Onboard=(()=>{
     back:()=>{ readStep2(); render(1); box().scrollTop=0; },
     set2:(k,val)=>{ readStep2(); ob[k]=val; render(2); },
     setRunning:(b)=>{ readStep2(); ob.running=b; render(2); },
-    toggleGoal:(g)=>{ readStep2(); const i=ob.goals.indexOf(g); if(i>=0)ob.goals.splice(i,1); else ob.goals.push(g); render(2); },
+    toggleGoal:(g)=>{ readStep2(); if(!ob.goals)ob.goals=[]; const i=ob.goals.indexOf(g); if(i>=0){ ob.goals.splice(i,1); } else if(ob.goals.length<2){ ob.goals.push(g); } else { toast('운동 목표는 최대 2개까지 선택할 수 있어요.'); return; } render(2); },
     togglePType:(t)=>{ readStep2(); if(!ob.postureTypes)ob.postureTypes=[]; const i=ob.postureTypes.indexOf(t); if(i>=0)ob.postureTypes.splice(i,1); else ob.postureTypes.push(t); render(2); },
-    toggleGoalEtc:()=>{ readStep2(); ob.goalEtc=!ob.goalEtc; render(2); },
     setInj:(b)=>{ readStep2(); ob.injHas=b; render(2); },
     toggleInj:(x)=>{ readStep2(); const i=ob.injList.indexOf(x); if(i>=0)ob.injList.splice(i,1); else ob.injList.push(x); render(2); },
     toggleInjEtc:()=>{ readStep2(); ob.injEtc=!ob.injEtc; render(2); },
@@ -3132,7 +3143,7 @@ const Onboard=(()=>{
         liftingExp:ob.lifting, running:ob.running,
         runPace:(ob.running&&ob.paceMin!=null&&ob.paceSec!=null)?(ob.paceMin+':'+String(ob.paceSec).padStart(2,'0')):null,
         runMaxKm:ob.running?ob.maxKm:null,
-        goals:ob.goals.slice(), goalOther:ob.goalEtc?(ob.goalOther||''):'', postureTypes:ob.goals.includes('자세교정')?((ob.postureTypes||[]).slice()):[],
+        goals:(ob.goals||[]).slice(0,2), postureTypes:ob.goals.includes('자세교정')?((ob.postureTypes||[]).slice()):[],
         injuries:{has:ob.injHas===true, list:ob.injHas===true?ob.injList.slice():[], other:(ob.injHas===true&&ob.injEtc)?(ob.injOther||''):''},
         conditions:{has:ob.condHas===true, list:ob.condHas===true?ob.condList.slice():[], other:(ob.condHas===true&&ob.condEtc)?(ob.condOther||''):''},
         ts:Date.now()

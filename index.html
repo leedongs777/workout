@@ -1733,7 +1733,7 @@ function cardioGuide(detail){
   let note=detail.replace(/존\s*[1-5]\s*강도?/,'').replace(/^\s*[·,]\s*/,'').trim();
   /* 심박수는 추정치이므로 대화 검사를 함께 제시 */
   const talk=ZONE_INFO[z]?ZONE_INFO[z].talk:'';
-  if(talk) note = note ? (talk+'<span class="vdiv"></span>'+note) : talk;
+  if(talk) note = note ? (talk+'. '+note) : talk;
   return `<div class="cz"><button class="cz-badge cz${z} cz-tap" onclick="showZoneInfo()">Zone ${z}<svg class="cz-i" viewBox="0 0 20 20" width="13" height="13" aria-hidden="true"><circle cx="10" cy="10" r="8.4" fill="none" stroke="currentColor" stroke-width="1.7"/><circle cx="10" cy="6.3" r="1.15" fill="currentColor"/><path d="M10 9.3v4.6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button><span class="cz-hr"><span class="cz-heart">♥</span> ${hrTxt}</span>${note?`<span class="vdiv"></span><span class="cz-note">${note}</span>`:''}</div>`;
 }
 function showZoneInfo(){

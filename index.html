@@ -568,6 +568,21 @@
   .field input[type=date]::-webkit-calendar-picker-indicator{opacity:.5; cursor:pointer;}
   .ob-next{width:100%; margin-top:22px; height:52px; border:none; border-radius:13px; background:var(--accent); color:var(--on-accent); font-family:inherit; font-size:16px; font-weight:800; letter-spacing:-.01em; cursor:pointer; box-shadow:0 8px 20px rgba(46,94,86,.26); transition:.15s;}
   .ob-next:active{transform:translateY(1px); box-shadow:0 4px 12px rgba(46,94,86,.22);}
+  /* 편집 모드: 닫기(X) + 하단 취소/저장 액션 */
+  .gate-x{position:absolute; top:16px; right:18px; width:34px; height:34px; border-radius:50%; border:none; background:var(--surface-2); color:var(--muted); font-size:16px; cursor:pointer; font-family:inherit; z-index:2; display:flex; align-items:center; justify-content:center;}
+  .gate-x:active{background:var(--line);}
+  .ob-actions{display:flex; gap:10px; margin-top:22px;}
+  .ob-cancel{flex:0 0 34%; height:52px; border:1px solid var(--line); border-radius:13px; background:var(--surface-2); color:var(--muted); font-family:inherit; font-size:15px; font-weight:700; cursor:pointer;}
+  .ob-cancel:active{background:var(--line);}
+  .ob-save{flex:1; height:52px; border:none; border-radius:13px; background:var(--accent); color:var(--on-accent); font-family:inherit; font-size:16px; font-weight:800; letter-spacing:-.01em; cursor:pointer; box-shadow:0 8px 20px rgba(46,94,86,.26);}
+  .ob-save:active{transform:translateY(1px); box-shadow:0 4px 12px rgba(46,94,86,.22);}
+  /* 편집 중에는 하단 네비게이션을 gate 위로 올려 다른 메뉴로 이동 가능하게 */
+  body.obediting nav{z-index:250;}
+  body.obediting .gate-inner{padding-bottom:calc(var(--nav-h) + 44px + env(safe-area-inset-bottom));}
+  /* 확인 대화상자 */
+  .cf-msg{font-size:15.5px; line-height:1.6; color:var(--ink); text-align:center; padding:8px 4px 2px; font-weight:600;}
+  .cf-btns{display:flex; gap:10px; margin-top:18px;}
+  .cf-btns .btn{width:auto; flex:1;}
   .ob-datebtn{width:100%; height:48px; padding:0 14px; border:1px solid var(--line); border-radius:12px; background:var(--surface-2); color:var(--ink); font-family:inherit; font-size:15px; text-align:left; cursor:pointer; box-sizing:border-box; display:flex; align-items:center; justify-content:space-between;}
   .ob-datebtn.ph{color:var(--faint);}
   .ob-datebtn .dbi{color:var(--muted); font-size:13px;}
@@ -702,6 +717,7 @@
 <div id="onboard" class="gate hidden"></div>
 <div id="eqmodal" class="eqmodal hidden" onclick="if(event.target===this)closeEqInfo()"></div>
 <div id="ympick" class="eqmodal hidden" onclick="if(event.target===this)closeYM()"></div>
+<div id="confirmm" class="eqmodal hidden" onclick="if(event.target===this)closeConfirm()"></div>
 <div id="drawer" class="drawer hidden"><div class="drawer-backdrop" onclick="Drawer.close()"></div><div class="drawer-panel"></div></div>
 <div class="wrap">
   <header>
@@ -2217,6 +2233,19 @@ function planSetMode(m){ planMode=m; renderPlan(); }
 let pickStep='year', pickYear=null;
 function openYM(){ pickStep='year'; pickYear=planYear; renderYM(); document.getElementById('ympick').classList.remove('hidden'); }
 function closeYM(){ const m=document.getElementById('ympick'); m.classList.add('hidden'); m.innerHTML=''; }
+/* 스타일 통일된 확인 대화상자. onOk는 [확인]을 눌렀을 때만 실행된다. */
+let _cfOk=null;
+function askConfirm(msg, onOk, okLabel, cancelLabel){
+  _cfOk=onOk||null;
+  const m=document.getElementById('confirmm');
+  m.innerHTML=`<div class="eqmodal-card" style="max-width:320px">
+    <div class="cf-msg">${msg}</div>
+    <div class="cf-btns"><button class="btn ghost" onclick="closeConfirm()">${cancelLabel||'취소'}</button><button class="btn primary" onclick="confirmOk()">${okLabel||'확인'}</button></div>
+  </div>`;
+  m.classList.remove('hidden');
+}
+function confirmOk(){ const f=_cfOk; closeConfirm(); if(f)f(); }
+function closeConfirm(){ _cfOk=null; const m=document.getElementById('confirmm'); m.classList.add('hidden'); m.innerHTML=''; }
 function ymPickYear(y){ pickYear=y; pickStep='month'; renderYM(); }
 function ymBackYear(){ pickStep='year'; renderYM(); }
 function ymPickMonth(mo){ planYear=pickYear; planMonth=mo; closeYM(); renderPlan(); }
@@ -2749,7 +2778,7 @@ function switchTab(tab,isBack){
 function updateBackBtn(){ const b=$('hd-back'); if(b) b.classList.toggle('hidden', activeTab==='home'); }
 function goBack(){ switchTab('home'); }
 function goTab(tab){ switchTab(tab); }
-document.querySelectorAll('.nav-btn').forEach(b=>{ b.addEventListener('click',()=>switchTab(b.dataset.tab)); });
+document.querySelectorAll('.nav-btn').forEach(b=>{ b.addEventListener('click',()=>{ if(typeof Onboard!=='undefined' && Onboard.isEditing && Onboard.isEditing()){ Onboard.exitEdit(b.dataset.tab); } else { switchTab(b.dataset.tab); } }); });
 
 /* ---------------- Cloud sync (Firebase + Google 로그인) ---------------- */
 const CFG_KEY='workoutPlanner:fbcfg';
@@ -2965,7 +2994,34 @@ const Auth=(()=>{
 /* ---------------- Onboarding (signup profile) ---------------- */
 const Onboard=(()=>{
   let ob={}, done=null;
+  let editing=false, obInit=null, curStep=1;
   let bdY=2000, bdM=0, bdStep='cal';
+  const snap=()=>JSON.parse(JSON.stringify(ob));
+  /* 빈 입력은 numv()가 ''→null로 바꾸므로, 비교 시 ''와 null을 같은 값으로 취급해 헛된 변경 감지를 막는다 */
+  const norm=(o)=>JSON.stringify(o, (k,v)=> v===''?null:v);
+  function readCurrent(){ if(curStep===1)readStep1(); else if(curStep===2)readStep2(); }
+  function isDirty(){ readCurrent(); return obInit!=null && norm(ob)!==norm(obInit); }
+  /* ob → state.profile 반영(내비게이션은 하지 않음). finish와 편집 중 저장이 공유한다. */
+  function commit(){
+    state.profile={
+      name:ob.name, nickname:ob.nickname||'', birth:ob.birth, gender:ob.gender, foreigner:ob.foreigner,
+      verifyMethod:ob.verifyMethod, verified:!!ob.verified,
+      heightCm:ob.heightCm, weightKg:ob.weightKg, targetWeightKg:ob.targetWeightKg,
+      liftingExp:ob.lifting, running:ob.running,
+      runPace:(ob.running&&ob.paceMin!=null&&ob.paceSec!=null)?(ob.paceMin+':'+String(ob.paceSec).padStart(2,'0')):null,
+      runMaxKm:ob.running?ob.maxKm:null,
+      goals:(ob.goals||[]).slice(0,2), postureTypes:ob.goals.includes('자세교정')?((ob.postureTypes||[]).slice()):[],
+      injuries:{has:ob.injHas===true, list:ob.injHas===true?ob.injList.slice():[], other:(ob.injHas===true&&ob.injEtc)?(ob.injOther||''):''},
+      conditions:{has:ob.condHas===true, list:ob.condHas===true?ob.condList.slice():[], other:(ob.condHas===true&&ob.condEtc)?(ob.condOther||''):''},
+      ts:Date.now()
+    };
+    state.equipment=ob.equipment.slice();
+    state.includeBodyweight=!!ob.obBw;
+    state.includeFloor=!!ob.obFloor;
+    state.workoutDays=ob.workoutDays.slice();
+    state.sessionMinutes=ob.sessionMinutes||60;
+    touch();
+  }
   function renderBirthCal(){
     const m=document.getElementById('ympick'); const WDh=['일','월','화','수','목','금','토']; let inner;
     if(bdStep==='year'){
@@ -2989,7 +3045,7 @@ const Onboard=(()=>{
   }
   const box=()=>document.getElementById('onboard');
   function show(){ box().classList.remove('hidden'); document.body.style.overflow='hidden'; box().scrollTop=0; }
-  function hide(){ box().classList.add('hidden'); document.body.style.overflow=''; }
+  function hide(){ box().classList.add('hidden'); document.body.style.overflow=''; editing=false; obInit=null; document.body.classList.remove('obediting'); }
   const GENDERS=[['male','남성'],['female','여성']];
   const GOALS=['다이어트(체중감량)','근육 만들기','체력 향상','자세교정','현 상태 유지'];
   const INJ=['허리 (디스크/수술)','무릎','어깨','발목','손목','목/거북목'];
@@ -2999,11 +3055,12 @@ const Onboard=(()=>{
   function numv(id){ const el=document.getElementById(id); if(!el||el.value==='')return null; const n=parseFloat(el.value); return isNaN(n)?null:n; }
   function readStep1(){ ob.name=v('ob-name'); ob.nickname=v('ob-nick'); }
   function readStep2(){ ob.heightCm=numv('ob-h'); ob.weightKg=numv('ob-w'); ob.targetWeightKg=numv('ob-tw'); if(ob.running===true){ const pm=numv('ob-pmin'); if(pm!=null)ob.paceMin=pm; const ps=numv('ob-psec'); if(ps!=null)ob.paceSec=ps; ob.maxKm=numv('ob-maxkm'); } if(ob.injEtc)ob.injOther=v('ob-injother'); if(ob.condEtc)ob.condOther=v('ob-condother'); }
-  function render(step){ box().innerHTML = step===1?step1():step===2?step2():step3(); }
+  function render(step){ curStep=step; box().innerHTML = step===1?step1():step===2?step2():step3(); }
   function step3(){
     const bw=ob.obBw, fl=ob.obFloor; const wd=ob.workoutDays||[]; const n=wd.length;
     const dayList=[[1,'월'],[2,'화'],[3,'수'],[4,'목'],[5,'금'],[6,'토'],[0,'일']];
     return `<div class="gate-inner">
+      ${editing?`<button class="gate-x" onclick="Onboard.exitEdit()" aria-label="닫기">✕</button>`:''}
       <button class="gate-back" onclick="Onboard.back2()">← 뒤로</button>
       <div class="ob-prog">STEP 3 / 3<span class="vdiv"></span>운동 환경/요일</div>
       <div class="ob-title">운동 요일과 환경을 정해요</div>
@@ -3020,11 +3077,12 @@ const Onboard=(()=>{
       <div class="ob-sec">보유 기구</div>
       <p class="ob-hint" style="margin:0 0 10px">헬스장에 있는 기구를 눌러 주세요. 각 기구의 <b>?</b>로 설명을 볼 수 있어요. <b>기구는 나중에 [설정] 탭에서 얼마든지 변경할 수 있어요.</b></p>
       ${eqGridHTML(ob.equipment,'Onboard.toggleEq')}
-      <button class="ob-next" onclick="Onboard.finish()">확인하고 내 플랜 보기</button>
+      <button class="ob-next" onclick="Onboard.finish()">${editing?'저장하고 완료':'확인하고 내 플랜 보기'}</button>
     </div>`;
   }
   function step1(){
     return `<div class="gate-inner">
+      ${editing?`<button class="gate-x" onclick="Onboard.exitEdit()" aria-label="닫기">✕</button>`:''}
       <div class="ob-prog">STEP 1 / 3<span class="vdiv"></span>개인정보</div>
       <div class="ob-title">기본 정보를 알려주세요</div>
       <div class="ob-sub">계정과 맞춤 플랜에 사용돼요.</div>
@@ -3040,12 +3098,15 @@ const Onboard=(()=>{
       ${ob.foreigner===true?`<div class="ob-hint">외국인은 여권 / 외국인등록번호 기반 인증이 제공될 예정이에요.</div>`:''}
       <div class="ob-verify"><button class="vbtn" onclick="Onboard.verify()">${ob.verified?'✓ 인증됨':'본인인증 하기'}</button></div>
       <div class="ob-hint">지금은 인증 화면만 준비돼 있어요. 실제 본인인증(휴대폰/간편인증)은 정식 출시 때 연동되며, 지금은 건너뛰고 진행돼요.</div>
-      <button class="ob-next" onclick="Onboard.next1()">다음</button>
+      ${editing
+        ?`<div class="ob-actions"><button class="ob-cancel" onclick="Onboard.exitEdit()">취소</button><button class="ob-save" onclick="Onboard.saveNext(1)">저장하고 다음으로</button></div>`
+        :`<button class="ob-next" onclick="Onboard.next1()">다음</button>`}
     </div>`;
   }
   function step2(){
     const r=ob.running===true; const mins=[]; for(let i=2;i<=12;i++)mins.push(i); const secs=[]; for(let i=0;i<60;i++)secs.push(i);
     return `<div class="gate-inner">
+      ${editing?`<button class="gate-x" onclick="Onboard.exitEdit()" aria-label="닫기">✕</button>`:''}
       <button class="gate-back" onclick="Onboard.back()">← 뒤로</button>
       <div class="ob-prog">STEP 2 / 3<span class="vdiv"></span>신상정보</div>
       <div class="ob-title">운동 정보를 알려주세요</div>
@@ -3083,12 +3144,14 @@ const Onboard=(()=>{
       <div class="ob-sec">지병 <span class="opt">(선택)</span></div>
       <div class="obchips seg">${chip('없음',ob.condHas===false,'Onboard.setCond(false)')}${chip('있음',ob.condHas===true,'Onboard.setCond(true)')}</div>
       ${ob.condHas===true?`<div class="obgrid" style="margin-top:8px">${COND.map(x=>chip(x,ob.condList.includes(x),`Onboard.toggleCond('${x}')`)).join('')}${chip('기타',!!ob.condEtc,'Onboard.toggleCondEtc()')}</div>${ob.condEtc?`<input class="ob-textin" id="ob-condother" type="text" value="${ob.condOther||''}" placeholder="직접 입력">`:''}`:''}
-      <button class="ob-next" onclick="Onboard.next2()">다음<span class="vdiv"></span>운동 환경</button>
+      ${editing
+        ?`<div class="ob-actions"><button class="ob-cancel" onclick="Onboard.exitEdit()">취소</button><button class="ob-save" onclick="Onboard.saveNext(2)">저장하고 다음으로</button></div>`
+        :`<button class="ob-next" onclick="Onboard.next2()">다음<span class="vdiv"></span>운동 환경</button>`}
     </div>`;
   }
   return {
     hide,
-    start:(cb)=>{ done=cb; ob={ nickname:'', gender:null, foreigner:null, verifyMethod:null, verified:false, lifting:null, running:null, goals:[], postureTypes:[], injHas:null, injList:[], condHas:null, condList:[], equipment:[...DEFAULT_EQUIP], obBw:true, obFloor:true, workoutDays:[1,3,5,6], sessionMinutes:60 }; render(1); show(); },
+    start:(cb)=>{ done=cb; editing=false; obInit=null; document.body.classList.remove('obediting'); ob={ nickname:'', gender:null, foreigner:null, verifyMethod:null, verified:false, lifting:null, running:null, goals:[], postureTypes:[], injHas:null, injList:[], condHas:null, condList:[], equipment:[...DEFAULT_EQUIP], obBw:true, obFloor:true, workoutDays:[1,3,5,6], sessionMinutes:60 }; render(1); show(); },
     openBirth:()=>{ readStep1(); const b=ob.birth?parse(ob.birth):new Date(2000,0,1); bdY=b.getFullYear(); bdM=b.getMonth(); bdStep='cal'; renderBirthCal(); document.getElementById('ympick').classList.remove('hidden'); },
     bdShift:(n)=>{ bdM+=n; if(bdM<0){bdM=11;bdY--;} else if(bdM>11){bdM=0;bdY++;} renderBirthCal(); },
     bdTo:(step)=>{ bdStep=step; renderBirthCal(); },
@@ -3108,6 +3171,7 @@ const Onboard=(()=>{
         condHas:(p.conditions?p.conditions.has:null), condList:((p.conditions&&p.conditions.list)||[]).slice(), condEtc:!!(p.conditions&&p.conditions.other), condOther:(p.conditions&&p.conditions.other)||'',
         equipment:[...(state.equipment||[])], obBw:!!state.includeBodyweight, obFloor:!!state.includeFloor,
         workoutDays:(state.workoutDays||[1,3,5,6]).slice(), sessionMinutes:state.sessionMinutes||60 };
+      editing=true; obInit=snap(); document.body.classList.add('obediting');
       render(1); show();
     },
     set:(k,val)=>{ readStep1(); ob[k]=val; render(1); },
@@ -3136,26 +3200,24 @@ const Onboard=(()=>{
     finish:()=>{
       if(!ob.heightCm||!ob.weightKg||ob.lifting===null||ob.running===null){ toast('이전 단계 정보를 확인해 주세요'); render(2); return; }
       if(!ob.workoutDays||ob.workoutDays.length===0){ toast('운동할 요일을 최소 1개 선택해 주세요'); return; }
-      state.profile={
-        name:ob.name, nickname:ob.nickname||'', birth:ob.birth, gender:ob.gender, foreigner:ob.foreigner,
-        verifyMethod:ob.verifyMethod, verified:!!ob.verified,
-        heightCm:ob.heightCm, weightKg:ob.weightKg, targetWeightKg:ob.targetWeightKg,
-        liftingExp:ob.lifting, running:ob.running,
-        runPace:(ob.running&&ob.paceMin!=null&&ob.paceSec!=null)?(ob.paceMin+':'+String(ob.paceSec).padStart(2,'0')):null,
-        runMaxKm:ob.running?ob.maxKm:null,
-        goals:(ob.goals||[]).slice(0,2), postureTypes:ob.goals.includes('자세교정')?((ob.postureTypes||[]).slice()):[],
-        injuries:{has:ob.injHas===true, list:ob.injHas===true?ob.injList.slice():[], other:(ob.injHas===true&&ob.injEtc)?(ob.injOther||''):''},
-        conditions:{has:ob.condHas===true, list:ob.condHas===true?ob.condList.slice():[], other:(ob.condHas===true&&ob.condEtc)?(ob.condOther||''):''},
-        ts:Date.now()
-      };
-      state.equipment=ob.equipment.slice();
-      state.includeBodyweight=!!ob.obBw;
-      state.includeFloor=!!ob.obFloor;
-      state.workoutDays=ob.workoutDays.slice();
-      state.sessionMinutes=ob.sessionMinutes||60;
-      touch(); hide(); if(done)done();
+      const wasEditing=editing;
+      commit();
+      hide(); if(done)done();
       if(typeof switchTab==='function') switchTab('home');
-      toast('플랜이 준비됐어요! 아래에서 확인해 보세요');
+      toast(wasEditing?'변경 사항을 저장했어요':'플랜이 준비됐어요! 아래에서 확인해 보세요');
+    },
+    isEditing:()=>editing,
+    /* 편집 저장 후 다음 단계로. obInit 기준선을 갱신해 이후 [취소]가 이 단계 변경을 '변경 없음'으로 본다. */
+    saveNext:(step)=>{
+      if(step===1){ readStep1(); if(!ob.name){toast('이름을 입력해 주세요');return;} if(!ob.birth){toast('생년월일을 선택해 주세요');return;} if(!ob.gender){toast('성별을 선택해 주세요');return;} if(ob.foreigner===null){toast('내/외국인을 선택해 주세요');return;} commit(); obInit=snap(); render(2); box().scrollTop=0; toast('저장했어요'); }
+      else if(step===2){ readStep2(); if(!ob.heightCm||!ob.weightKg){toast('키와 현재 몸무게를 입력해 주세요');return;} if(ob.lifting===null){toast('근력 운동 경험을 선택해 주세요');return;} if(ob.running===null){toast('러닝 경험을 선택해 주세요');return;} commit(); obInit=snap(); render(3); box().scrollTop=0; toast('저장했어요'); }
+    },
+    /* 편집 종료(취소/X/네비 이동). 변경 사항이 있으면 확인을 받는다. targetTab 기본값은 설정 탭. */
+    exitEdit:(targetTab)=>{
+      const t=(typeof targetTab==='string')?targetTab:'setup';
+      const go=()=>{ hide(); if(done)done(); if(typeof switchTab==='function') switchTab(t); };
+      if(isDirty()) askConfirm('변경 사항을 저장하지 않고 나가시겠습니까?', go, '확인', '취소');
+      else go();
     }
   };
 })();

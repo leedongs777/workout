@@ -818,10 +818,9 @@ const EQ_LABEL={}; EQUIP_GROUPS.forEach(g=>g.items.forEach(([id,l])=>EQ_LABEL[id
 const EQ_COMBO_LABEL={'smith,bench':'스미스 머신'};
 /* 기구 선택 버튼용 짧은 이름 — 이중 이름(박스/플라이오박스)이 슬래시로 겹치는 것 방지 */
 const EQ_SHORT={box:'박스', band:'밴드'};
-const DEFAULT_EQUIP=['treadmill','elliptical','recumbent_bike','leg_press','leg_extension','leg_curl',
-  'hip_abduction','hip_adduction','lat_pulldown','seated_row','chest_press','pec_deck','reverse_pec_deck','shoulder_press',
-  'assisted_pullup','cable','smith','barbell','dumbbell','kettlebell','bench','band','mat','foam_roller','step_box',
-  'lying_leg_curl','bicep_curl'];
+/* 중립 최소 구성: 기본은 기구 없음(맨몸 자동 ON). 특정 헬스장 구성을 전역 기본값으로 넣지 않는다.
+   사용자는 온보딩/설정에서 자기가 가진 기구를 직접 고른다. 첫 진입·둘러보기는 맨몸 플랜으로 시작. */
+const DEFAULT_EQUIP=[];
 
 /* ---------------- Illustrations (one consistent line-art style) ---------------- */
 function svgWrap(inner){return `<svg viewBox="0 0 48 44" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">${inner}</svg>`;}
@@ -1332,7 +1331,7 @@ function buildWU(s){
   // 그날 부위 집중(활성화) — 정식 명칭
   if(cat==='upper'){
     A.push({n:'밴드 풀 어파트', a:'15회', d:'밴드를 가슴 앞에서 잡고|양옆으로 쭉 당겨 벌리기', eq:['band'], alt:{n:'날개뼈 모으기', a:'15회', d:'양 팔꿈치를 뒤로 당겨|날개뼈를 가운데로 모으기'}});
-    if(pull) A.push({n:'턱 당기기', a:'30초', d:'턱을 목 쪽으로 살짝 당겨|뒤통수를 위로 미는 느낌으로 유지'});
+    if(pull) A.push({n:'턱 당기기', a:'30초', d:'턱을 목 쪽으로 살짝 당겨|뒤통수를 위로 미는 느낌으로 유지', posture:'neck'}); // 거북목 교정용 — 자세교정(거북목) 목표일 때만 노출(wuResolve 게이팅)
     else A.push({n:'벽 팔굽혀펴기', a:'12회', d:'벽·기둥을 짚고|가슴을 벽 쪽으로 가볍게 내렸다 밀기'});
   } else if(cat==='lower'){
     A.push({n:'바디웨이트 스쿼트', a:'15회', d:'발을 어깨너비로,|엉덩이를 뒤로 빼며 앉았다 서기'});
@@ -1818,6 +1817,7 @@ function wuResolve(arr){
   return (arr||[]).map(it=>{
     if(typeof it==='string') return {n:it};
     if(it.cardio) return {cardio:true};
+    if(it.posture && !(goalMods().posture && ptypes().includes(it.posture))) return null; // 자세교정 목표 + 해당 증상일 때만 노출
     if(okEq(it.eq)&&okFloor(it.floor)) return {n:it.n,a:it.a,d:it.d};
     const alt=it.alt;
     if(alt && okEq(alt.eq)&&okFloor(alt.floor)) return {n:alt.n,a:alt.a,d:alt.d};

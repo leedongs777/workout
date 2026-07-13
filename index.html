@@ -785,7 +785,8 @@ function parse(s){const [y,m,d]=s.split('-').map(Number);return new Date(y,m-1,d
 function addDays(d,n){const x=new Date(d);x.setDate(x.getDate()+n);return x;}
 function todayStr(){return fmt(new Date());}
 function isMon(d){return d.getDay()===1;}
-function wDays(){ return (state.workoutDays && state.workoutDays.length) ? state.workoutDays : [0,2,3,4,5,6]; } // weekday indices (0=Sun); default = all but Monday
+const DEFAULT_WORKOUT_DAYS=[1,3,5,6]; // 중립 기본값: 주 4일(월·수·금·토). 특정 개인의 일정이 아님. 한 곳에서만 정의.
+function wDays(){ return (state.workoutDays && state.workoutDays.length) ? state.workoutDays : DEFAULT_WORKOUT_DAYS; } // weekday indices (0=Sun)
 function isRestDow(d){ return !wDays().includes(d.getDay()); } // recurring weekly rest if this weekday isn't a workout day
 function human(s){const d=parse(s);return `${d.getMonth()+1}월 ${d.getDate()}일 (${WD[d.getDay()]})`;}
 
@@ -1282,6 +1283,35 @@ const SESSIONS=[
   cardio:{label:'유산소', detail:'존2 강도'},
  },
 ];
+/* ---- 빈도 티어용 세션 (저빈도 전신 / 4일 상하체). 기존 슬롯을 참조해 구성 ----
+   슬롯 객체를 공유해도 로그·커스텀 키는 (세션 인덱스, 슬롯 위치)로 잡혀 충돌 없음.
+   웜업/쿨다운은 아래 SESSIONS.forEach가 title 기준으로 자동 생성한다.
+   ⚠️ 제목에 하체/상체/당기기/밀기/둔근/균형이 들어가면 sessionCat이 그 부위로 잡힌다.
+      전신 세션은 'full'로 잡히도록 제목을 '전신 A/B'로 둔다. */
+const _sl=(si,oi)=>SESSIONS[si].slots[oi];
+const FB_A=11, FB_B=12, UP_A=13, UP_B=14;
+SESSIONS.push(
+ { // 11 · 전신 A — 스쿼트·수평밀기·수직당기기 (저빈도 1~3일)
+  title:'전신 A', focus:['전신','하체','밀기','당기기'], est:'40–55분',
+  slots:[ _sl(0,0), _sl(0,2), _sl(4,0), _sl(1,0), _sl(0,4) ],
+  cardio:{label:'유산소', detail:'존2 강도'},
+ },
+ { // 12 · 전신 B — 수직밀기·수평당기기·편측하체·후면(교정) (저빈도 1~3일)
+  title:'전신 B', focus:['전신','상체','힌지','자세교정'], est:'40–55분',
+  slots:[ _sl(4,1), _sl(1,1), _sl(3,0), _sl(0,3), _sl(1,4), _sl(3,4) ],
+  cardio:{label:'유산소', detail:'존2 강도'},
+ },
+ { // 13 · 상체 A — 밀기 중심 (4일 상하체 순환)
+  title:'상체 A · 밀기 중심', focus:['가슴','어깨','등','팔'], est:'40–55분',
+  slots:[ _sl(4,0), _sl(4,1), _sl(1,1), _sl(1,0), _sl(4,3), _sl(1,4) ],
+  cardio:{label:'유산소', detail:'존2 강도'},
+ },
+ { // 14 · 상체 B — 당기기 중심 (4일 상하체 순환). 동작은 A와 다른 변형(S6·S7)으로
+  title:'상체 B · 당기기 중심', focus:['등','후면','어깨','팔'], est:'40–55분',
+  slots:[ _sl(6,1), _sl(6,0), _sl(7,0), _sl(7,1), _sl(6,3), _sl(1,3) ],
+  cardio:{label:'유산소', detail:'존2 강도'},
+ },
+);
 /* ---- 웜업/쿨다운: 한 항목 = 한 동작, 전신을 순서대로(그날 부위 중심), 정식 명칭 ---- */
 function sessionCat(s){ const t=s.title||''; if(/유산소/.test(t))return 'cardio'; if(/상체|당기기|밀기|가슴/.test(t))return 'upper'; if(/하체|둔근|균형/.test(t))return 'lower'; return 'full'; }
 function isPullDay(s){ return /당기기|등|후면/.test(s.title||''); }
@@ -1307,7 +1337,9 @@ function buildWU(s){
   } else if(cat==='lower'){
     A.push({n:'바디웨이트 스쿼트', a:'15회', d:'발을 어깨너비로,|엉덩이를 뒤로 빼며 앉았다 서기'});
     A.push({n:'밴드 사이드 스텝', a:'좌/우 각각 12걸음', d:'밴드를 무릎에 걸고|반쯤 앉은 자세로 옆으로 이동', eq:['band'], alt:{n:'사이드 스텝', a:'좌/우 각각 12걸음', d:'무릎을 살짝 굽힌|반쯤 앉은 자세로 옆으로 이동'}});
-  } else {
+  } else { // 전신·유산소 외: 상·하체를 모두 예열
+    A.push({n:'바디웨이트 스쿼트', a:'15회', d:'발을 어깨너비로,|엉덩이를 뒤로 빼며 앉았다 서기'});
+    A.push({n:'밴드 풀 어파트', a:'15회', d:'밴드를 가슴 앞에서 잡고|양옆으로 쭉 당겨 벌리기', eq:['band'], alt:{n:'날개뼈 모으기', a:'15회', d:'양 팔꿈치를 뒤로 당겨|날개뼈를 가운데로 모으기'}});
     A.push({n:'힙 서클', a:'좌/우 각 8회', d:'손을 허리에 얹고|골반으로 큰 원을 그리기'});
   }
   return A;
@@ -1336,7 +1368,7 @@ function buildCD(s){
 }
 SESSIONS.forEach(s=>{ s.warm=buildWU(s); s.cool=buildCD(s); });
 /* ---------------- App state ---------------- */
-let state={ equipment:[...DEFAULT_EQUIP], includeBodyweight:true, includeFloor:true, workoutDays:[0,2,3,4,5,6], sessionMinutes:60, startDate:todayStr(), restDays:[], doneDays:[], log:{}, steps:{}, slotCustom:{}, wDefaults:null, setInc:1, authPassed:false, authProvider:null, consent:null, profile:null, onboarded:true };
+let state={ equipment:[...DEFAULT_EQUIP], includeBodyweight:true, includeFloor:true, workoutDays:[...DEFAULT_WORKOUT_DAYS], sessionMinutes:60, startDate:todayStr(), restDays:[], doneDays:[], log:{}, steps:{}, slotCustom:{}, wDefaults:null, setInc:1, authPassed:false, authProvider:null, consent:null, profile:null, onboarded:true };
 let activeTab='home';
 let openDays={}; // schedule expand state
 
@@ -1349,10 +1381,16 @@ let saveT=null;
 function persist(){ clearTimeout(saveT); saveT=setTimeout(()=>Store.set(KEY,JSON.stringify(state)),120); }
 function touch(){ state._ts=Date.now(); persist(); if(typeof Sync!=='undefined' && Sync.isConnected()) Sync.push(); }
 
-/* ---------------- Programs (목표별 세션 순환) ----------------
-   각 배열 = 운동일 순환에 배치될 세션 인덱스(SESSIONS 기준). 1순위 목표로 프로그램을 고른다.
-   2순위는 스플릿을 바꾸지 않고 goalMods(세트·반복·유산소 길이·휴식)로만 반영한다.
-   default = 현행 6일 균형 순환(무회귀 기준). 아직 전용 프로그램이 없는 목표는 default로. */
+/* ---------------- Programs (빈도 티어 × 목표) ----------------
+   순환 구조는 먼저 "주당 운동 일수"가 정한다(운동생리학: 저빈도일수록 전신).
+     1~2일 → 전신 A/B (매 세션 전신, 부위별 주 1~2회)
+     3일   → 전신 A/B + 전신 순환(S8)
+     4일   → 상/하체 ×2 (상체A·하체A·상체B·하체B) — 4일 표준
+     5일+  → 아래 목표별 스플릿(PROGRAMS)
+   목표(goals)는 저빈도에서도 goalMods(세트·반복·유산소·휴식·교정)로 세션 안에서 반영된다.
+   PROGRAMS 각 배열 = 운동일 순환에 배치될 세션 인덱스(SESSIONS 기준). 1순위 목표로 고른다.
+   2순위는 스플릿을 바꾸지 않고 goalMods로만 반영한다.
+   default = 6일 균형 순환. 아직 전용 프로그램이 없는 목표는 default로. */
 const PROGRAMS={
   default:[0,1,2,3,4,5],       // 하체A, 당기기, 유산소·모빌리티, 하체B, 밀기, 유산소·코어교정 (균형)
   hyper:  [0,1,4,3,6,7],       // 하체A, 당기기, 밀기, 하체B, 당기기B, 밀기B — 상하체 2회/주, 전용 유산소일 없음
@@ -1366,7 +1404,13 @@ function programKey(){
   const k=map[first];
   return (k&&PROGRAMS[k])?k:'default';
 }
-function programFor(){ return PROGRAMS[programKey()]||PROGRAMS.default; }
+function programFor(){
+  const n=weekTotal();
+  if(n<=2) return [FB_A, FB_B];          // 전신 A/B — 둘이 함께 전신을 완전 커버(주 2일이면 각 부위 2회)
+  if(n===3) return [FB_A, FB_B, 8];      // 전신 A/B + 전신 순환(S8) — 부위별 주 3회
+  if(n===4) return [UP_A, 0, UP_B, 3];   // 상체A · 하체A(S0) · 상체B · 하체B(S3) — 상/하 각 2회
+  return PROGRAMS[programKey()]||PROGRAMS.default; // 5일+ : 목표별 스플릿
+}
 function programLen(){ return programFor().length; }
 /* ---------------- Schedule engine ---------------- */
 function buildSchedule(fromStr,toStr){
@@ -2181,7 +2225,7 @@ function streak(){ let n=0,guard=0; let d=parse(todayStr()); const today=todaySt
   }
   return n;
 }
-function weekTotal(){ return (state.workoutDays||[0,2,3,4,5,6]).length; }
+function weekTotal(){ return (state.workoutDays||DEFAULT_WORKOUT_DAYS).length; }
 function monthDone(){ const t=parse(todayStr()),y=t.getFullYear(),m=t.getMonth(); return state.doneDays.filter(k=>{const d=parse(k);return d.getFullYear()===y&&d.getMonth()===m;}).length; }
 function monthTotal(){ const t=parse(todayStr()),y=t.getFullYear(),m=t.getMonth(),last=new Date(y,m+1,0).getDate(); let c=0; for(let i=1;i<=last;i++){ const e=sessionFor(fmt(new Date(y,m,i))); if(e&&!e.rest)c++; } return c; }
 const MOTIV=['오늘의 땀은 내일의 자신감이 돼요.','작은 한 걸음이 큰 변화를 만들어요!','어제의 나를 이겨볼까요?','꾸준함이 재능을 이겨요.','이미 시작했으니 절반은 온 거예요!','몸은 오늘의 노력을 기억해요.','포기하지 않는 한 실패는 없어요!','건강은 가장 확실한 투자예요.','미래의 나에게 선물을 줄 시간이에요!','완벽함보다 꾸준함이에요.','움직이는 만큼 강해져요!','오늘도 나를 아껴볼까요?'];
@@ -2234,7 +2278,7 @@ function profileBanner(){
   const inj=(p.injuries&&p.injuries.has)?((p.injuries.list||[]).concat(p.injuries.other?[p.injuries.other]:[])):[];
   const cond=(p.conditions&&p.conditions.has)?((p.conditions.list||[]).concat(p.conditions.other?[p.conditions.other]:[])):[];
   let caution='';
-  if(inj.length) caution+=warnNote('부상 및 수술 이력 반영', `${inj.join(', ')} 관련 동작은 자동으로 제외하거나 완화했어요. 통증 시 즉시 중단하고 전문의와 상담하세요.`);
+  if(inj.length) caution+=warnNote('부상 및 수술 이력 반영', `${inj.join(', ')} 관련 부위에 부담이 큰 동작은 뒤로 미뤘어요. 금지된 동작은 아니니 통증 없는 범위에서 가볍게 하고, 통증 시 즉시 중단하고 전문의와 상담하세요.`);
   if(cond.length) caution+=warnNote('건강 주의', `${cond.join(', ')} 이력이 있어요. 무거운 중량에서 숨을 참은 채 힘주기(발살바)를 피하고, 세트 사이 충분히 쉬며 어지럼이나 통증 시 중단하세요.`);
   if(!chips.length && !caution) return '';
   return `<div class="card" style="margin:0 0 4px; padding:16px"><div class="pbanner-h">🤖 내 프로필 기반 맞춤 조정</div>${chips.length?`<div class="pbanner-chips">${chips.map(c=>`<span class="pchip">${c}</span>`).join('')}</div>`:''}${caution}</div>`;
@@ -2651,10 +2695,10 @@ const Drawer=(()=>{
 })();
 
 /* ----- SETTINGS view ----- */
-function toggleWorkoutDay(i){ if(!state.workoutDays) state.workoutDays=[0,2,3,4,5,6]; const j=state.workoutDays.indexOf(i); if(j>=0){ if(state.workoutDays.length<=1){ toast('최소 1개 요일은 운동해야 해요'); return; } state.workoutDays.splice(j,1); } else state.workoutDays.push(i); touch(); renderSetup(); }
+function toggleWorkoutDay(i){ if(!state.workoutDays) state.workoutDays=[...DEFAULT_WORKOUT_DAYS]; const j=state.workoutDays.indexOf(i); if(j>=0){ if(state.workoutDays.length<=1){ toast('최소 1개 요일은 운동해야 해요'); return; } state.workoutDays.splice(j,1); } else state.workoutDays.push(i); touch(); renderSetup(); }
 function setSessionMin(m){ state.sessionMinutes=m; touch(); renderSetup(); }
 function scheduleSettingsHTML(){
-  const wd=state.workoutDays||[0,2,3,4,5,6]; const n=wd.length;
+  const wd=state.workoutDays||DEFAULT_WORKOUT_DAYS; const n=wd.length;
   const dayList=[[1,'월'],[2,'화'],[3,'수'],[4,'목'],[5,'금'],[6,'토'],[0,'일']];
   const mins=[30,45,60,75,90,120]; const cur=state.sessionMinutes||60;
   return `<div class="sec-label">회원 정보</div>
@@ -2678,7 +2722,7 @@ function renderSetup(){
     <div class="divider"></div>
     ${programFor().map((si,i)=>{ const s=SESSIONS[si]; return `<div style="display:flex;gap:10px;margin:7px 0"><span style="flex:none;width:22px;height:22px;border-radius:7px;background:var(--accent-soft);color:var(--accent-ink);font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center">${i+1}</span><span>${sessTitle(s.title)} <span style="color:var(--faint)">${s.focus.slice(0,3).join('/')}</span></span></div>`; }).join('')}
     <div class="divider"></div>
-    <b>부상 및 수술 이력 반영</b><br>${periodLines('척추에 수직 하중이 큰 바벨 스쿼트, 데드리프트, 스탠딩 오버헤드, 허리를 굽혀 부하하는 크런치, 싯업, 굿모닝은 제외했습니다. 대신 등받이 머신, 힙힌지, 둔근 운동, 데드버그, 버드독, 플랭크 같은 안정화 코어 위주로 구성했어요.')}
+    <b>부상 및 수술 이력 반영</b><br>${(()=>{ const p=state.profile; const inj=(p&&p.injuries&&p.injuries.has)?((p.injuries.list||[]).concat(p.injuries.other?[p.injuries.other]:[])):[]; return inj.length?periodLines(inj.join(', ')+' 관련 부위에 부담이 큰 동작은 뒤로 미뤘어요. 금지된 동작은 아니고, 통증 없는 범위에서 가볍게 하면 돼요. 자세한 안전 원칙은 플랜 화면 맨 아래에 있어요.'):periodLines('선택한 부상·수술 이력이 없어 표준 구성으로 짰어요. 통증이나 이력이 있으면 회원 정보에서 입력하면 관련 동작을 조절해 드려요.'); })()}
   </div>`;
 
   // ---- cloud sync panel (Google 로그인) ----
@@ -2894,7 +2938,7 @@ function setWDefault(cat,dir){
   touch(); renderSetup();
 }
 function resetAll(){
-  state={ equipment:[...DEFAULT_EQUIP], includeBodyweight:true, includeFloor:true, workoutDays:[0,2,3,4,5,6], sessionMinutes:60, startDate:todayStr(), restDays:[], doneDays:[], log:{}, steps:{}, slotCustom:{}, wDefaults:null, setInc:1, authPassed:false, authProvider:null, consent:null, profile:null, onboarded:true };
+  state={ equipment:[...DEFAULT_EQUIP], includeBodyweight:true, includeFloor:true, workoutDays:[...DEFAULT_WORKOUT_DAYS], sessionMinutes:60, startDate:todayStr(), restDays:[], doneDays:[], log:{}, steps:{}, slotCustom:{}, wDefaults:null, setInc:1, authPassed:false, authProvider:null, consent:null, profile:null, onboarded:true };
   openDays={}; touch(); toast('전체 초기화 완료'); if(typeof Auth!=='undefined') Auth.show(); refresh();
 }
 

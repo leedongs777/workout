@@ -111,11 +111,18 @@
 - `wDays()` = `state.workoutDays`(없으면 기본값). 기본값은 코드의 한 곳에서만 정의할 것.
 - `isRestDow(d)` = 해당 요일이 workoutDays에 없으면 정기 휴식.
 - `buildSchedule`, `sessionFor` 모두 `isRestDow` 사용(휴식 = isRestDow || restDays). `sessionFor`는 startDate 이전엔 null.
-- 6개 세션(S0~S5) 로테이션: startDate부터 비휴식일을 카운트해 배정.
-- `isMon()`은 남아있지만 미사용. 하드코딩된 요일 참조 금지 — 항상 `isRestDow`.
+- **로테이션은 고정 6개가 아니라 `programFor()`가 돌려주는 순환표**다: startDate부터 비휴식일을 카운트(`rot`)해 `prog[rot % prog.length]`. 반환값에 `pos`(순환 내 위치)·`len`(순환 길이) 포함 → "순환 N/M" 라벨과 "M일 순환" 문구가 동적. **`SESSIONS[e.session]`은 여전히 유효**(session은 라이브러리 인덱스).
+- `isMon()`은 남아있지만 미사용. 하드코딩된 요일 참조 금지 — 항상 `isRestDow`. **하드코딩 `%6`·"/6"·"6일" 금지** — `programLen()`/`entry.len` 사용.
 
-### 4.3 6개 세션 (S0~S5)
-- S0 하체A·둔근 / S1 상체 당기기·자세교정 / S2 유산소·모빌리티 / S3 하체B·좌우균형 / S4 상체 밀기·자세교정 / S5 유산소·코어·교정.
+### 4.2b 목표별 프로그램 (`PROGRAMS` / `programFor`, 2026-07)
+- `PROGRAMS[key]` = 운동일 순환에 배치할 **세션 인덱스 배열**. `programKey()`가 **1순위 목표**로 고른다(2순위는 스플릿 불변, `goalMods` 다이얼로만 반영 — 사용자 결정).
+- `default:[0,1,2,3,4,5]`(현행 균형, 유지/미구현 목표의 폴백). `hyper:[0,1,4,3,6,7]`(상하체 2회/주, **전용 유산소일 없음** — 유산소는 각 날 마무리 존2만).
+- **설정 "구성" 목록·"내 프로필"** 은 `SESSIONS` 전체가 아니라 `programFor()`를 순회해 실제 순환만 보여줄 것.
+- 미구현: `diet`/`endur`/`posture` 전용 프로그램(현재 default로 폴백). 목표별 신규 세션은 `SESSIONS` 끝에 append하고 인덱스로 PROGRAMS에서 참조.
+
+### 4.3 세션 라이브러리 (S0~S7)
+- S0 하체A·둔근 / S1 상체 당기기·자세교정 / S2 유산소·모빌리티 / S3 하체B·좌우균형 / S4 상체 밀기·자세교정 / S5 유산소·코어·교정 / **S6 상체 당기기 B·등 두께(hyper 전용) / S7 상체 밀기 B·어깨 중심(hyper 전용)**.
+- S6·S7은 hyper 프로그램의 상체 2회차. 역할·장비 ID는 기존 것 재사용(신규 role 만들지 말 것 — ROLE_INFO/ROLE_PAT 키). 웜업/쿨다운은 title로 `sessionCat` 판정돼 자동 생성되므로 저작 불필요.
 - 각 slot: `{role, sets, reps, options:[{name, eq[], cue, reps?}], fb, alts?:[…]}`.
   - `reps`는 **슬롯 단위 기본값**이고, 운동별로 `reps`를 주면 그게 우선(`defReps(slot, r)`). 유지형(월 싯 `30–45초`)이 그 예. 같은 슬롯의 기구 운동은 영향받지 않는다.
   - `alts`는 **부상 시에만 쓰이는 안전 대안**(3.1 참고). `options`에 넣지 말 것.

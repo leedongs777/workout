@@ -1168,6 +1168,64 @@ const SESSIONS=[
   cardio:{label:'메인 유산소', detail:'존3 강도 · 가벼운 인터벌(빠르게 1분 / 보통 3분 반복), 관절 부담은 적게 하세요'},
   cool:[{n:'가슴 스트레칭',a:'40초',d:'벽·기둥·문틀 등에 팔을 대고 몸을 앞으로 기울여 가슴을 펴기'},{n:'어깨·목 스트레칭',a:'좌/우 각각 40초',d:'어깨를 아래로 내리며 반대쪽으로 목을 기울이기'},{n:'앞허벅지 스트레칭',a:'좌/우 각각 40초',d:'서서 한 발등을 잡아 발뒤꿈치를 엉덩이 쪽으로 당기기'},{n:'무릎 끌어안기',a:'40초',d:'누워 양 무릎을 가슴으로 당겨 허리·엉덩이 늘이기',floor:true,alt:{n:'앉아 무릎 끌어안기',a:'40초',d:'앉아서 한 무릎씩 가슴으로 당기기'}}],
  },
+ { // S6 — 상체 당기기 B (근육 만들기 프로그램에서 등/당기기 2회차, 로우 중심)
+  title:'상체 당기기 B · 등 두께', focus:['등','후면','이두','자세교정'], est:'45–55분',
+  slots:[
+   {role:'수평 당기기', sets:4, reps:'10회', options:[
+     {name:'체스트서포트 로우 머신', eq:['chest_supported_row'], cue:'가슴 패드에 기대 허리 부담 없이 견갑을 모으며 당기기 · 반동 없이'},
+     {name:'시티드 로우', eq:['seated_row'], cue:'가슴을 세우고 견갑을 모으며 배꼽 쪽으로 당기기 · 상체 반동 없이'},
+     {name:'원암 덤벨 로우', eq:['dumbbell','bench'], cue:'벤치에 한 손과 무릎을 대고 덤벨을 옆구리 쪽으로 당기기 · 허리 중립, 좌우 동일'},
+     {name:'밴드 시티드 로우', eq:['band'], cue:'앉아서 발에 밴드를 걸고 견갑을 모으며 당기기'},
+   ], fb:{name:'인버티드 로우', cue:'튼튼한 책상 아래 누워 모서리를 잡고 가슴을 끌어당기기 · 몸통을 일직선으로 유지하고 허리가 꺾이지 않게'}},
+   {role:'수직 당기기', sets:3, reps:'12회', options:[
+     {name:'어시스트 풀업', eq:['assisted_pullup'], cue:'가슴을 바 쪽으로, 견갑 하강부터 시작 · 반동 없이'},
+     {name:'랫풀다운 (뉴트럴 그립)', eq:['lat_pulldown'], cue:'손바닥이 마주 보는 그립으로 견갑을 내리며 당기기 · 허리 중립'},
+     {name:'밴드 랫풀다운', eq:['band'], cue:'머리 위 고정점에 밴드를 걸고 아래로 당기기 · 견갑 하강부터'},
+   ], fb:{name:'타월 랫 풀다운', cue:'수건 양끝을 잡고 머리 위로 올린 뒤 한쪽 손으로 저항을 주며 반대쪽으로 끌어내리기 · 견갑을 먼저 아래로 내리기'}},
+   {role:'후면 삼각/능형근', sets:3, reps:'15회', options:[
+     {name:'리버스 펙덱', eq:['reverse_pec_deck'], cue:'팔을 뒤로 벌리며 견갑을 모으기 · 반동 없이'},
+     {name:'리어 델트 플라이 (가슴 지지)', eq:['dumbbell','bench'], cue:'인클라인 벤치에 가슴을 대고 엎드려 양옆으로 들어올리기'},
+     {name:'밴드 풀어파트', eq:['band'], cue:'팔을 펴서 밴드를 좌우로 벌리며 견갑을 모으기'},
+   ], fb:{name:'프론 T 레이즈', cue:'엎드려 엄지를 위로 향한 채 양팔을 T자로 들어올리기 · 견갑을 모으며 2초 유지'}},
+   {role:'이두 (팔 굽히기)', sets:3, reps:'12회', options:[
+     {name:'케이블 컬', eq:['cable'], cue:'팔꿈치를 옆구리에 고정하고 케이블로 굽히기 · 반동 없이'},
+     {name:'덤벨 해머 컬', eq:['dumbbell'], cue:'손바닥이 마주 보게 잡고 팔꿈치를 고정한 채 굽히기 · 전완과 이두를 함께'},
+     {name:'밴드 컬', eq:['band'], cue:'밴드를 밟고 서서 팔꿈치를 고정한 채 반동 없이 굽히기'},
+   ], fb:{name:'타월 컬', cue:'수건 가운데를 한 발로 밟고 양끝을 잡아 위로 당기기 · 팔꿈치를 옆구리에 붙여 고정'}},
+   {role:'거북목 교정', opt:'posture:neck', sets:2, reps:'12회', options:[], fb:{name:'턱 당기기', cue:'턱을 목 쪽으로 당겨 뒤통수를 위로 밀어내듯 5초 유지'}},
+  ],
+  cardio:{label:'유산소', detail:'존2 강도'},
+ },
+ { // S7 — 상체 밀기 B (근육 만들기 프로그램에서 가슴/밀기 2회차, 어깨 중심)
+  title:'상체 밀기 B · 어깨 중심', focus:['어깨','가슴','삼두','자세교정'], est:'45–55분',
+  slots:[
+   {role:'수직 밀기 (어깨)', sets:4, reps:'10회', options:[
+     {name:'숄더 프레스 머신', eq:['shoulder_press'], cue:'등받이에 허리를 지지하고 통증 없는 범위까지 밀어 올리기'},
+     {name:'시티드 덤벨 숄더 프레스', eq:['dumbbell','bench'], cue:'등받이 있는 벤치에 앉아 허리를 지지한 채 머리 위로 밀기 · 갈비뼈를 닫고 허리를 젖히지 않게'},
+     {name:'바벨 오버헤드 프레스', eq:['barbell'], cue:'서서 바를 쇄골 앞에서 머리 위로 곧게 밀기 · 배에 힘을 주어 허리가 젖혀지지 않게'},
+     {name:'밴드 오버헤드 프레스', eq:['band'], cue:'밴드를 밟고 머리 위로 밀기 · 허리 중립'},
+   ], fb:{name:'파이크 푸시업', cue:'엉덩이를 높이 들어 A자를 만들고 정수리를 바닥 쪽으로 내렸다 밀어 올리기 · 힘들면 무릎을 대기'}},
+   {role:'수평 밀기', sets:3, reps:'12회', options:[
+     {name:'인클라인 덤벨 프레스', eq:['dumbbell','bench'], cue:'벤치를 30도로 세워 덤벨을 가슴 위쪽으로 밀기 · 견갑을 모아 고정'},
+     {name:'체스트 프레스 머신', eq:['chest_press'], cue:'견갑을 안정시키고 허리 과도한 아치 없이 밀기 · 등받이에 기대 요추 보호'},
+     {name:'밴드 체스트 프레스', eq:['band'], cue:'밴드를 등 뒤로 두르고 앞으로 밀기 · 견갑 고정'},
+   ], fb:{name:'경사 푸시업', cue:'벤치나 벽에 손을 대고 각도를 조절해 몸통을 일직선으로 내렸다 밀기'}},
+   {role:'가슴 보조', sets:3, reps:'15회', options:[
+     {name:'펙덱 플라이', eq:['pec_deck'], cue:'팔을 살짝 굽힌 채 가슴을 모으며 천천히 · 어깨가 앞으로 말리지 않게'},
+     {name:'케이블 플라이', eq:['cable'], cue:'양쪽 케이블을 가슴 앞에서 모으며 수축 · 팔꿈치 각도를 유지'},
+     {name:'덤벨 플로어 플라이', eq:['dumbbell'], cue:'바닥에 누워 팔을 살짝 굽힌 채 양옆으로 열었다 모으기 · 바닥이 어깨 과신전을 막아 안전'},
+   ], fb:{name:'와이드 경사 푸시업', cue:'벽이나 튼튼한 탁자를 짚고 손을 어깨보다 넓게 벌려 가슴을 내렸다 밀기'}},
+   {role:'삼두', sets:3, reps:'12회', options:[
+     {name:'케이블 푸시다운', eq:['cable'], cue:'팔꿈치를 옆구리에 고정하고 팔뚝만 펴기'},
+     {name:'덤벨 오버헤드 익스텐션', eq:['dumbbell'], cue:'덤벨을 머리 뒤로 내렸다 팔꿈치만 펴서 올리기 · 팔꿈치를 벌리지 않게'},
+     {name:'밴드 푸시다운', eq:['band'], cue:'높은 고정점의 밴드를 아래로 밀기 · 팔꿈치 고정'},
+   ], fb:{name:'내로우 경사 푸시업', cue:'벽이나 탁자를 짚고 양손을 어깨너비보다 좁게 모아 내렸다 밀기 · 팔꿈치를 몸통에 붙여 삼두에 집중'}},
+   {role:'자세교정 (하부 승모)', opt:'posture:back', sets:2, reps:'12회', options:[
+     {name:'프론 Y-T-W 레이즈', eq:['mat'], cue:'엎드려 팔을 Y·T·W 모양으로 들어 하부 승모근·능형근 활성화', floor:true},
+   ], fb:{name:'프론 Y-T-W 레이즈', cue:'엎드려 엄지 위로, 팔을 Y·T·W 모양으로 들어 견갑 모으기'}},
+  ],
+  cardio:{label:'유산소', detail:'존2 강도'},
+ },
 ];
 /* ---- 웜업/쿨다운: 한 항목 = 한 동작, 전신을 순서대로(그날 부위 중심), 정식 명칭 ---- */
 function sessionCat(s){ const t=s.title||''; if(/유산소/.test(t))return 'cardio'; if(/상체|당기기|밀기|가슴/.test(t))return 'upper'; if(/하체|둔근|균형/.test(t))return 'lower'; return 'full'; }
@@ -1236,9 +1294,25 @@ let saveT=null;
 function persist(){ clearTimeout(saveT); saveT=setTimeout(()=>Store.set(KEY,JSON.stringify(state)),120); }
 function touch(){ state._ts=Date.now(); persist(); if(typeof Sync!=='undefined' && Sync.isConnected()) Sync.push(); }
 
+/* ---------------- Programs (목표별 세션 순환) ----------------
+   각 배열 = 운동일 순환에 배치될 세션 인덱스(SESSIONS 기준). 1순위 목표로 프로그램을 고른다.
+   2순위는 스플릿을 바꾸지 않고 goalMods(세트·반복·유산소 길이·휴식)로만 반영한다.
+   default = 현행 6일 균형 순환(무회귀 기준). 아직 전용 프로그램이 없는 목표는 default로. */
+const PROGRAMS={
+  default:[0,1,2,3,4,5], // 하체A, 당기기, 유산소·모빌리티, 하체B, 밀기, 유산소·코어교정
+  hyper:  [0,1,4,3,6,7], // 하체A, 당기기, 밀기, 하체B, 당기기B, 밀기B — 상하체 2회/주, 전용 유산소일 없음
+};
+function programKey(){
+  const first=((state.profile&&state.profile.goals)||[])[0];
+  const map={'근육 만들기':'hyper','다이어트(체중감량)':'diet','체력 향상':'endur','자세교정':'posture','현 상태 유지':'default'};
+  const k=map[first];
+  return (k&&PROGRAMS[k])?k:'default';
+}
+function programFor(){ return PROGRAMS[programKey()]||PROGRAMS.default; }
+function programLen(){ return programFor().length; }
 /* ---------------- Schedule engine ---------------- */
 function buildSchedule(fromStr,toStr){
-  const rest=new Set(state.restDays);
+  const rest=new Set(state.restDays); const prog=programFor(); const len=prog.length;
   const map={}; let rot=0; let d=parse(state.startDate); const to=parse(toStr);
   const from=parse(fromStr);
   while(d<=to){
@@ -1246,7 +1320,7 @@ function buildSchedule(fromStr,toStr){
     const isRest = isRestDow(d) || rest.has(k);
     let entry;
     if(isRest){ entry={rest:true, fixed:isRestDow(d)}; }
-    else { entry={session:rot%6}; rot++; }
+    else { entry={session:prog[rot%len], pos:rot%len, len}; rot++; }
     if(d>=from) map[k]=entry;
     d=addDays(d,1);
   }
@@ -1254,12 +1328,12 @@ function buildSchedule(fromStr,toStr){
 }
 function sessionFor(dateStr){
   // compute rotation index up to dateStr from startDate
-  const rest=new Set(state.restDays);
+  const rest=new Set(state.restDays); const prog=programFor(); const len=prog.length;
   let rot=0; let d=parse(state.startDate); const target=parse(dateStr);
   if(target<d) return null;
   while(d<target){ if(!(isRestDow(d)||rest.has(fmt(d)))) rot++; d=addDays(d,1); }
   if(isRestDow(target)||rest.has(dateStr)) return {rest:true, fixed:isRestDow(target)};
-  return {session:rot%6};
+  const pos=rot%len; return {session:prog[pos], pos, len};
 }
 
 /* ---------------- Slot resolution ---------------- */
@@ -2067,7 +2141,7 @@ function renderHome(){
     html+=`<div class="card"><div class="hero-pad">
       <div class="hero-date">${longDate(t)}, <b>오늘의 운동</b></div>
       <div class="hero-title">${sessTitle(s.title)}</div>
-      <div class="hero-est">순환 ${entry.session+1}/6<span class="vdiv"></span>${dn}/${ids.length}단계</div>
+      <div class="hero-est">순환 ${entry.pos+1}/${entry.len}<span class="vdiv"></span>${dn}/${ids.length}단계</div>
       ${dn>0?`<div class="home-prog"><div class="home-prog-bar" style="width:${pct}%"></div></div>`:''}
       <button class="btn primary" style="margin-top:14px" onclick="goTab('plan')">${dayDone?'✓ 오늘 완료<span class="vdiv"></span>다시 보기':(dn>0?'이어서 운동하기 →':'오늘 운동 시작하기 →')}</button>
     </div></div>`;
@@ -2364,7 +2438,7 @@ function renderPlan(){
     <div class="modeseg"><button class="${planMode==='list'?'on':''}" onclick="planSetMode('list')">리스트</button><button class="${planMode==='cal'?'on':''}" onclick="planSetMode('cal')">달력</button></div>
   </div>`;
   html+=(planMode==='list')?planListHTML():planCalHTML();
-  html+=`<p class="info" style="margin-top:14px;padding:0 4px">오늘 이전은 지난 날이라 고정돼요. 앞으로의 날짜에 <b>쉬는 날</b>을 표시하면<br>이후 일정이 6일 순환에 맞춰 자동으로 다시 배정됩니다.</p>`;
+  html+=`<p class="info" style="margin-top:14px;padding:0 4px">오늘 이전은 지난 날이라 고정돼요. 앞으로의 날짜에 <b>쉬는 날</b>을 표시하면<br>이후 일정이 ${programLen()}일 순환에 맞춰 자동으로 다시 배정됩니다.</p>`;
   $('view-plan').innerHTML=html;
   $('hd-title').textContent='일정'; $('hd-cyc').innerHTML='';
 }
@@ -2542,9 +2616,9 @@ function renderSetup(){
   <div class="card pad info">
     <b>목표</b><br>${(()=>{ const p=state.profile; const g=(p&&p.goals)?p.goals.slice(0,2):[]; return g.length?periodLines(g.map((x,i)=>(i+1)+'순위 '+x).join(', ')):'회원 정보 수정에서 목표를 선택하면 여기에 표시돼요.'; })()}
     <div style="height:9px"></div>
-    <b>구성</b><br>${periodLines('설정한 운동 요일에 따라 쉬는 날이 정해지고, 운동일은 아래 6일 순환을 반복해요')}
+    <b>구성</b><br>${periodLines('설정한 운동 요일에 따라 쉬는 날이 정해지고, 운동일은 아래 '+programLen()+'일 순환을 반복해요')}
     <div class="divider"></div>
-    ${SESSIONS.map((s,i)=>`<div style="display:flex;gap:10px;margin:7px 0"><span style="flex:none;width:22px;height:22px;border-radius:7px;background:var(--accent-soft);color:var(--accent-ink);font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center">${i+1}</span><span>${sessTitle(s.title)} <span style="color:var(--faint)">${s.focus.slice(0,3).join('/')}</span></span></div>`).join('')}
+    ${programFor().map((si,i)=>{ const s=SESSIONS[si]; return `<div style="display:flex;gap:10px;margin:7px 0"><span style="flex:none;width:22px;height:22px;border-radius:7px;background:var(--accent-soft);color:var(--accent-ink);font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center">${i+1}</span><span>${sessTitle(s.title)} <span style="color:var(--faint)">${s.focus.slice(0,3).join('/')}</span></span></div>`; }).join('')}
     <div class="divider"></div>
     <b>부상 및 수술 이력 반영</b><br>${periodLines('척추에 수직 하중이 큰 바벨 스쿼트, 데드리프트, 스탠딩 오버헤드, 허리를 굽혀 부하하는 크런치, 싯업, 굿모닝은 제외했습니다. 대신 등받이 머신, 힙힌지, 둔근 운동, 데드버그, 버드독, 플랭크 같은 안정화 코어 위주로 구성했어요.')}
   </div>`;

@@ -93,7 +93,7 @@
   .tags{display:flex; flex-wrap:wrap; gap:6px; margin-top:11px;}
   .tag{font-size:11.5px; font-weight:650; padding:4px 9px; border-radius:999px; background:var(--accent-soft); color:var(--accent-ink); letter-spacing:.01em;}
   .pill{font-size:11px; font-weight:750; letter-spacing:.1em; text-transform:uppercase; padding:5px 10px; border-radius:999px;}
-  .pill.rest{background:var(--sand); color:#fff;}
+  .pill.rest{background:var(--sand); color:#3a2a00;}
   .pill.rest-fixed{background:transparent; color:var(--sand); border:1px solid var(--sand);}
 
   /* section label */
@@ -350,7 +350,7 @@
   .voledit .voltimes{color:var(--faint); font-weight:700;}
   .cardiomin{margin-top:2px; margin-bottom:10px;}
   .cardiomin .cm-label{font-size:12.5px; font-weight:700; color:var(--muted); margin-right:4px;}
-  .repin{width:74px; border:1px solid var(--line); border-radius:8px; background:var(--surface-2); color:var(--ink); font-family:inherit; font-size:13px; font-weight:700; text-align:center; padding:6px 4px; outline:none;}
+  .repin{width:74px; border:1px solid var(--line); border-radius:8px; background:var(--surface-2); color:var(--ink); font-family:inherit; font-size:16px; font-weight:700; text-align:center; padding:6px 4px; outline:none;}
   .repin:focus{border-color:var(--accent);}
   .volreset{margin-left:2px; border:none; background:none; color:var(--accent-ink); font-size:12px; font-weight:700; cursor:pointer; font-family:inherit; text-decoration:underline;}
   .vol-tag{font-size:10.5px; font-weight:700; color:var(--accent-ink); background:var(--accent-soft); border-radius:6px; padding:2px 6px;}
@@ -383,6 +383,8 @@
   .cz .vdiv{margin:0;}
   /* 심박존 — 팬톤 334 C / 7489 C / 142 C / 7577 C / 7619 C */
   .cz1{background:#009775;} .cz2{background:#74AA50;} .cz3{background:#F1BE48;} .cz4{background:#E07E3C;} .cz5{background:#C04C36;}
+  /* 밝은 존(2·3·4) 배지는 흰 글자가 대비 미달(WCAG AA) → 어두운 글자로. 어두운 존(1·5)은 흰 글자 유지 */
+  .cz-badge.cz2, .cz-badge.cz3, .cz-badge.cz4{color:#241a00;}
   .cz-tap{border:none; font-family:inherit; cursor:pointer;}
   .zi-title{font-size:17px; font-weight:800; color:var(--ink);}
   .zi-sub{font-size:12px; color:var(--muted); margin:5px 0 14px; line-height:1.5;}
@@ -445,7 +447,7 @@
   .gate-back{background:none; border:none; color:var(--muted); font-family:inherit; font-size:14px; font-weight:600; cursor:pointer; padding:6px 0; margin-bottom:6px;}
   .field{margin-bottom:12px;}
   .field label{display:block; font-size:12.5px; font-weight:700; color:var(--muted); margin-bottom:6px;}
-  .field input{width:100%; height:48px; padding:0 14px; border:1px solid var(--line); border-radius:12px; background:var(--surface-2); color:var(--ink); font-family:inherit; font-size:15px; box-sizing:border-box; outline:none;}
+  .field input{width:100%; height:48px; padding:0 14px; border:1px solid var(--line); border-radius:12px; background:var(--surface-2); color:var(--ink); font-family:inherit; font-size:16px; box-sizing:border-box; outline:none;}
   .field input:focus{border-color:var(--accent);}
   .seg{display:flex; gap:8px; margin-bottom:18px;}
   .seg button{flex:1; height:44px; border:1px solid var(--line); background:var(--surface-2); border-radius:11px; font-family:inherit; font-size:14px; font-weight:700; color:var(--muted); cursor:pointer;}
@@ -551,7 +553,7 @@
   .rankbadge{display:inline-block; margin-left:5px; padding:1px 6px; border-radius:999px; background:var(--on-accent); color:var(--accent); font-size:10.5px; font-weight:800; vertical-align:middle;}
   .ob-half{display:flex; gap:10px;} .ob-half>.field{flex:1;}
   .pace{display:flex; align-items:center; gap:8px; flex-wrap:wrap;}
-  .pace select,.ob-select{height:46px; border:1px solid var(--line); border-radius:11px; background:var(--surface-2); color:var(--ink); font-family:inherit; font-size:15px; padding:0 10px; outline:none;}
+  .pace select,.ob-select{height:46px; border:1px solid var(--line); border-radius:11px; background:var(--surface-2); color:var(--ink); font-family:inherit; font-size:16px; padding:0 10px; outline:none;}
   .pace select:focus,.ob-select:focus{border-color:var(--accent);}
   .pace .u{font-size:13px; color:var(--muted); font-weight:600;}
   .ob-verify{display:flex; gap:8px; margin-top:8px;}
@@ -560,7 +562,7 @@
   .ob-freq{margin-top:11px; font-size:15px; color:var(--ink); text-align:center; background:var(--accent-soft); border-radius:10px; padding:11px;}
   .ob-freq b{color:var(--accent-ink); font-weight:800;}
   .ob-inline{margin-top:10px;}
-  .ob-inline input{width:100%; height:46px; padding:0 13px; border:1px solid var(--line); border-radius:11px; background:var(--surface); color:var(--ink); font-family:inherit; font-size:15px; box-sizing:border-box; outline:none;}
+  .ob-inline input{width:100%; height:46px; padding:0 13px; border:1px solid var(--line); border-radius:11px; background:var(--surface); color:var(--ink); font-family:inherit; font-size:16px; box-sizing:border-box; outline:none;}
   .ob-inline input:focus{border-color:var(--accent);}
   .obchips.seg{flex-wrap:nowrap; gap:8px; background:none; border:none; padding:0; margin-bottom:0;}
   .obchips.seg .obchip{flex:1 1 0; text-align:center; padding:12px 4px;}
@@ -586,7 +588,7 @@
   .ob-datebtn .dbi{color:var(--muted); font-size:13px;}
   .obgrid{display:grid; grid-template-columns:repeat(2,1fr); gap:8px;}
   .obgrid .obchip{text-align:center; padding:11px 6px;}
-  .ob-textin{width:100%; height:46px; margin-top:8px; padding:0 13px; border:1px solid var(--line); border-radius:11px; background:var(--surface); color:var(--ink); font-family:inherit; font-size:15px; box-sizing:border-box; outline:none;}
+  .ob-textin{width:100%; height:46px; margin-top:8px; padding:0 13px; border:1px solid var(--line); border-radius:11px; background:var(--surface); color:var(--ink); font-family:inherit; font-size:16px; box-sizing:border-box; outline:none;}
   .ob-textin:focus{border-color:var(--accent);}
   .bcal-head{display:flex; align-items:center; justify-content:space-between; margin-bottom:12px;}
   .bcal-title{border:none; background:none; font-family:inherit; font-size:15px; font-weight:800; color:var(--ink); cursor:pointer; padding:6px 8px; border-radius:8px;}
@@ -2230,7 +2232,7 @@ function streak(){ let n=0,guard=0; let d=parse(todayStr()); const today=todaySt
   }
   return n;
 }
-function weekTotal(){ return (state.workoutDays||DEFAULT_WORKOUT_DAYS).length; }
+function weekTotal(){ return wDays().length; } // wDays()와 단일 소스 — 빈 배열이면 기본 요일 수를 따름
 function monthDone(){ const t=parse(todayStr()),y=t.getFullYear(),m=t.getMonth(); return state.doneDays.filter(k=>{const d=parse(k);return d.getFullYear()===y&&d.getMonth()===m;}).length; }
 function monthTotal(){ const t=parse(todayStr()),y=t.getFullYear(),m=t.getMonth(),last=new Date(y,m+1,0).getDate(); let c=0; for(let i=1;i<=last;i++){ const e=sessionFor(fmt(new Date(y,m,i))); if(e&&!e.rest)c++; } return c; }
 const MOTIV=['오늘의 땀은 내일의 자신감이 돼요.','작은 한 걸음이 큰 변화를 만들어요!','어제의 나를 이겨볼까요?','꾸준함이 재능을 이겨요.','이미 시작했으니 절반은 온 거예요!','몸은 오늘의 노력을 기억해요.','포기하지 않는 한 실패는 없어요!','건강은 가장 확실한 투자예요.','미래의 나에게 선물을 줄 시간이에요!','완벽함보다 꾸준함이에요.','움직이는 만큼 강해져요!','오늘도 나를 아껴볼까요?'];
@@ -3353,7 +3355,7 @@ const Onboard=(()=>{
   }
   return {
     hide,
-    start:(cb)=>{ done=cb; editing=false; obInit=null; document.body.classList.remove('obediting'); ob={ nickname:'', gender:null, foreigner:null, verifyMethod:null, verified:false, lifting:null, running:null, goals:[], postureTypes:[], injHas:null, injList:[], condHas:null, condList:[], equipment:[...DEFAULT_EQUIP], obBw:true, obFloor:true, workoutDays:[1,3,5,6], sessionMinutes:60 }; render(1); show(); },
+    start:(cb)=>{ done=cb; editing=false; obInit=null; document.body.classList.remove('obediting'); ob={ nickname:'', gender:null, foreigner:null, verifyMethod:null, verified:false, lifting:null, running:null, goals:[], postureTypes:[], injHas:null, injList:[], condHas:null, condList:[], equipment:[...DEFAULT_EQUIP], obBw:true, obFloor:true, workoutDays:[...DEFAULT_WORKOUT_DAYS], sessionMinutes:60 }; render(1); show(); },
     openBirth:()=>{ readStep1(); const b=ob.birth?parse(ob.birth):new Date(2000,0,1); bdY=b.getFullYear(); bdM=b.getMonth(); bdStep='cal'; renderBirthCal(); document.getElementById('ympick').classList.remove('hidden'); },
     bdShift:(n)=>{ bdM+=n; if(bdM<0){bdM=11;bdY--;} else if(bdM>11){bdM=0;bdY++;} renderBirthCal(); },
     bdTo:(step)=>{ bdStep=step; renderBirthCal(); },
@@ -3372,7 +3374,7 @@ const Onboard=(()=>{
         injHas:(p.injuries?p.injuries.has:null), injList:((p.injuries&&p.injuries.list)||[]).slice(), injEtc:!!(p.injuries&&p.injuries.other), injOther:(p.injuries&&p.injuries.other)||'',
         condHas:(p.conditions?p.conditions.has:null), condList:((p.conditions&&p.conditions.list)||[]).slice(), condEtc:!!(p.conditions&&p.conditions.other), condOther:(p.conditions&&p.conditions.other)||'',
         equipment:[...(state.equipment||[])], obBw:!!state.includeBodyweight, obFloor:!!state.includeFloor,
-        workoutDays:(state.workoutDays||[1,3,5,6]).slice(), sessionMinutes:state.sessionMinutes||60 };
+        workoutDays:(state.workoutDays||DEFAULT_WORKOUT_DAYS).slice(), sessionMinutes:state.sessionMinutes||60 };
       editing=true; obInit=snap(); document.body.classList.add('obediting');
       render(1); show();
     },

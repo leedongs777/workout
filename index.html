@@ -1048,11 +1048,11 @@ const SESSIONS=[
      {name:'케이블 컬', eq:['cable'], cue:'팔꿈치를 옆구리에 고정하고 케이블로 굽히기'},
      {name:'밴드 컬', eq:['band'], cue:'밴드를 밟고 서서 팔꿈치 고정, 반동 없이 굽히기'},
    ], fb:{name:'타월 컬', cue:'수건 가운데를 한 발로 밟고 양끝을 잡아 위로 당기기 · 팔꿈치를 옆구리에 붙여 고정하고 반동 없이 천천히'}},
-   {role:'자세교정 (말린 어깨)', sets:3, reps:'15회', options:[
+   {role:'자세교정 (말린 어깨)', posture:true, sets:3, reps:'15회', options:[
      {name:'페이스풀 (케이블)', eq:['cable'], cue:'로프를 얼굴 쪽으로, 팔꿈치를 높게 유지하며 외회전 · 말린 어깨 교정 핵심'},
      {name:'밴드 페이스풀', eq:['band'], cue:'밴드를 눈높이 고정, 얼굴 쪽으로 당기며 외회전'},
    ], fb:{name:'월 슬라이드', cue:'벽에 등과 팔꿈치를 붙인 채 팔을 위아래로 미끄러뜨리기 · 허리가 벽에서 뜨지 않게 갈비뼈를 닫고 유지'}},
-   {role:'후면 삼각/능형근', sets:3, reps:'15회', options:[
+   {role:'후면 삼각/능형근', posture:true, sets:3, reps:'15회', options:[
      {name:'리버스 펙덱', eq:['reverse_pec_deck'], cue:'팔을 뒤로 벌리며 견갑 모으기'},
      {name:'리어 델트 플라이 (가슴 지지)', eq:['dumbbell','bench'], cue:'인클라인 벤치에 가슴 대고 엎드려 양옆으로'},
      {name:'밴드 풀어파트', eq:['band'], cue:'팔을 펴서 밴드를 좌우로 벌리며 견갑 모으기'},
@@ -1126,7 +1126,7 @@ const SESSIONS=[
      {name:'케이블 푸시다운', eq:['cable'], cue:'팔꿈치 고정, 팔뚝만 펴기'},
      {name:'밴드 푸시다운', eq:['band'], cue:'높은 고정점 밴드를 아래로 밀기'},
    ], fb:{name:'내로우 경사 푸시업', cue:'벽이나 탁자를 짚고 양손을 어깨너비보다 좁게 모아 내렸다 밀기 · 팔꿈치를 몸통에 붙여 삼두에 집중'}},
-   {role:'자세교정 (하부 승모)', sets:2, reps:'12회', options:[
+   {role:'자세교정 (하부 승모)', posture:true, sets:2, reps:'12회', options:[
      {name:'프론 Y-T-W 레이즈', eq:['mat'], cue:'엎드려 팔을 Y·T·W 모양으로 들어 하부 승모근·능형근 활성화', floor:true},
    ], fb:{name:'프론 Y-T-W 레이즈', cue:'엎드려 엄지 위로, 팔을 Y·T·W 모양으로 들어 견갑 모으기'}},
   ],
@@ -1172,7 +1172,7 @@ const SESSIONS=[
      {name:'랫풀다운 (뉴트럴 그립)', eq:['lat_pulldown'], cue:'손바닥이 마주 보는 그립으로 견갑을 내리며 당기기 · 허리 중립'},
      {name:'밴드 랫풀다운', eq:['band'], cue:'머리 위 고정점에 밴드를 걸고 아래로 당기기 · 견갑 하강부터'},
    ], fb:{name:'타월 랫 풀다운', cue:'수건 양끝을 잡고 머리 위로 올린 뒤 한쪽 손으로 저항을 주며 반대쪽으로 끌어내리기 · 견갑을 먼저 아래로 내리기'}},
-   {role:'후면 삼각/능형근', sets:3, reps:'15회', options:[
+   {role:'후면 삼각/능형근', posture:true, sets:3, reps:'15회', options:[
      /* 당기기 A(S1)의 기본이 리버스 펙덱이라, B일은 다른 동작이 먼저 오게 순서를 다르게 둠 */
      {name:'리어 델트 플라이 (가슴 지지)', eq:['dumbbell','bench'], cue:'인클라인 벤치에 가슴을 대고 엎드려 양옆으로 들어올리기'},
      {name:'밴드 풀어파트', eq:['band'], cue:'팔을 펴서 밴드를 좌우로 벌리며 견갑을 모으기'},
@@ -1260,13 +1260,13 @@ const SESSIONS=[
  { // S10 — 자세교정 집중 (자세교정 프로그램의 교정·모빌리티 집중일). 항상 노출 교정 + 증상별 게이팅
   title:'자세교정 집중 · 상체 교정', focus:['자세교정','후면','코어','회복'], est:'35–45분',
   slots:[
-   {role:'후면 삼각/능형근', sets:3, reps:'15회', options:[
+   {role:'후면 삼각/능형근', posture:true, sets:3, reps:'15회', options:[
      /* 당기기 날(S1)의 기본이 리버스 펙덱이라, 집중일은 다른 동작이 먼저 오게 순서를 다르게 둠 */
      {name:'리어 델트 플라이 (가슴 지지)', eq:['dumbbell','bench'], cue:'인클라인 벤치에 가슴을 대고 엎드려 양옆으로 들어올리기'},
      {name:'밴드 풀어파트', eq:['band'], cue:'팔을 펴서 밴드를 좌우로 벌리며 견갑을 모으기'},
      {name:'리버스 펙덱', eq:['reverse_pec_deck'], cue:'팔을 뒤로 벌리며 견갑을 모으기 · 반동 없이'},
    ], fb:{name:'프론 T 레이즈', cue:'엎드려 엄지를 위로 향한 채 양팔을 T자로 들어올리기 · 견갑을 모으며 2초 유지'}},
-   {role:'자세교정 (말린 어깨)', sets:3, reps:'15회', options:[
+   {role:'자세교정 (말린 어깨)', posture:true, sets:3, reps:'15회', options:[
      /* 당기기 날(S1)의 기본이 케이블 페이스풀이라, 집중일은 밴드가 먼저 */
      {name:'밴드 페이스풀', eq:['band'], cue:'밴드를 눈높이 고정, 얼굴 쪽으로 당기며 외회전'},
      {name:'페이스풀 (케이블)', eq:['cable'], cue:'로프를 얼굴 쪽으로, 팔꿈치를 높게 유지하며 외회전 · 말린 어깨 교정 핵심'},
@@ -1707,15 +1707,20 @@ function goalReps(base){
 /* 추천 횟수 = 동작별 기본값에 목표 가중치를 반영한 값 */
 function recReps(slot,r){ return goalReps(defReps(slot,r)); }
 
-/* 자세교정이 목표면 교정 계열 슬롯의 세트를 1 늘림 */
-const _POSTURE_ROLE=/자세교정|거북목|흉추|페이스 풀|후면 삼각|골반 정렬/;
+/* ---- 자세교정 판정: 단일 소스(슬롯 데이터) ----
+   role 이름 regex는 폐기(브리틀·죽은 패턴 잔존 위험). 슬롯 데이터로만 판단한다.
+   · symptom-gated: opt:'posture:neck|shoulder|back|pelvis' — 해당 증상을 골랐을 때만 노출(slotActive).
+   · always-shown : posture:true — 항상 노출하되 자세교정 목표면 세트 +1(근비대 가치가 함께 있는 교정 슬롯).
+   둘 다 "자세교정 요소"이므로 목표가 자세교정이면 세트 +1 대상이다. */
+function postureSym(sl){ const o=sl.opt||''; return o.indexOf('posture:')===0 ? o.slice(8) : null; }
+function isPostureSlot(sl){ return sl.posture===true || postureSym(sl)!=null; }
 function effVol(si,oi,slot,r){
   const c=state.slotCustom&&state.slotCustom[si+':'+oi];
   const beginner=state.profile&&state.profile.liftingExp===false;
   const gm=goalMods();
   let base=beginner?Math.max(2,slot.sets-1):slot.sets;
   let delta=gm.setDelta;
-  if(gm.posture && _POSTURE_ROLE.test(slot.role)) delta+=1;
+  if(gm.posture && isPostureSlot(slot)) delta+=1;
   base=Math.max(2,Math.min(5,base+delta));
   const sets=(c&&c.sets)?c.sets:base;
   const reps=(c&&c.reps!=null&&c.reps!=='')?c.reps:recReps(slot,r);
@@ -1776,8 +1781,8 @@ function ptypes(){
   return t;
 }
 function slotActive(sl){
-  const o=sl.opt||'';
-  if(o.indexOf('posture:')===0) return goalMods().posture && ptypes().includes(o.slice(8));
+  const sym=postureSym(sl);
+  if(sym) return goalMods().posture && ptypes().includes(sym);
   return true;
 }
 function sessionExercises(s, si){

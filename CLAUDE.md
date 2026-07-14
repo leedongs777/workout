@@ -35,8 +35,11 @@
 편집 후 반드시 이 순서로 검증:
 1. **문법 검사**: `<script>` 블록을 추출해 `node --check`.
    - 예: HTML에서 `<script>…</script>` 안 JS를 파일로 뽑아 `node --check file.js`.
-2. **로직 유닛 테스트**: 함수/상수를 brace-match로 추출해 mock state로 `eval` 실행.
-   - 헬퍼 패턴: 이름으로 함수 본문을 뽑는 `grab()`, `const`를 brace-match로 뽑는 `gc()`.
+2. **로직 회귀 테스트 — `node test/run.js`** (2026-07 영구화, 의존성 0). ⭐ 편집 후 반드시 실행.
+   - `index.html`의 `<script>`를 추출해 vm 샌드박스(가짜 DOM)에서 실행하고 검증한다: **① 플랜 엔진 매트릭스**(목표×장비×일수, 시간 합=sessionMinutes·세트 범위·빈 슬롯 0·cardio raw `·` 0) **② 렌더 스캔**(전 화면 렌더 → 생성된 모든 `on*` 핸들러 `new Function` 문법검증 + 특수문자 프로필로 원시 HTML 주입 0 = 이스케이프 확인) **③ 자세교정 판정 보존**(구 regex ≡ `isPostureSlot`) **④ 유닛**(esc·wByGender·freshState 등).
+   - **`deploy.yml`의 validate 잡이 push마다 자동 실행** — 실패 시 배포 중단. `test/`는 Pages에 안 올라감(index.html만 배포).
+   - ⚠️ node가 PATH에 없으면 Adobe 번들 `node.exe`로 실행(로컬). Firebase/실브라우저 경로는 로직 목만 커버 — 라이브는 수동(§7).
+   - **새 기능·수정 시 이 테스트에 케이스를 추가**할 것(회귀 안전망을 계속 키운다).
 3. **UI 렌더링 확인**(가능한 환경일 때): 헤드리스 브라우저 스크린샷 등으로 확인. 과거엔 `wkhtmltoimage`(한국어 폰트 NanumGothic) + `cairosvg`를 썼음.
    - ⚠️ `wkhtmltoimage`는 **구형 webkit이라 CSS Grid 지원이 약함** → 달력 등 grid 레이아웃 미리보기가 실제와 다르게(겹치거나 세로 stack) 나옴. 실제 iOS/안드 Safari에선 정상. **grid는 그 도구로 시각 검증 불가**로 간주.
 4. 편집 완료 후: `index.html`에서 `<script>` 추출해 `node --check`로 문법 확인 → 로직 테스트 → (가능하면) 렌더 확인.

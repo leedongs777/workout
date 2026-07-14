@@ -53,6 +53,14 @@ jobs:
           console.log('모든 script 문법 통과 ✅');
           EOF
 
+      - name: 로직 회귀 테스트 (플랜 엔진·렌더·이스케이프)
+        run: |
+          if [ -f test/run.js ]; then
+            node test/run.js
+          else
+            echo "test/run.js 없음 — 스킵"
+          fi
+
       - name: 기본 HTML 구조 확인
         run: |
           grep -qi '<!doctype html' index.html || { echo "::error::<!doctype html> 누락"; exit 1; }

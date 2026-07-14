@@ -2214,7 +2214,7 @@ function profileBanner(){
   const chips=[];
   if(p.liftingExp===false) chips.push('근력 초보<span class="vdiv"></span>세트/무게 낮춰 시작');
   if(p.goals&&p.goals.length) chips.push('목표: '+p.goals.slice(0,2).map((g,i)=>(i+1)+'순위 '+g).join('<span class="vdiv"></span>'));
-  if(p.running&&p.runPace) chips.push('러닝 1km '+p.runPace+' 기준');
+  if(p.running&&p.runPace) chips.push('러닝 1km '+esc(p.runPace)+' 기준');
   if(p.targetWeightKg&&p.weightKg){ const d=(p.weightKg-p.targetWeightKg); if(d>0) chips.push('감량 목표 '+d.toFixed(1)+'kg'); }
   const inj=(p.injuries&&p.injuries.has)?((p.injuries.list||[]).concat(p.injuries.other?[esc(p.injuries.other)]:[])):[];
   const cond=(p.conditions&&p.conditions.has)?((p.conditions.list||[]).concat(p.conditions.other?[esc(p.conditions.other)]:[])):[];

@@ -1064,7 +1064,7 @@ const SESSIONS=[
    ], fb:{name:'내로우 경사 푸시업', cue:'벽이나 탁자를 짚고 양손을 어깨너비보다 좁게 모아 내렸다 밀기 · 팔꿈치를 몸통에 붙여 삼두에 집중'}},
    {role:'자세교정 (하부 승모)', posture:true, sets:2, reps:'12회', options:[
      {name:'프론 Y-T-W 레이즈', eq:['mat'], cue:'엎드려 팔을 Y·T·W 모양으로 들어 하부 승모근·능형근 활성화', floor:true},
-   ], fb:{name:'프론 Y-T-W 레이즈', cue:'엎드려 엄지 위로, 팔을 Y·T·W 모양으로 들어 견갑 모으기'}},
+   ], fb:{name:'월 슬라이드', cue:'벽에 등과 팔꿈치를 붙인 채 팔을 위아래로 미끄러뜨리기 · 허리가 벽에서 뜨지 않게 갈비뼈를 닫고, 팔꿈치를 벽에 붙여 하부 승모근으로 끌어내리기'}},
   ],
   cardio:{label:'유산소', detail:'존2 강도'},
   cool:[{n:'가슴 스트레칭',a:'좌/우 각각 30초',d:'벽·기둥·문틀 등에 팔을 대고 몸을 앞으로 기울여 가슴을 펴기'},{n:'어깨 앞쪽 스트레칭',a:'좌/우 각각 30초',d:'한 팔을 몸 앞으로 가로질러 반대 팔로 몸쪽으로 당기기'},{n:'목 옆 스트레칭',a:'좌/우 각각 30초',d:'한 손으로 반대쪽 머리를 지그시 당겨 목 옆을 늘이기'}],
@@ -1143,9 +1143,9 @@ const SESSIONS=[
      {name:'케이블 푸시다운', eq:['cable'], cue:'팔꿈치를 옆구리에 고정하고 팔뚝만 펴기'},
      {name:'밴드 푸시다운', eq:['band'], cue:'높은 고정점의 밴드를 아래로 밀기 · 팔꿈치 고정'},
    ], fb:{name:'내로우 경사 푸시업', cue:'벽이나 탁자를 짚고 양손을 어깨너비보다 좁게 모아 내렸다 밀기 · 팔꿈치를 몸통에 붙여 삼두에 집중'}},
-   {role:'자세교정 (하부 승모)', opt:'posture:back', sets:2, reps:'12회', options:[
+   {role:'자세교정 (하부 승모)', posture:true, sets:2, reps:'12회', options:[
      {name:'프론 Y-T-W 레이즈', eq:['mat'], cue:'엎드려 팔을 Y·T·W 모양으로 들어 하부 승모근·능형근 활성화', floor:true},
-   ], fb:{name:'프론 Y-T-W 레이즈', cue:'엎드려 엄지 위로, 팔을 Y·T·W 모양으로 들어 견갑 모으기'}},
+   ], fb:{name:'월 슬라이드', cue:'벽에 등과 팔꿈치를 붙인 채 팔을 위아래로 미끄러뜨리기 · 허리가 벽에서 뜨지 않게 갈비뼈를 닫고, 팔꿈치를 벽에 붙여 하부 승모근으로 끌어내리기'}},
   ],
   cardio:{label:'유산소', detail:'존2 강도'},
  },
@@ -1722,6 +1722,8 @@ function sessionExercises(s, si){
     const cands=slotCands(sl); if(!cands.length) return;
     const eqCands=cands.filter(c=>!c.bw);
     const bwCand=cands.find(c=>c.bw);
+    /* pbw = options[0]이 맨몸이면 "맨몸 동작을 항상 노출"(예: 코어 데드버그) + 기구 옵션을 별도로 추가.
+       그래서 코어 슬롯의 options[0]=데드버그(mat)는 fb의 데드버그와 이름이 같아도 중복이 아니라 이 트리거다 — 지우지 말 것. */
     const pbw=(sl.options&&sl.options.length>0)&&isBW(sl.options[0].eq||[]);
     if(pbw && bwCand) out.push({sl,oi,id:'ex'+oi+'b',key:oi+'b',r:bwCand,eqCands:[]});
     if(eqCands.length){ const nm=state.slotPick&&state.slotPick[si+':'+oi]; const r=(nm&&eqCands.find(c=>c.name===nm))||eqCands[0]; out.push({sl,oi,id:'ex'+oi,key:oi,r,eqCands}); }

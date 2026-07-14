@@ -2929,7 +2929,7 @@ const Sync=(()=>{
   async function attach(){
     if(!user){ if(ref){ref.off();ref=null;} return; }
     ref=db.ref('users/'+user.uid);
-    if(!state._ts)state._ts=nowTs();
+    /* ⚠️ 여기서 state._ts를 now로 찍지 말 것 — 실데이터 없는 새 기기(_ts=0)가 원격보다 최신으로 보여 빈 state로 클라우드를 덮어씀(기록 소실). _ts=0이면 원격이 항상 우선(다운로드). */
     try{
       const snap=await ref.once('value');
       const remote=snap.exists()?snap.val():null;
@@ -3082,7 +3082,7 @@ const Auth=(()=>{
     google:async()=>{
       if(!Sync.hasConfig()){ toast('구글 로그인은 클라우드 연결이 필요해요. 지금은 "둘러보기"로 이용하거나, 설정에서 연결하세요.'); return; }
       _interactive=true;
-      try{ const r=await Sync.signIn(); _interactive=false; if(r&&r.redirect)return; if(r&&r.isNewUser){ pending={type:'google'}; render('consent'); } else completeAuth('google'); }
+      try{ const r=await Sync.signIn(); _interactive=false; if(r&&r.redirect)return; if((r&&r.isNewUser)||!state.consent){ pending={type:'google'}; render('consent'); } else completeAuth('google'); } // 신규거나 동의 이력 없으면(기존 계정이라도) 동의 화면 — 우회 금지
       catch(e){ _interactive=false; toast(e.message||'로그인에 실패했어요'); }
     },
     emailScreen:()=>{ emailMode='login'; render('email'); },
@@ -3274,10 +3274,10 @@ const Onboard=(()=>{
         <p class="ob-hint" style="margin-top:6px">근육 불균형에서 오는 일반적인 자세를 다뤄요. 척추측만 같은 구조적 변형이나 통증이 있으면 전문가와 상담하세요.</p>`:''}
       <div class="ob-sec">부상/수술 이력 <span class="opt">(선택)</span></div>
       <div class="obchips seg">${chip('없음',ob.injHas===false,'Onboard.setInj(false)')}${chip('있음',ob.injHas===true,'Onboard.setInj(true)')}</div>
-      ${ob.injHas===true?`<div class="obgrid" style="margin-top:8px">${INJ.map(x=>chip(x,ob.injList.includes(x),`Onboard.toggleInj('${x}')`)).join('')}${chip('기타',!!ob.injEtc,'Onboard.toggleInjEtc()')}</div>${ob.injEtc?`<input class="ob-textin" id="ob-injother" type="text" value="${ob.injOther||''}" placeholder="직접 입력">`:''}`:''}
+      ${ob.injHas===true?`<div class="obgrid" style="margin-top:8px">${INJ.map(x=>chip(x,ob.injList.includes(x),`Onboard.toggleInj('${x}')`)).join('')}${chip('기타',!!ob.injEtc,'Onboard.toggleInjEtc()')}</div>${ob.injEtc?`<input class="ob-textin" id="ob-injother" type="text" value="${esc(ob.injOther||'')}" placeholder="직접 입력">`:''}`:''}
       <div class="ob-sec">지병 <span class="opt">(선택)</span></div>
       <div class="obchips seg">${chip('없음',ob.condHas===false,'Onboard.setCond(false)')}${chip('있음',ob.condHas===true,'Onboard.setCond(true)')}</div>
-      ${ob.condHas===true?`<div class="obgrid" style="margin-top:8px">${COND.map(x=>chip(x,ob.condList.includes(x),`Onboard.toggleCond('${x}')`)).join('')}${chip('기타',!!ob.condEtc,'Onboard.toggleCondEtc()')}</div>${ob.condEtc?`<input class="ob-textin" id="ob-condother" type="text" value="${ob.condOther||''}" placeholder="직접 입력">`:''}`:''}
+      ${ob.condHas===true?`<div class="obgrid" style="margin-top:8px">${COND.map(x=>chip(x,ob.condList.includes(x),`Onboard.toggleCond('${x}')`)).join('')}${chip('기타',!!ob.condEtc,'Onboard.toggleCondEtc()')}</div>${ob.condEtc?`<input class="ob-textin" id="ob-condother" type="text" value="${esc(ob.condOther||'')}" placeholder="직접 입력">`:''}`:''}
       ${editing
         ?`<div class="ob-actions"><button class="ob-cancel" onclick="Onboard.exitEdit()">취소</button><button class="ob-save" onclick="Onboard.saveNext(2)">저장하고 다음으로</button></div>`
         :`<button class="ob-next" onclick="Onboard.next2()">다음<span class="vdiv"></span>운동 환경</button>`}
@@ -3377,8 +3377,8 @@ setInterval(()=>{ document.querySelectorAll('.live-timer').forEach(el=>{ const s
 /* ---------------- Init ---------------- */
 (async function(){
   await load();
-  if(!state._ts) state._ts=Date.now();
-  clampStartDate(); // load()에도 있지만 방어적으로 재확인
+  // state._ts는 여기서 찍지 않는다 — 실데이터 없는 새 기기는 _ts=0이어야 첫 동기화에서 원격을 다운로드(빈 state로 덮어쓰기 방지). 실제 편집 시 touch()가 stamp함.
+  clampStartDate();
   renderHome();
   Sync.setOnAuth(u=>{ Auth.onSignedIn(u); });
   if(!state.authPassed) Auth.show(); else Auth.hide();

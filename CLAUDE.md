@@ -109,6 +109,8 @@
   - **로그아웃/전체초기화는 로컬 데이터를 클리어**한다(`freshState`) — 같은 기기 다음 사용자에게 이전 기록·프로필이 새지 않게. `resetAll`은 `Sync.signOut()`도 먼저 호출(빈 state가 클라우드를 덮거나 세션 잔존으로 게이트 우회하는 것 방지).
   - **`Auth.onSignedIn`은 동의 없는 계정 로그인을 통과시키지 않는다** — `state.consent`가 없으면 게이트를 닫지 않고 동의 화면으로. (예전 버그: attach 레이스로 신규 로그인이 약관 동의를 건너뜀.)
   - **`applyRemote`는 날짜 키 필드(`log`/`steps`/`stepStart`/`stepMs`)를 로컬·원격 병합**한다(문서 전체 LWW라 두 기기가 다른 날짜를 편집하면 소실되던 것 완화). 배열(doneDays 등)은 여전히 LWW.
+  - 🔴 **실데이터 없는 새 기기는 `state._ts`를 `now`로 찍지 말 것**(부팅·attach 둘 다). `_ts`가 0/undefined여야 첫 동기화에서 `remote.updatedAt >= state._ts`가 참이 되어 **원격을 다운로드**한다. now로 찍으면 빈 state가 원격보다 최신으로 보여 **클라우드 기록을 빈 문서로 덮어씀(소실)**. `_ts`는 실제 편집 시 `touch()`가 stamp. (2026-07, 되돌리지 말 것.)
+  - **인증 게이트는 `state.consent` 없으면 통과 금지** — `Auth.google`의 기존계정(isNewUser=false) 경로도 `!state.consent`면 동의 화면으로(우회 금지). `onSignedIn`도 동일.
   - ⚠️ 이 경로들은 **Firebase+브라우저 없이는 실행 테스트 불가** — 상태머신 로직만 node로 검증됨. 실제 로그인/동기화는 라이브 테스트 필요(§7 출시 전 항목).
 - **state 필드**: `equipment[]`, `includeBodyweight`, `includeFloor`, `workoutDays[]`(요일 인덱스, 0=일), `sessionMinutes`, `startDate`, `restDays[]`, `doneDays[]`, `log{}`, `steps{}`(날짜별 단계 완료), `stepStart{}`(단계 시작 타임스탬프), `stepMs{}`(단계 소요 ms), `slotCustom{}`, `cardioChoice`, `cardioMin{}`(세션 인덱스별 유산소 분 override, 없으면 추천값 `sessionTimes().cardioAuto`), `authPassed`, `authProvider`, `consent`, `profile`, `onboarded`, `_ts`.
 - `resetAll`과 state 기본값 모두 `workoutDays`, `sessionMinutes` 포함.

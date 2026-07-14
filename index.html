@@ -267,7 +267,7 @@
   .wu-desc .wu-dtx{flex:1; min-width:0;}
   .wu-desc .wu-seg{white-space:nowrap;}
   .cardio-chips{display:flex; flex-wrap:wrap; gap:7px; margin-top:7px;}
-  .cardio-chips .cardio-chip{flex:1 1 0; min-width:0;}
+  .cardio-chips .cardio-chip{flex:0 1 auto;} /* 내용 크기 + 자연 줄바꿈 — 등분 강제하면 좁은 폰에서 '리컴번트 바이크' 등 긴 라벨이 잘림(nowrap) */
   .cardio-chips{align-items:stretch;}
   .cardio-chip{padding:7px 8px; border-radius:9px; border:1px solid var(--line); background:var(--surface-2); color:var(--muted); font-family:inherit; font-size:12.5px; font-weight:700; cursor:pointer; text-align:center; white-space:normal; word-break:keep-all; line-height:1.3; display:flex; align-items:center; justify-content:center;}
   /* 본운동 기구 선택 버튼 — 시작 버튼 너비에 맞춰 균등 채움(최대 3) */
@@ -1748,8 +1748,8 @@ function pickCardio(id){ state.cardioChoice=(state.cardioChoice===id?null:id); t
 function cardioChips(){
   const m=cardioMachines();
   if(!m.length) return wuDesc('보유한 유산소 기구가 없어요.|제자리 걷기·마칭으로 대체하세요.');
-  const cb=cellBasis(m.length);
-  return `<div class="cardio-chips" style="justify-content:center">${m.map(([id,label])=>`<button class="cardio-chip ${state.cardioChoice===id?'on':''}" style="${cb}" onclick="pickCardio('${id}')"><span class="eq-ic">${eqIcon(id)}</span><span class="eq-tx">${label}</span></button>`).join('')}</div>`;
+  /* 칩은 내용 크기(flex:0 1 auto) + 줄바꿈 — cellBasis로 등분하면 좁은 폰에서 긴 라벨('리컴번트 바이크')이 잘린다. 되돌리지 말 것 */
+  return `<div class="cardio-chips" style="justify-content:center">${m.map(([id,label])=>`<button class="cardio-chip ${state.cardioChoice===id?'on':''}" onclick="pickCardio('${id}')"><span class="eq-ic">${eqIcon(id)}</span><span class="eq-tx">${label}</span></button>`).join('')}</div>`;
 }
 function wuResolve(arr){
   const okEq=e=>!e||e.every(x=>state.equipment.includes(x));

@@ -26,7 +26,7 @@
     /* 액센트 배경 위 글자색 */
     --on-accent:#FFFFFF;
     /* 7556 C / 7556 C 16% 틴트 */
-    --sand:#B78B20; --sand-soft:#F3ECDB;
+    --sand:#B78B20; --sand-soft:#F3ECDB; --sand-ink:#6F5310; /* 배경 위 읽히는 진한 샌드(라이트) */
     /* 7599 C */
     --danger:#B33D26;
     --radius:16px; --radius-sm:11px;
@@ -43,11 +43,14 @@
       /* 밝은 액센트 위에는 627 C 글자 — 흰 글자는 대비 미달(2.9:1) */
       --on-accent:#13322B;
       /* 7407 C / 7407 C 다크 틴트 */
-      --sand:#CBA052; --sand-soft:#28251E;
+      --sand:#CBA052; --sand-soft:#28251E; --sand-ink:#CBA052; /* 다크 배경에선 밝은 샌드가 대비 충분 */
       /* 7416 C */
       --danger:#E56A54;
       --shadow:0 1px 2px rgba(0,0,0,.3), 0 10px 30px -20px rgba(0,0,0,.7);
     }
+    /* 달력 일/토 색: 라이트 하드코딩 색은 다크 배경에서 대비 미달 → 밝은 변형으로 오버라이드 */
+    .cal-wd.sun, .cal-cell.sun .cal-n, .bcal-wd .sun, .bcal-cell.sun{color:#E8917D;}
+    .cal-wd.sat, .cal-cell.sat .cal-n, .bcal-wd .sat, .bcal-cell.sat{color:#8FB0E8;}
   }
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
   html,body{margin:0;padding:0;}
@@ -93,7 +96,7 @@
   .tag{font-size:11.5px; font-weight:650; padding:4px 9px; border-radius:999px; background:var(--accent-soft); color:var(--accent-ink); letter-spacing:.01em;}
   .pill{font-size:11px; font-weight:750; letter-spacing:.1em; text-transform:uppercase; padding:5px 10px; border-radius:999px;}
   .pill.rest{background:var(--sand); color:#3a2a00;}
-  .pill.rest-fixed{background:transparent; color:var(--sand); border:1px solid var(--sand);}
+  .pill.rest-fixed{background:transparent; color:var(--sand-ink); border:1px solid var(--sand);}
 
   /* section label */
   .sec-label{font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--faint); font-weight:700; margin:22px 4px 9px;}
@@ -141,7 +144,7 @@
   .badge{font-size:10px; font-weight:750; letter-spacing:.06em; text-transform:uppercase; padding:2px 7px; border-radius:999px; flex:none;}
   .badge.today{background:var(--accent); color:var(--on-accent);}
   .badge.done{background:var(--accent-soft); color:var(--accent-ink);}
-  .rest-tag{font-size:12.5px; font-weight:650; color:var(--sand);}
+  .rest-tag{font-size:12.5px; font-weight:650; color:var(--sand-ink);}
   .day-expand{background:var(--surface-2); border-top:1px solid var(--line-2);}
   .mini-ex{padding:8px 15px 8px 15px; border-top:1px solid var(--line-2); font-size:13.5px; display:flex; align-items:center; gap:10px;}
   .mini-ex:first-child{border-top:none;}
@@ -261,7 +264,6 @@
   .step-cue{font-size:12.5px; color:var(--muted); line-height:1.55; margin-top:6px;}
   .step-cue .wu-desc:first-child{margin-top:0;}
   .step-list li.wu-item{padding-top:7px; padding-bottom:7px;}
-  .step-list li.nodot::before{display:none;}
   .wu-name{font-weight:600; font-size:13.5px; color:var(--ink);}
   .wu-desc{font-size:12.5px; color:var(--muted); margin-top:3px; line-height:1.5; display:flex; gap:.3em; word-break:keep-all;}
   .wu-desc .wu-dash{flex:none;}
@@ -298,7 +300,6 @@
   .safety-note .sl-tx{flex:1; min-width:0;}
   .step-done-btn{width:100%; margin-top:12px; border:1px solid var(--accent); background:transparent; color:var(--accent-ink); font-weight:700; font-size:14px; padding:10px; border-radius:11px; cursor:pointer; font-family:inherit; transition:.14s;}
   .step.active .step-done-btn{background:var(--accent); color:var(--on-accent); border-color:var(--accent);}
-  .step-done-btn.is-done{background:transparent; color:var(--muted); border-color:var(--line); border-style:dashed;}
   .step-done-btn.start{background:var(--accent); color:var(--on-accent); border-color:var(--accent);}
   .step-done-btn.timing{background:var(--sand-soft); color:var(--sand); border-color:var(--sand); font-variant-numeric:tabular-nums;}
   .step.timing{box-shadow:0 0 0 2px var(--sand) inset; border-radius:14px;}
@@ -371,8 +372,8 @@
   .cz .vdiv{margin:0;}
   /* 심박존 — 팬톤 334 C / 7489 C / 142 C / 7577 C / 7619 C */
   .cz1{background:#009775;} .cz2{background:#74AA50;} .cz3{background:#F1BE48;} .cz4{background:#E07E3C;} .cz5{background:#C04C36;}
-  /* 밝은 존(2·3·4) 배지는 흰 글자가 대비 미달(WCAG AA) → 어두운 글자로. 어두운 존(1·5)은 흰 글자 유지 */
-  .cz-badge.cz2, .cz-badge.cz3, .cz-badge.cz4{color:#241a00;}
+  /* 존1~4 배지는 흰 글자가 대비 미달(WCAG AA, cz1 3.7:1) → 어두운 글자로. 가장 어두운 cz5(레드)만 흰 글자 유지(4.9:1) */
+  .cz-badge.cz1, .cz-badge.cz2, .cz-badge.cz3, .cz-badge.cz4{color:#241a00;}
   .cz-tap{border:none; font-family:inherit; cursor:pointer;}
   .zi-title{font-size:17px; font-weight:800; color:var(--ink);}
   .zi-sub{font-size:12px; color:var(--muted); margin:5px 0 14px; line-height:1.5;}
@@ -540,8 +541,8 @@
   .rankbadge{display:inline-block; margin-left:5px; padding:1px 6px; border-radius:999px; background:var(--on-accent); color:var(--accent); font-size:10.5px; font-weight:800; vertical-align:middle;}
   .ob-half{display:flex; gap:10px;} .ob-half>.field{flex:1;}
   .pace{display:flex; align-items:center; gap:8px; flex-wrap:wrap;}
-  .pace select,.ob-select{height:46px; border:1px solid var(--line); border-radius:11px; background:var(--surface-2); color:var(--ink); font-family:inherit; font-size:16px; padding:0 10px; outline:none;}
-  .pace select:focus,.ob-select:focus{border-color:var(--accent);}
+  .pace select{height:46px; border:1px solid var(--line); border-radius:11px; background:var(--surface-2); color:var(--ink); font-family:inherit; font-size:16px; padding:0 10px; outline:none;}
+  .pace select:focus{border-color:var(--accent);}
   .pace .u{font-size:13px; color:var(--muted); font-weight:600;}
   .ob-verify{display:flex; gap:8px; margin-top:8px;}
   .ob-verify .vbtn{flex:1; height:46px; border:1px solid var(--accent); border-radius:11px; background:var(--accent-soft); color:var(--accent-ink); font-weight:700; font-size:14px; cursor:pointer; font-family:inherit;}
@@ -837,7 +838,6 @@ const POSE_SVG={
 const PAT_ICON={
   strength:'<circle cx="24" cy="11" r="3.2"/><path d="M24 14v11"/><path d="M14 20h20"/><path d="M24 25l-3 12M24 25l3 12"/>',
   squat:'<circle cx="27" cy="9" r="3.2"/><path d="M27 12l-4 14h8"/><path d="M31 26v11M21 27l-1 10"/><path d="M25 16l8 3"/>',
-  legpress:'<circle cx="14" cy="16" r="3.2"/><path d="M14 19v6h7"/><path d="M21 25l11-8"/><path d="M11 21l6 2"/>',
   legext:'<circle cx="16" cy="14" r="3.2"/><path d="M16 17v7h6"/><path d="M22 24l9 4"/><path d="M13 19h5"/>',
   legcurl:'<circle cx="12" cy="24" r="3.2"/><path d="M15 24h15"/><path d="M30 24l4-7"/>',
   hipthrust:'<circle cx="12" cy="27" r="3"/><path d="M15 28l9-6h7"/><path d="M31 22l3 10"/><path d="M15 31h7"/>',
@@ -849,7 +849,6 @@ const PAT_ICON={
   row:'<circle cx="20" cy="13" r="3.2"/><path d="M20 16v11"/><path d="M20 27l-3 10M20 27l3 10"/><path d="M20 20l11-2"/>',
   facepull:'<circle cx="24" cy="11" r="3.2"/><path d="M24 14v13"/><path d="M24 27l-3 10M24 27l3 10"/><path d="M24 16l-7-2M24 16l7-2"/><path d="M17 14l-3 4M31 14l3 4"/>',
   reardelt:'<circle cx="24" cy="12" r="3.2"/><path d="M24 15v12"/><path d="M13 18h22"/><path d="M24 27l-3 10M24 27l3 10"/>',
-  extrot:'<circle cx="22" cy="12" r="3.2"/><path d="M22 15v12"/><path d="M22 22h6l3-4"/><path d="M22 27l-2 10M22 27l3 10"/>',
   chintuck:'<circle cx="27" cy="16" r="5"/><path d="M23 22v10"/><path d="M13 18h7"/><path d="M16 15l-3 3 3 3"/>',
   stepup:'<circle cx="19" cy="9" r="3.2"/><path d="M19 12v10"/><path d="M19 22l6 2v6M19 22l-4 13"/><path d="M23 30h11v6H23z"/>',
   splitsquat:'<circle cx="22" cy="9" r="3.2"/><path d="M22 12v12"/><path d="M22 24l6 4v8M22 24l-7 6-2 6"/>',
@@ -904,11 +903,11 @@ function showRoleInfo(role){
 }
 const ROLE_PAT={
   '메인 하체':'squat','대퇴사두':'legext','햄스트링/둔근':'legcurl','둔근 메인':'hipthrust','코어 (안티 익스텐션)':'deadbug',
-  '수직 당기기':'latpull','수평 당기기':'row','이두 (팔 굽히기)':'biceps','자세교정 (말린 어깨)':'facepull','후면 삼각/능형근':'reardelt','페이스 풀':'facepull','거북목 교정':'chintuck','흉추 신전':'stretch',
+  '수직 당기기':'latpull','수평 당기기':'row','이두 (팔 굽히기)':'biceps','자세교정 (말린 어깨)':'facepull','후면 삼각/능형근':'reardelt','거북목 교정':'chintuck','흉추 신전':'stretch',
   '전신 (스텝)':'stepup','코어 안티 로테이션':'pallof','코어 (버드독)':'birddog',
   '편측 하체':'splitsquat','중둔근':'abduction','둔근 편측':'hipthrust','내전근 균형':'adduction','사이드 플랭크 (맥길)':'sideplank',
   '수평 밀기':'chestpress','수직 밀기 (어깨)':'shoulderpress','가슴 보조':'fly','삼두':'triceps','자세교정 (하부 승모)':'ytw',
-  '코어 (안티 익스텐션)':'deadbug','코어 (안정화)':'birddog','코어 (측면)':'sideplank','자세교정 종합':'facepull',
+  '코어 (안정화)':'birddog','코어 (측면)':'sideplank','자세교정 종합':'facepull',
 };
 /* 기구 아이콘: 투명 PNG 알파를 CSS mask로 렌더 (색은 currentColor). 모든 기구 id가 마스크로 존재하므로 벡터 폴백은 불필요(미지의 id면 빈 span으로 무해하게 degrade) */
 function eqIcon(id){ return `<span class="ic-msk ic-eq-${id}" aria-hidden="true"></span>`; }
@@ -1504,7 +1503,7 @@ function exCat(name,eq){
   return 'machine'; // 핀 스택 머신·케이블 등
 }
 /* 성별에 따라 값이 갈리는 카테고리(덤벨·케틀벨)의 남/여 시작값 */
-function wByGender(base){ const p=state.profile||{}; return p.gender==='여'?base.f:base.m; }
+function wByGender(base){ const p=state.profile||{}; return (p.gender==='female'||p.gender==='여')?base.f:base.m; } // 저장값은 'female'/'male'(GENDERS). '여'는 레거시 방어
 const WBASE={
   machine:5,          // 핀 스택 최소
   barbell:20,         // 올림픽 바 빈 봉
@@ -2683,7 +2682,7 @@ function renderSetup(){
   "databaseURL": "https://…firebasedatabase.app",
   "projectId": "…",
   "appId": "…"
-}' style="width:100%;font-family:ui-monospace,Menlo,monospace;font-size:12px;padding:11px;border:1px solid var(--line);border-radius:var(--radius-sm);background:var(--surface-2);color:var(--ink);resize:vertical;box-sizing:border-box"></textarea>
+}' style="width:100%;font-family:ui-monospace,Menlo,monospace;font-size:16px;padding:11px;border:1px solid var(--line);border-radius:var(--radius-sm);background:var(--surface-2);color:var(--ink);resize:vertical;box-sizing:border-box"></textarea>
       <button id="fb-connect" class="btn" style="margin-top:12px" onclick="saveConfigAndSignIn()">저장하고 Google로 로그인</button>
       <button class="btn ghost" style="margin-top:8px" onclick="pasteConfigPrompt()">칸에 입력이 안 되나요? 팝업으로 붙여넣기</button>
       <details style="margin-top:14px">

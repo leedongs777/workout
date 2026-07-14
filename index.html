@@ -1302,7 +1302,8 @@ function buildCD(s){
 }
 SESSIONS.forEach(s=>{ s.warm=buildWU(s); s.cool=buildCD(s); });
 /* ---------------- App state ---------------- */
-let state={ equipment:[...DEFAULT_EQUIP], includeBodyweight:true, includeFloor:true, workoutDays:[...DEFAULT_WORKOUT_DAYS], sessionMinutes:60, startDate:todayStr(), restDays:[], doneDays:[], log:{}, steps:{}, slotCustom:{}, wDefaults:null, authPassed:false, authProvider:null, consent:null, profile:null, onboarded:true };
+function freshState(){ return { equipment:[...DEFAULT_EQUIP], includeBodyweight:true, includeFloor:true, workoutDays:[...DEFAULT_WORKOUT_DAYS], sessionMinutes:60, startDate:todayStr(), restDays:[], doneDays:[], log:{}, steps:{}, stepStart:{}, stepMs:{}, slotCustom:{}, slotPick:{}, cardioMin:{}, cardioChoice:null, wDefaults:null, authPassed:false, authProvider:null, consent:null, profile:null, onboarded:true }; }
+let state=freshState();
 let activeTab='home';
 let openDays={}; // schedule expand state
 
@@ -1315,7 +1316,8 @@ async function load(){
 let saveT=null;
 function persist(){ clearTimeout(saveT); saveT=setTimeout(()=>Store.set(KEY,JSON.stringify(state)),120); }
 let _syncT=null;
-function touch(){ state._ts=Date.now(); persist(); if(typeof Sync!=='undefined' && Sync.isConnected()){ clearTimeout(_syncT); _syncT=setTimeout(()=>Sync.push(),500); } } // push 디바운스 — 롱프레스 등 연타 시 전체 문서 쓰기 폭주 방지
+let _clockSkew=0; function nowTs(){ return Date.now()+_clockSkew; } // Firebase 서버 시각 보정(.info/serverTimeOffset) — 기기 시계 오차로 최신 편집이 밀리지 않게. 미연결 시 0
+function touch(){ state._ts=nowTs(); persist(); if(typeof Sync!=='undefined' && Sync.isConnected()){ clearTimeout(_syncT); _syncT=setTimeout(()=>Sync.push(),500); } } // push 디바운스 — 롱프레스 등 연타 시 전체 문서 쓰기 폭주 방지
 
 /* ---------------- Programs (빈도 티어 × 목표) ----------------
    순환 구조는 먼저 "주당 운동 일수"가 정한다(운동생리학: 저빈도일수록 전신).
@@ -2851,10 +2853,11 @@ function setWDefault(cat,dir){
   state.wDefaults[cat]=Math.max(0, Math.round((cur+dir*step)*10)/10);
   touch(); renderSetup();
 }
-function resetAll(){
-  state={ equipment:[...DEFAULT_EQUIP], includeBodyweight:true, includeFloor:true, workoutDays:[...DEFAULT_WORKOUT_DAYS], sessionMinutes:60, startDate:todayStr(), restDays:[], doneDays:[], log:{}, steps:{}, slotCustom:{}, wDefaults:null, authPassed:false, authProvider:null, consent:null, profile:null, onboarded:true };
+async function resetAll(){
+  if(typeof Sync!=='undefined' && Sync.isConnected()){ try{ await Sync.signOut(); }catch(e){} } // 로그아웃 먼저 — 빈 state가 클라우드를 덮거나 세션 잔존으로 게이트 우회하는 것 방지
   if(wuTimer){ clearInterval(wuTimer); wuTimer=null; } wuP=null; // 웜업 타이머 정리 — 초기화된 state에 stray 완료 기록 방지
-  openDays={}; touch(); toast('전체 초기화 완료'); if(typeof Auth!=='undefined') Auth.show(); refresh();
+  state=freshState();
+  openDays={}; persist(); toast('전체 초기화 완료'); if(typeof Auth!=='undefined') Auth.show(); refresh();
 }
 
 /* ---------------- Nav ---------------- */
@@ -2913,12 +2916,18 @@ const Sync=(()=>{
     })();
   });}
   function applyRemote(r){
-    try{const d=JSON.parse(r.data);state={...state,...d};state._ts=r.updatedAt||Date.now();clampStartDate();persist();refresh();}catch(e){}
+    try{
+      const d=JSON.parse(r.data);
+      const merged={...state,...d};
+      /* 날짜 키 기반 append-only 필드는 로컬·원격을 병합 — 두 기기가 다른 날짜를 편집해도 서로를 통째로 덮지 않게(문서 LWW 완화). 같은 날짜는 원격이 우선. */
+      ['log','steps','stepStart','stepMs'].forEach(f=>{ merged[f]={...(state[f]||{}),...(d[f]||{})}; });
+      state=merged; state._ts=r.updatedAt||Date.now(); clampStartDate(); persist(); refresh();
+    }catch(e){}
   }
   async function attach(){
     if(!user){ if(ref){ref.off();ref=null;} return; }
     ref=db.ref('users/'+user.uid);
-    if(!state._ts)state._ts=Date.now();
+    if(!state._ts)state._ts=nowTs();
     try{
       const snap=await ref.once('value');
       const remote=snap.exists()?snap.val():null;
@@ -2933,7 +2942,7 @@ const Sync=(()=>{
   }
   async function push(){
     if(!ref)return;
-    const ts=state._ts||Date.now(); lastPushed=ts;
+    const ts=state._ts||nowTs(); lastPushed=ts;
     try{await ref.set({data:JSON.stringify(state),updatedAt:ts});}catch(e){console.warn('sync push failed',e);}
   }
   async function init(cfgStr){
@@ -2943,6 +2952,7 @@ const Sync=(()=>{
     await loadSDK();
     const app=(firebase.apps&&firebase.apps.length)?firebase.app():firebase.initializeApp(cfg);
     auth=firebase.auth(app); db=firebase.database(app);
+    try{ db.ref('.info/serverTimeOffset').on('value',s=>{ _clockSkew=s.val()||0; }); }catch(e){} // 서버 시각 오프셋으로 _ts 보정(S5)
     try{ await auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL); }catch(e){}
     await Store.set(CFG_KEY,cfgStr);
     auth.onAuthStateChanged(async u=>{ user=u; ready=true; await attach(); if(onAuth) onAuth(u); if(activeTab==='setup')renderSetup(); });
@@ -2995,7 +3005,7 @@ function pasteConfigPrompt(){
   connectWithConfig(v);
 }
 async function googleSignIn(){ try{ await Sync.signIn(); }catch(e){ toast(e.message||'로그인에 실패했어요'); } renderSetup(); }
-async function googleSignOut(){ await Sync.signOut(); state.authProvider=null; state.authPassed=false; persist(); toast('로그아웃했어요'); Auth.show(); }
+async function googleSignOut(){ await Sync.signOut(); if(wuTimer){clearInterval(wuTimer);wuTimer=null;} wuP=null; state=freshState(); persist(); toast('로그아웃했어요'); Auth.show(); refresh(); } // 로컬 데이터 전체 클리어 — 같은 기기 다음 사용자에게 이전 기록·프로필이 새지 않게
 
 /* ---------------- Auth gate (login / consent / guest) ---------------- */
 const CONSENT_VERSION='1.0';
@@ -3054,7 +3064,17 @@ const Auth=(()=>{
   function emailErr(e){ const c=e&&e.code||''; if(c.includes('email-already-in-use'))return '이미 가입된 이메일이에요. 로그인해 주세요.'; if(c.includes('wrong-password')||c.includes('invalid-credential'))return '비밀번호가 올바르지 않아요.'; if(c.includes('user-not-found'))return '가입되지 않은 이메일이에요. 회원가입을 눌러주세요.'; if(c.includes('weak-password'))return '비밀번호는 6자 이상이어야 해요.'; if(c.includes('invalid-email'))return '이메일 형식이 올바르지 않아요.'; return (e&&e.message)||'처리 중 오류가 발생했어요.'; }
   return {
     show, hide,
-    onSignedIn:(u)=>{ if(!u)return; if(_interactive)return; if(!state.authPassed){ state.authProvider=state.authProvider||'google'; state.authPassed=true; persist(); } hide(); },
+    onSignedIn:(u)=>{
+      if(!u) return;
+      if(_interactive) return; // 인터랙티브 로그인(google/email)은 자체 라우팅
+      if(state.consent){ // 이미 동의(복귀 유저는 attach가 원격 consent를 동기화) → 통과
+        if(!state.authPassed){ state.authProvider=state.authProvider||'google'; state.authPassed=true; persist(); }
+        hide(); return;
+      }
+      // 계정 로그인했으나 동의 이력 없음(신규·게스트 전환·리다이렉트 복귀) → 약관 동의 필수(우회 금지)
+      cons={tos:false,privacy:false,age:false,marketing:false}; openText=null; pending={type:'google'};
+      render('consent'); gate().classList.remove('hidden'); document.body.style.overflow='hidden';
+    },
     kakao:()=>toast('카카오 로그인은 준비 중이에요 — 카카오 개발자 연동 후 활성화됩니다.'),
     apple:()=>toast('Apple 로그인은 준비 중이에요 — Apple 개발자 계정 연결 후 활성화됩니다.'),
     google:async()=>{

@@ -102,7 +102,14 @@
 
 ### 4.1 저장/상태
 - 저장 계층: `window.storage → localStorage → memory`. 키 **`workoutPlanner:v1`**.
-- `persist()`(디바운스), `touch()`(=_ts 갱신 + persist + Sync.push). Firebase 설정 키 `workoutPlanner:fbcfg`.
+- `persist()`(디바운스 120ms), `touch()`(=_ts 갱신 + persist + **디바운스된 Sync.push 500ms**). Firebase 설정 키 `workoutPlanner:fbcfg`.
+- **`freshState()`**: 기본 state를 만드는 단일 소스. state 초기화·`resetAll`·`googleSignOut` 모두 이걸 쓴다(필드 누락 방지).
+- **`nowTs()` = `Date.now()+_clockSkew`**: `_ts`는 이걸로 찍는다. `_clockSkew`는 Firebase `.info/serverTimeOffset`로 세팅(미연결 시 0) — 기기 시계 오차로 최신 편집이 밀리는 것 방지.
+- ⚠️ **인증/동기화 안전장치(2026-07, Firebase 연결 사용자에 한정)**:
+  - **로그아웃/전체초기화는 로컬 데이터를 클리어**한다(`freshState`) — 같은 기기 다음 사용자에게 이전 기록·프로필이 새지 않게. `resetAll`은 `Sync.signOut()`도 먼저 호출(빈 state가 클라우드를 덮거나 세션 잔존으로 게이트 우회하는 것 방지).
+  - **`Auth.onSignedIn`은 동의 없는 계정 로그인을 통과시키지 않는다** — `state.consent`가 없으면 게이트를 닫지 않고 동의 화면으로. (예전 버그: attach 레이스로 신규 로그인이 약관 동의를 건너뜀.)
+  - **`applyRemote`는 날짜 키 필드(`log`/`steps`/`stepStart`/`stepMs`)를 로컬·원격 병합**한다(문서 전체 LWW라 두 기기가 다른 날짜를 편집하면 소실되던 것 완화). 배열(doneDays 등)은 여전히 LWW.
+  - ⚠️ 이 경로들은 **Firebase+브라우저 없이는 실행 테스트 불가** — 상태머신 로직만 node로 검증됨. 실제 로그인/동기화는 라이브 테스트 필요(§7 출시 전 항목).
 - **state 필드**: `equipment[]`, `includeBodyweight`, `includeFloor`, `workoutDays[]`(요일 인덱스, 0=일), `sessionMinutes`, `startDate`, `restDays[]`, `doneDays[]`, `log{}`, `steps{}`(날짜별 단계 완료), `stepStart{}`(단계 시작 타임스탬프), `stepMs{}`(단계 소요 ms), `slotCustom{}`, `cardioChoice`, `cardioMin{}`(세션 인덱스별 유산소 분 override, 없으면 추천값 `sessionTimes().cardioAuto`), `authPassed`, `authProvider`, `consent`, `profile`, `onboarded`, `_ts`.
 - `resetAll`과 state 기본값 모두 `workoutDays`, `sessionMinutes` 포함.
 - ⚠️ **기본값은 중립적이어야 한다.** `workoutDays`는 **주 4일 중립값 `DEFAULT_WORKOUT_DAYS=[1,3,5,6]`(월·수·금·토)**, `DEFAULT_EQUIP`은 **빈 배열(기구 없음)**로 통일했다(2026-07, 과거 주 6일·27종은 특정 개인 일정·헬스장이라 폐기 — 되돌리지 말 것). 기구가 비면 맨몸이 자동 ON이라 첫 진입·둘러보기는 맨몸 플랜으로 시작하고, 사용자는 온보딩/설정에서 자기 기구를 직접 고른다. 온보딩을 마친 사용자는 자기 값을 쓴다.

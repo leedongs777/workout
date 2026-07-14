@@ -1768,6 +1768,8 @@ function wuResolve(arr){
   }).filter(Boolean);
 }
 function wuDesc(t){ t=String(t).replace(/\s*·\s*/g,', '); const inner=t.indexOf('|')>=0?t.split('|').map(p=>`<span class="wu-seg">${p}</span>`).join(' '):t; return `<div class="wu-desc"><span class="wu-dash">-</span><span class="wu-dtx">${inner}</span></div>`; }
+/* 사용자 자유입력(닉네임·이름·부상/지병 기타)을 innerHTML에 넣기 전 이스케이프 — `<`·`"`·`&` 등으로 UI가 깨지거나 자기-XSS가 되지 않게 */
+function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 /* 스마트 줄바꿈: (1)마침표(. ) 뒤 문장 분리 (2)문장이 한 줄(cap)을 넘칠 때만, 그리고 쉼표 앞부분이 한 줄에 들어갈 때만 그 쉼표에서 줄바꿈. cap = 한 줄에 들어가는 대략 글자 수 */
 function smartBreak(t, cap){
   cap=cap||26; t=String(t).replace(/\s*·\s*/g,', ');
@@ -2170,7 +2172,7 @@ let _motiv=null; function homeMotiv(){ if(!_motiv) _motiv=MOTIV[Math.floor(Math.
 function longDate(t){ const d=parse(t); return `${d.getMonth()+1}월 ${d.getDate()}일 ${WD[d.getDay()]}요일`; }
 function renderHome(){
   const t=todayStr(); const entry=sessionFor(t);
-  const nm=(state.profile&&(state.profile.nickname||state.profile.name))?(state.profile.nickname||state.profile.name)+'님, ':'';
+  const nm=(state.profile&&(state.profile.nickname||state.profile.name))?esc(state.profile.nickname||state.profile.name)+'님, ':'';
   let html=`<div class="home-hi">${nm}${homeMotiv()}</div>`;
   if(!entry){
     html+=`<div class="card hero"><div class="hero-top rest"><div><div class="hero-date"><b>오늘</b></div><div class="hero-title">플랜 시작 전</div><div class="hero-est">플랜 시작일 이전이에요<span class="vdiv"></span>설정에서 시작일을 확인하세요</div></div></div></div>`;
@@ -2214,8 +2216,8 @@ function profileBanner(){
   if(p.goals&&p.goals.length) chips.push('목표: '+p.goals.slice(0,2).map((g,i)=>(i+1)+'순위 '+g).join('<span class="vdiv"></span>'));
   if(p.running&&p.runPace) chips.push('러닝 1km '+p.runPace+' 기준');
   if(p.targetWeightKg&&p.weightKg){ const d=(p.weightKg-p.targetWeightKg); if(d>0) chips.push('감량 목표 '+d.toFixed(1)+'kg'); }
-  const inj=(p.injuries&&p.injuries.has)?((p.injuries.list||[]).concat(p.injuries.other?[p.injuries.other]:[])):[];
-  const cond=(p.conditions&&p.conditions.has)?((p.conditions.list||[]).concat(p.conditions.other?[p.conditions.other]:[])):[];
+  const inj=(p.injuries&&p.injuries.has)?((p.injuries.list||[]).concat(p.injuries.other?[esc(p.injuries.other)]:[])):[];
+  const cond=(p.conditions&&p.conditions.has)?((p.conditions.list||[]).concat(p.conditions.other?[esc(p.conditions.other)]:[])):[];
   let caution='';
   if(inj.length) caution+=warnNote('부상 및 수술 이력 반영', `${inj.join(', ')} 관련 부위에 부담이 큰 동작은 뒤로 미뤘어요. 금지된 동작은 아니니 통증 없는 범위에서 가볍게 하고, 통증 시 즉시 중단하고 전문의와 상담하세요.`);
   if(cond.length) caution+=warnNote('건강 주의', `${cond.join(', ')} 이력이 있어요. 무거운 중량에서 숨을 참은 채 힘주기(발살바)를 피하고, 세트 사이 충분히 쉬며 어지럼이나 통증 시 중단하세요.`);
@@ -2267,8 +2269,8 @@ function safetyBox(){
   }
   let personalized=false, hasHtn=false;
   if(p){
-    const inj=(p.injuries&&p.injuries.has)?((p.injuries.list||[]).concat(p.injuries.other?[p.injuries.other]:[])):[];
-    const cond=(p.conditions&&p.conditions.has)?((p.conditions.list||[]).concat(p.conditions.other?[p.conditions.other]:[])):[];
+    const inj=(p.injuries&&p.injuries.has)?((p.injuries.list||[]).concat(p.injuries.other?[esc(p.injuries.other)]:[])):[];
+    const cond=(p.conditions&&p.conditions.has)?((p.conditions.list||[]).concat(p.conditions.other?[esc(p.conditions.other)]:[])):[];
     if(inj.length||cond.length) personalized=true;
     inj.forEach(x=>{
       if(/무릎/.test(x)) rules.push('무릎은 발끝을 크게 넘어가지 않게 하고, 통증이 오기 전 범위까지만 천천히 움직여주세요.');
@@ -2585,7 +2587,7 @@ function showProfile(){
   const p=state.profile; const m=document.getElementById('eqmodal');
   if(!p){ m.innerHTML=`<div class="eqmodal-card"><button class="eqmodal-x" onclick="closeEqInfo()">✕</button><div class="eqmodal-name">내 프로필</div><div class="eqmodal-desc">아직 프로필이 없어요.<br>회원가입 시 입력한 정보가 여기 표시돼요.</div></div>`; m.classList.remove('hidden'); return; }
   const G={male:'남성',female:'여성',other:'기타'};
-  const rows=[['이름',p.name||'-']];
+  const rows=[['이름',esc(p.name||'-')]];
   if(p.birth) rows.push(['생년월일',p.birth]);
   rows.push(['성별',G[p.gender]||'-']);
   if(p.foreigner!=null) rows.push(['구분',p.foreigner?'외국인':'내국인']);
@@ -2593,10 +2595,10 @@ function showProfile(){
   if(p.weightKg) rows.push(['현재 체중',p.weightKg+' kg']);
   if(p.targetWeightKg) rows.push(['목표 체중',p.targetWeightKg+' kg']);
   rows.push(['근력 경험',p.liftingExp?'있음':'없음']);
-  rows.push(['러닝',p.running?('있음'+(p.runPace?(', 1km '+p.runPace):'')):'없음']);
+  rows.push(['러닝',p.running?('있음'+(p.runPace?(', 1km '+esc(p.runPace)):'')):'없음']);
   if(p.goals&&p.goals.length) rows.push(['운동 목표',p.goals.slice(0,2).map((g,i)=>(i+1)+'순위 '+g).join(', ')]);
-  if(p.injuries&&p.injuries.has) rows.push(['부상/수술',(p.injuries.list||[]).concat(p.injuries.other?[p.injuries.other]:[]).join(', ')||'있음']);
-  if(p.conditions&&p.conditions.has) rows.push(['지병',(p.conditions.list||[]).concat(p.conditions.other?[p.conditions.other]:[]).join(', ')||'있음']);
+  if(p.injuries&&p.injuries.has) rows.push(['부상/수술',(p.injuries.list||[]).concat(p.injuries.other?[esc(p.injuries.other)]:[]).join(', ')||'있음']);
+  if(p.conditions&&p.conditions.has) rows.push(['지병',(p.conditions.list||[]).concat(p.conditions.other?[esc(p.conditions.other)]:[]).join(', ')||'있음']);
   const body=rows.map(([k,v])=>`<div class="prow"><span class="pk">${k}</span><span class="pv">${v}</span></div>`).join('');
   m.innerHTML=`<div class="eqmodal-card" style="text-align:left;max-width:380px"><button class="eqmodal-x" onclick="closeEqInfo()">✕</button><div class="eqmodal-name" style="text-align:left;margin-bottom:12px">내 프로필</div>${body}<p class="ob-hint" style="margin-top:14px">프로필 편집 기능은 곧 추가될 예정이에요.</p></div>`;
   m.classList.remove('hidden');
@@ -2606,8 +2608,8 @@ const Drawer=(()=>{
   function mi(tab,ic,label){ return `<button class="drawer-item ${activeTab===tab?'on':''}" onclick="Drawer.go('${tab}')"><span class="di-ic">${ic}</span>${label}</button>`; }
   function render(){
     const p=state.profile; const ui=(typeof Sync!=='undefined'&&Sync.userInfo)?Sync.userInfo():null;
-    const name=(p&&(p.nickname||p.name))?(p.nickname||p.name):(ui&&ui.name?ui.name:'게스트');
-    const sub=state.authProvider==='guest'?'둘러보기 모드':(ui&&ui.email?ui.email:'내 프로필 보기');
+    const name=esc((p&&(p.nickname||p.name))?(p.nickname||p.name):(ui&&ui.name?ui.name:'게스트'));
+    const sub=state.authProvider==='guest'?'둘러보기 모드':esc(ui&&ui.email?ui.email:'내 프로필 보기');
     const av=(name&&name[0])?name[0]:'👤';
     const loggedIn=state.authProvider&&state.authProvider!=='guest';
     el().querySelector('.drawer-panel').innerHTML=`
@@ -2661,7 +2663,7 @@ function renderSetup(){
     <div class="divider"></div>
     ${programFor().map((si,i)=>{ const s=SESSIONS[si]; return `<div style="display:flex;gap:10px;margin:7px 0"><span style="flex:none;width:22px;height:22px;border-radius:7px;background:var(--accent-soft);color:var(--accent-ink);font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center">${i+1}</span><span>${sessTitle(s.title)} <span style="color:var(--faint)">${s.focus.slice(0,3).join('/')}</span></span></div>`; }).join('')}
     <div class="divider"></div>
-    <b>부상 및 수술 이력 반영</b><br>${(()=>{ const p=state.profile; const inj=(p&&p.injuries&&p.injuries.has)?((p.injuries.list||[]).concat(p.injuries.other?[p.injuries.other]:[])):[]; return inj.length?periodLines(inj.join(', ')+' 관련 부위에 부담이 큰 동작은 뒤로 미뤘어요. 금지된 동작은 아니고, 통증 없는 범위에서 가볍게 하면 돼요. 자세한 안전 원칙은 플랜 화면 맨 아래에 있어요.'):periodLines('선택한 부상·수술 이력이 없어 표준 구성으로 짰어요. 통증이나 이력이 있으면 회원 정보에서 입력하면 관련 동작을 조절해 드려요.'); })()}
+    <b>부상 및 수술 이력 반영</b><br>${(()=>{ const p=state.profile; const inj=(p&&p.injuries&&p.injuries.has)?((p.injuries.list||[]).concat(p.injuries.other?[esc(p.injuries.other)]:[])):[]; return inj.length?periodLines(inj.join(', ')+' 관련 부위에 부담이 큰 동작은 뒤로 미뤘어요. 금지된 동작은 아니고, 통증 없는 범위에서 가볍게 하면 돼요. 자세한 안전 원칙은 플랜 화면 맨 아래에 있어요.'):periodLines('선택한 부상·수술 이력이 없어 표준 구성으로 짰어요. 통증이나 이력이 있으면 회원 정보에서 입력하면 관련 동작을 조절해 드려요.'); })()}
   </div>`;
 
   // ---- cloud sync panel (Google 로그인) ----
@@ -2676,7 +2678,7 @@ function renderSetup(){
       <span class="info" style="margin-left:auto">폰/노트북 실시간 공유</span>
     </div>`;
   if(signedIn){
-    html+=`<div class="info" style="margin-bottom:12px">${u&&u.email?('<b>'+(u.name||u.email)+'</b>'+(u.name?('<span class="vdiv"></span>'+u.email):'')+' 계정으로 '):''}기록이 실시간 동기화되고 있어요. 다른 기기에서 <b>같은 구글 계정</b>으로 로그인하면 자동으로 이어집니다.</div>
+    html+=`<div class="info" style="margin-bottom:12px">${u&&u.email?('<b>'+esc(u.name||u.email)+'</b>'+(u.name?('<span class="vdiv"></span>'+esc(u.email)):'')+' 계정으로 '):''}기록이 실시간 동기화되고 있어요. 다른 기기에서 <b>같은 구글 계정</b>으로 로그인하면 자동으로 이어집니다.</div>
       <button class="btn ghost" onclick="googleSignOut()">이 기기에서 로그아웃</button>`;
   } else if(hasCfg){
     html+=`<div class="info" style="margin-bottom:12px">설정이 준비됐어요. 구글로 로그인하면 이 기기의 기록이 클라우드와 연결됩니다.</div>
@@ -3219,8 +3221,8 @@ const Onboard=(()=>{
       <div class="ob-prog">STEP 1 / 3<span class="vdiv"></span>개인정보</div>
       <div class="ob-title">기본 정보를 알려주세요</div>
       <div class="ob-sub">계정과 맞춤 플랜에 사용돼요.</div>
-      <div class="field" style="margin-top:16px"><label>이름</label><input id="ob-name" type="text" value="${ob.name||''}" placeholder="이름"></div>
-      <div class="field"><label>닉네임 <span class="opt">(최대 10자)</span></label><input id="ob-nick" type="text" maxlength="10" value="${ob.nickname||''}" placeholder="앱에서 표시될 이름"></div>
+      <div class="field" style="margin-top:16px"><label>이름</label><input id="ob-name" type="text" value="${esc(ob.name||'')}" placeholder="이름"></div>
+      <div class="field"><label>닉네임 <span class="opt">(최대 10자)</span></label><input id="ob-nick" type="text" maxlength="10" value="${esc(ob.nickname||'')}" placeholder="앱에서 표시될 이름"></div>
       <div class="field"><label>생년월일</label><button type="button" class="ob-datebtn ${ob.birth?'':'ph'}" onclick="Onboard.openBirth()">${ob.birth?`${(''+ob.birth).slice(0,4)}년 ${+(''+ob.birth).slice(5,7)}월 ${+(''+ob.birth).slice(8,10)}일`:'생년월일 선택'}<span class="dbi">▾</span></button></div>
       <div class="ob-sec">성별</div>
       <div class="obchips seg">${GENDERS.map(([val,l])=>chip(l,ob.gender===val,`Onboard.set('gender','${val}')`)).join('')}</div>

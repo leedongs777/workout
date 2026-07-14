@@ -1314,7 +1314,8 @@ async function load(){
 }
 let saveT=null;
 function persist(){ clearTimeout(saveT); saveT=setTimeout(()=>Store.set(KEY,JSON.stringify(state)),120); }
-function touch(){ state._ts=Date.now(); persist(); if(typeof Sync!=='undefined' && Sync.isConnected()) Sync.push(); }
+let _syncT=null;
+function touch(){ state._ts=Date.now(); persist(); if(typeof Sync!=='undefined' && Sync.isConnected()){ clearTimeout(_syncT); _syncT=setTimeout(()=>Sync.push(),500); } } // push 디바운스 — 롱프레스 등 연타 시 전체 문서 쓰기 폭주 방지
 
 /* ---------------- Programs (빈도 티어 × 목표) ----------------
    순환 구조는 먼저 "주당 운동 일수"가 정한다(운동생리학: 저빈도일수록 전신).
@@ -1575,7 +1576,7 @@ function renderSetLog(slot,r,dateStr,oi,nSets){
   const n=nSets; const cb=cellBasis(n);
   if(r.bw){ // bodyweight/floor move → per-set completion dots
     let dots='';
-    for(let k=0;k<n;k++){ dots+=`<button class="setdot ${saved[k]?'on':''}" style="${cb}" onclick="toggleSetDone('${dateStr}',${oi},${k})">${k+1}</button>`; }
+    for(let k=0;k<n;k++){ dots+=`<button class="setdot ${saved[k]?'on':''}" style="${cb}" onclick="toggleSetDone('${dateStr}','${oi}',${k})">${k+1}</button>`; }
     return `<div class="setlog"><div class="setrow dots" style="justify-content:center">${dots}</div></div>`;
   }
   const bs=setBasis(n);
@@ -2852,6 +2853,7 @@ function setWDefault(cat,dir){
 }
 function resetAll(){
   state={ equipment:[...DEFAULT_EQUIP], includeBodyweight:true, includeFloor:true, workoutDays:[...DEFAULT_WORKOUT_DAYS], sessionMinutes:60, startDate:todayStr(), restDays:[], doneDays:[], log:{}, steps:{}, slotCustom:{}, wDefaults:null, authPassed:false, authProvider:null, consent:null, profile:null, onboarded:true };
+  if(wuTimer){ clearInterval(wuTimer); wuTimer=null; } wuP=null; // 웜업 타이머 정리 — 초기화된 state에 stray 완료 기록 방지
   openDays={}; touch(); toast('전체 초기화 완료'); if(typeof Auth!=='undefined') Auth.show(); refresh();
 }
 
@@ -2859,6 +2861,7 @@ function resetAll(){
 const TAB_VIEW={home:'view-home',plan:'view-today',schedule:'view-plan',setup:'view-setup'};
 const TAB_TITLE={home:'홈',plan:'오늘의 운동',schedule:'일정',setup:'설정'};
 function switchTab(tab,isBack){
+  if(wuTimer){ clearInterval(wuTimer); wuTimer=null; } wuP=null; // 탭 이동 시 웜업 플레이어 중단(백그라운드 진행·stray 완료 기록 방지)
   activeTab=tab;
   if(tab==='plan') planDate=null;
   document.querySelectorAll('.nav-btn').forEach(x=>x.classList.toggle('active',x.dataset.tab===tab));

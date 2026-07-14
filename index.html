@@ -589,7 +589,7 @@
   .bcal-cell:active{background:var(--surface-2);}
   .bcal-cell.on{background:var(--accent); color:var(--on-accent);}
   .bcal-cell.sun{color:#c0563f;} .bcal-cell.sat{color:#3f6bc0;}
-  .bcal-cell.on.sun,.bcal-cell.on.sat{color:#fff;}
+  .bcal-cell.on.sun,.bcal-cell.on.sat{color:var(--on-accent);}
   .bcal-foot{display:flex; justify-content:space-between; margin-top:12px; padding-top:10px; border-top:1px solid var(--line-2);}
   .bcal-foot button{border:none; background:none; font-family:inherit; font-size:13.5px; font-weight:700; color:var(--accent-ink); cursor:pointer;}
 
@@ -1306,10 +1306,11 @@ let state={ equipment:[...DEFAULT_EQUIP], includeBodyweight:true, includeFloor:t
 let activeTab='home';
 let openDays={}; // schedule expand state
 
+function clampStartDate(){ if(state.startDate>todayStr()) state.startDate=todayStr(); } // 시작일이 오늘보다 미래면 오늘로 — 로드/동기화 손상 방어(스케줄 깨짐 방지)
 async function load(){
   const raw=await Store.get(KEY);
   if(raw){ try{ const s=JSON.parse(raw); state={...state,...s}; }catch(e){} }
-  // never let startDate be in the future of today on first genuine load; keep as-is otherwise
+  clampStartDate();
 }
 let saveT=null;
 function persist(){ clearTimeout(saveT); saveT=setTimeout(()=>Store.set(KEY,JSON.stringify(state)),120); }
@@ -1561,8 +1562,11 @@ function wtHold(btn,date,oi,k,dir,step,ev){
    dv = 기본값 프리필(저장된 기록이 없을 때 흐리게 미리 채움), basis = 브릭 배치 flex 스타일 */
 function wtCell(date,oi,k,label,step,dv,basis){
   const sv=getLog(date,oi); const saved=(typeof sv[k]==='number');
-  const v = saved ? sv[k] : (dv>0?dv:'');
-  const pre = (!saved && dv>0) ? ' pre' : '';
+  /* 미저장 칸은 이전 세트(없으면 지난 기록) 무게를 우선 프리필 — 없으면 기본값(dv). 매번 처음부터 안 눌러도 되게 */
+  const seed = saved ? 0 : seedWeight(date,oi,k);
+  const fill = seed>0 ? seed : dv;
+  const v = saved ? sv[k] : (fill>0?fill:'');
+  const pre = (!saved && fill>0) ? ' pre' : '';
   const a=`this,'${date}','${oi}',${k}`;
   return `<div class="setcell wtc" style="${basis||''}">${label?`<span class="sn">${label}</span>`:''}<div class="wtstep"><button class="wtb" tabindex="-1" aria-label="무게 줄이기" onpointerdown="wtHold(${a},-1,${step},event)">−</button><span class="wtmid"><input class="wt${pre}" type="number" inputmode="decimal" min="0" step="${step}" value="${v}" placeholder="–" aria-label="무게(kg)" oninput="this.classList.remove('pre')" onchange="logWeight('${date}','${oi}',${k},this.value)"></span><button class="wtb" tabindex="-1" aria-label="무게 늘리기" onpointerdown="wtHold(${a},1,${step},event)">+</button></div></div>`;
 }
@@ -1658,9 +1662,9 @@ function effVol(si,oi,slot,r){
 function volEditor(si,oi,slot,v,r){
   const dr=recReps(slot,r);
   return `<div class="voledit">
-    <button class="stp" onclick="chgSets(${si},${oi},-1,${slot.sets})">−</button>
+    <button class="stp" onclick="chgSets(${si},${oi},-1,${v.sets})">−</button>
     <span class="volnum">${v.sets}세트</span>
-    <button class="stp" onclick="chgSets(${si},${oi},1,${slot.sets})">+</button>
+    <button class="stp" onclick="chgSets(${si},${oi},1,${v.sets})">+</button>
     <span class="voltimes">×</span>
     <input class="repin" value="${v.reps}" onchange="setReps(${si},${oi},this.value,'${dr}')" aria-label="세트당 반복">
     ${v.customized?`<button class="volreset" onclick="resetVol(${si},${oi})">추천값으로</button>`:''}
@@ -2154,7 +2158,8 @@ function streak(){ let n=0,guard=0; let d=parse(todayStr()); const today=todaySt
   }
   return n;
 }
-function weekTotal(){ return wDays().length; } // wDays()와 단일 소스 — 빈 배열이면 기본 요일 수를 따름
+function weekTotal(){ return wDays().length; } // 주당 운동일 수 — programFor 빈도 티어용(구조값). 홈 통계엔 쓰지 말 것(수동 휴식 미반영)
+function weekPlanned(){ const ws=weekStartStr(todayStr()); let c=0; for(let i=0;i<7;i++){ const e=sessionFor(fmt(addDays(parse(ws),i))); if(e&&!e.rest)c++; } return c; } // 이번 주 실제 예정일(수동 휴식·시작일 반영) — weekDone의 분모
 function monthDone(){ const t=parse(todayStr()),y=t.getFullYear(),m=t.getMonth(); return state.doneDays.filter(k=>{const d=parse(k);return d.getFullYear()===y&&d.getMonth()===m;}).length; }
 function monthTotal(){ const t=parse(todayStr()),y=t.getFullYear(),m=t.getMonth(),last=new Date(y,m+1,0).getDate(); let c=0; for(let i=1;i<=last;i++){ const e=sessionFor(fmt(new Date(y,m,i))); if(e&&!e.rest)c++; } return c; }
 const MOTIV=['오늘의 땀은 내일의 자신감이 돼요.','작은 한 걸음이 큰 변화를 만들어요!','어제의 나를 이겨볼까요?','꾸준함이 재능을 이겨요.','이미 시작했으니 절반은 온 거예요!','몸은 오늘의 노력을 기억해요.','포기하지 않는 한 실패는 없어요!','건강은 가장 확실한 투자예요.','미래의 나에게 선물을 줄 시간이에요!','완벽함보다 꾸준함이에요.','움직이는 만큼 강해져요!','오늘도 나를 아껴볼까요?'];
@@ -2164,8 +2169,10 @@ function renderHome(){
   const t=todayStr(); const entry=sessionFor(t);
   const nm=(state.profile&&(state.profile.nickname||state.profile.name))?(state.profile.nickname||state.profile.name)+'님, ':'';
   let html=`<div class="home-hi">${nm}${homeMotiv()}</div>`;
-  if(!entry||entry.rest){
-    html+=`<div class="card hero"><div class="hero-top rest"><div><div class="hero-date"><b>오늘</b></div><div class="hero-title">휴식일</div><div class="hero-est">${entry&&entry.fixed?'정기 휴식일<span class="vdiv"></span>이번 주 쉬는 요일':'쉬는 날'}<span class="vdiv"></span>가볍게 회복하세요</div></div><span class="pill ${entry&&entry.fixed?'rest-fixed':'rest'}">REST</span></div></div>`;
+  if(!entry){
+    html+=`<div class="card hero"><div class="hero-top rest"><div><div class="hero-date"><b>오늘</b></div><div class="hero-title">플랜 시작 전</div><div class="hero-est">플랜 시작일 이전이에요<span class="vdiv"></span>설정에서 시작일을 확인하세요</div></div></div></div>`;
+  } else if(entry.rest){
+    html+=`<div class="card hero"><div class="hero-top rest"><div><div class="hero-date"><b>오늘</b></div><div class="hero-title">휴식일</div><div class="hero-est">${entry.fixed?'정기 휴식일<span class="vdiv"></span>이번 주 쉬는 요일':'쉬는 날'}<span class="vdiv"></span>가볍게 회복하세요</div></div><span class="pill ${entry.fixed?'rest-fixed':'rest'}">REST</span></div></div>`;
   } else {
     const s=SESSIONS[entry.session]; const ids=stepIdsFor(t); const comp=(state.steps&&state.steps[t])||{}; const dn=ids.filter(id=>comp[id]).length; const pct=ids.length?Math.round(dn/ids.length*100):0;
     const dayDone=state.doneDays.includes(t);
@@ -2178,7 +2185,7 @@ function renderHome(){
     </div></div>`;
   }
   html+=`<div class="sec-label">내 운동 현황</div><div class="home-stats">
-    <div class="stat"><div class="stat-n">${weekDone()}<span class="stat-u">/${weekTotal()}일</span></div><div class="stat-l">이번 주 완료</div></div>
+    <div class="stat"><div class="stat-n">${weekDone()}<span class="stat-u">/${weekPlanned()}일</span></div><div class="stat-l">이번 주 완료</div></div>
     <div class="stat"><div class="stat-n">${streak()}<span class="stat-u">일째</span></div><div class="stat-l">연속 운동</div></div>
     <div class="stat"><div class="stat-n">${monthDone()}<span class="stat-u">/${monthTotal()}일</span></div><div class="stat-l">이번 달 완료</div></div>
   </div>`;
@@ -2903,7 +2910,7 @@ const Sync=(()=>{
     })();
   });}
   function applyRemote(r){
-    try{const d=JSON.parse(r.data);state={...state,...d};state._ts=r.updatedAt||Date.now();persist();refresh();}catch(e){}
+    try{const d=JSON.parse(r.data);state={...state,...d};state._ts=r.updatedAt||Date.now();clampStartDate();persist();refresh();}catch(e){}
   }
   async function attach(){
     if(!user){ if(ref){ref.off();ref=null;} return; }
@@ -3346,8 +3353,7 @@ setInterval(()=>{ document.querySelectorAll('.live-timer').forEach(el=>{ const s
 (async function(){
   await load();
   if(!state._ts) state._ts=Date.now();
-  // guard: startDate should not be after today (would break schedule); if so, reset to today
-  if(state.startDate>todayStr()) state.startDate=todayStr();
+  clampStartDate(); // load()에도 있지만 방어적으로 재확인
   renderHome();
   Sync.setOnAuth(u=>{ Auth.onSignedIn(u); });
   if(!state.authPassed) Auth.show(); else Auth.hide();

@@ -110,7 +110,9 @@
 ### 4.2 스케줄 엔진 (요일 기반)
 - `wDays()` = `state.workoutDays`(없으면 `DEFAULT_WORKOUT_DAYS`). **기본값은 이 상수 한 곳에서만 정의**한다(state 초기화·resetAll·weekTotal·toggle·설정 화면 모두 이걸 참조). 하드코딩 `[0,2,3,4,5,6]` 되살리지 말 것.
 - `isRestDow(d)` = 해당 요일이 workoutDays에 없으면 정기 휴식.
-- `buildSchedule`, `sessionFor` 모두 `isRestDow` 사용(휴식 = isRestDow || restDays). `sessionFor`는 startDate 이전엔 null.
+- `buildSchedule`, `sessionFor` 모두 `isRestDow` 사용(휴식 = isRestDow || restDays). `sessionFor`는 startDate 이전엔 null. **null(시작 전)과 rest는 다르다** — 렌더에서 반드시 분리(`renderHome`도 분리함, 예전엔 null을 휴식으로 오표기).
+- **`clampStartDate()`**: 시작일이 오늘보다 미래면 오늘로 당긴다. `load()`·동기화 `applyRemote()`·init 세 곳에서 호출(다중기기 sync로 미래 시작일이 들어와 스케줄이 깨지는 것 방어). 되돌리지 말 것.
+- **통계 분모 주의**: `weekTotal()`(=`wDays().length`)은 **`programFor` 빈도 티어 전용 구조값**이다. 홈 "이번 주 완료 N/M"의 분모는 수동 휴식·시작일을 반영하는 **`weekPlanned()`**(이번 주 비휴식일을 `sessionFor`로 카운트)를 쓴다 — 둘을 혼동하면 N/M이 어긋난다(N>M 등).
 - **로테이션은 고정 6개가 아니라 `programFor()`가 돌려주는 순환표**다: startDate부터 비휴식일을 카운트(`rot`)해 `prog[rot % prog.length]`. 반환값에 `pos`(순환 내 위치)·`len`(순환 길이) 포함 → "순환 N/M" 라벨과 "M일 순환" 문구가 동적. **`SESSIONS[e.session]`은 여전히 유효**(session은 라이브러리 인덱스).
 - 하드코딩된 요일 참조 금지 — 항상 `isRestDow`. **하드코딩 `%6`·"/6"·"6일" 금지** — `programLen()`/`entry.len` 사용.
 
@@ -235,11 +237,12 @@
 ### 4.7 본운동 단계별 타이머
 - `stepShell`: 시작/완료 타이머. 미시작→[시작 →](`startStep`) → 진행중→[완료 · live-timer](doneStep이 stepMs 기록) → 완료→"✓ 완료 · N분 M초" + 다시 열기(`resetStep`).
 - 전역 `setInterval(1s)`가 `.live-timer`(data-start) 갱신. `fmtDur(ms)`→"N분 M초".
-- **세트 무게 입력 = −/+ 스텝퍼**(`wtCell`/`adjWeight`). 직접 타이핑도 되지만 폰트는 **반드시 16px 이상**이어야 iOS가 입력 포커스 시 화면을 자동 확대하지 않는다(과거 14px이라 확대 불편 있었음). 빈 칸에서 +를 누르면 `seedWeight`가 이전 세트(없으면 지난 기록) 무게를 먼저 채운다.
+- **세트 무게 입력 = −/+ 스텝퍼**(`wtCell`/`adjWeight`). 직접 타이핑도 되지만 폰트는 **반드시 16px 이상**이어야 iOS가 입력 포커스 시 화면을 자동 확대하지 않는다(과거 14px이라 확대 불편 있었음). 무게 승계는 프리필이 담당(아래 참조).
+- **세트 수 ± 스텝퍼(`volEditor`→`chgSets`)**: `chgSets`에 넘기는 기준값은 **화면 표시값 `effVol().sets`(=`v.sets`)**여야 한다. `slot.sets`(raw)를 넘기면 목표(+1)·초보자(−1) 보정이 반영된 표시값과 어긋나 첫 탭이 값을 건너뛴다(2026-07 수정). 되돌리지 말 것.
   - **증량 단위는 기구별(`weightStep(eq)`)**: 덤벨 0.5 / 바벨·스미스·핵 스쿼트 2.5(원판) / 케틀벨 4 / 핀 스택 머신·케이블 5. 근거는 실제 무게 구성 조사(원판 최소쌍 2.5kg, 미터법 스택 5kg 등). 운동의 `eq` 배열로 판정한다.
   - **길게 누르면 연속 증가**(`wtHold`, `onpointerdown`): 첫 탭 1회, 계속 누르면 420ms 후부터 가속(×0.6, 하한 45ms). `pointerup`/`pointercancel`/`pointerleave`에서 멈춘다. 멀리 갈 때 편하도록.
   - **세트 칸 배치 = 브릭(`setBasis`)**: 1~3세트는 한 줄, 4+는 두 줄 균형(4→2+2, 5→3+2, 6→3+3, 7→4+3, 8→4+4). `cellBasis`와 달리 4를 2+2로 나눔.
-  - **기본값 프리필(`defaultWeight`, `.wt.pre` 흐리게)**: 저장된 기록이 없으면 시작 무게를 **모든 세트에 동일하게** 미리 채운다(자동 증량 없음 — 무게는 사용자가 올리는 게 맞다). 편집하거나 +/− 누르면 `pre` 해제되며 저장.
+  - **프리필(`.wt.pre` 흐리게, 2026-07 개선)**: 미저장 칸은 `wtCell`이 **`seedWeight`(같은 세션의 이전 세트 → 없으면 지난 기록) → `defaultWeight`(기구 기본값)** 순으로 미리 채운다. 즉 1세트에 60을 넣으면 2세트가 60(흐리게)으로 승계된다(자동 증량 아님 — 편집/±로 `pre` 해제되며 저장). ⚠️ `adjWeight`의 `isNaN` 분기는 프리필 때문에 거의 안 타므로, 프리필 로직을 `wtCell`에 두는 게 정답(예전엔 프리필이 항상 기본값이라 `seedWeight`가 죽은 코드였음).
   - **기본값 = 기구의 가장 가벼운 상태**: 머신·케이블 5 / 바벨 20(빈 봉) / 스미스 15 / 덤벨 남 5·여 3 / 케틀벨 4(남녀 공통). ⚠️ `wByGender`는 성별 저장값 `'female'`(GENDERS)로 판정 — `'여'` 같은 값과 비교하지 말 것. `exCat(name,eq)`로 5개 카테고리(machine/barbell/smith/dumbbell/kettlebell) 분류. 사용자가 설정 "무게 기본값"에서 카테고리별로 직접 조절(`state.wDefaults`, 편집 단위 `_WDEF_STEP`).
   - **무게 칸에 "kg" 단위 라벨을 넣지 않는다.** 3칸(3세트 한 줄)일 때 폭이 좁아 "100"·"22.5"가 잘렸던 문제 때문. 숫자만 가운데 정렬로 표시하고, 단위는 "지난 기록 … kg" 힌트와 맥락으로 전달(`aria-label="무게(kg)"`).
   - 일반: `.setcell.wtc{flex:1 1 118px}`로 폭이 좁으면 자동 줄바꿈(폰에서 보통 2칸씩). 좌/우(측면당): 헤더 칸수에 맞춰 `flex:1 1 0`로 줄바꿈 없이 균등 분할.

@@ -1858,7 +1858,7 @@ function cardioGuide(detail){
   const zm=detail.match(/존\s*([1-5])/); const z=zm?+zm[1]:2;
   const hr=hrZone(z);
   const hrTxt = hr.abs ? `심박수 ${hr.lo}~${hr.hi}` : `최대심박의 ${hr.plo}~${hr.phi}%`;
-  let note=detail.replace(/존\s*[1-5]\s*강도?/,'').replace(/^\s*[·,]\s*/,'').trim();
+  let note=detail.replace(/존\s*[1-5]\s*강도?/,'').replace(/^\s*[·,]\s*/,'').replace(/\s*·\s*/g,', ').trim(); // 앞 구분자 제거 + 남은 가운뎃점 전역 변환(raw 렌더라 · 유입 방어)
   /* 심박수는 추정치이므로 대화 검사를 함께 제시 */
   const talk=ZONE_INFO[z]?ZONE_INFO[z].talk:'';
   if(talk) note = note ? (talk+'. '+note) : talk;
@@ -2063,8 +2063,8 @@ function sessionTimes(s, kept, si){
   let sum=warm+cool+cardio+ex.reduce((a,b)=>a+b,0);
   cardio+=(T-sum);
   /* 반올림·최소 3분 보정에 유산소가 먹히지 않게, 목표치까지는 본 운동에서 되돌려 받음 */
-  while(cardio<cardioTarget){ const mi=ex.indexOf(Math.max(...ex)); if(ex[mi]<=3) break; ex[mi]--; cardio++; }
-  if(cardio<3){ let def=3-cardio;cardio=3; while(def>0){const mi=ex.indexOf(Math.max(...ex)); if(ex[mi]<=3)break; ex[mi]--;def--;} }
+  while(ex.length && cardio<cardioTarget){ const mi=ex.indexOf(Math.max(...ex)); if(ex[mi]<=3) break; ex[mi]--; cardio++; }
+  if(cardio<3){ let def=3-cardio;cardio=3; while(def>0 && ex.length){const mi=ex.indexOf(Math.max(...ex)); if(ex[mi]<=3)break; ex[mi]--;def--;} }
   const cardioAuto=cardio;
   const ov=state.cardioMin&&state.cardioMin[si];
   if(ov!=null) cardio=Math.max(0,ov);
@@ -2256,7 +2256,7 @@ function safetyBox(){
   } else if(!state.equipment.length){
     rules.push('맨몸 운동은 무게 대신 동작을 더 천천히 하거나 반복을 늘려 강도를 올려주세요.');
   }
-  let personalized=false;
+  let personalized=false, hasHtn=false;
   if(p){
     const inj=(p.injuries&&p.injuries.has)?((p.injuries.list||[]).concat(p.injuries.other?[p.injuries.other]:[])):[];
     const cond=(p.conditions&&p.conditions.has)?((p.conditions.list||[]).concat(p.conditions.other?[p.conditions.other]:[])):[];
@@ -2274,6 +2274,7 @@ function safetyBox(){
       if(/고혈압|심장/.test(x)){
         rules.push(x+'이 있으니 힘을 줄 때 숨을 참지 말고 내쉬어 주세요. 숨을 참은 채 힘주기(발살바)를 하면 혈압이 크게 올라 어지럼이나 실신이 올 수 있어요.');
         rules.push('안정시 혈압이 180/110mmHg 이상이면 운동을 시작하기 전에 먼저 의사와 상의해 혈압을 조절해 주세요.');
+        hasHtn=true;
       }
       else if(/당뇨/.test(x)) rules.push('당뇨가 있으니 저혈당에 주의하고, 필요하면 간단한 당분을 미리 준비해주세요.');
       else if(/천식/.test(x)) rules.push('천식이 있으니 흡입기를 가까이 두고, 호흡이 가빠지면 강도를 낮춰주세요.');
@@ -2288,7 +2289,7 @@ function safetyBox(){
   const title = personalized?'나를 위한 맞춤 안전 원칙':'안전 원칙';
   const TRI='<svg class="warn-tri" viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path d="M12 3.4 L22 20 H2 Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M12 9.5 V13.6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="16.7" r="1.15" fill="currentColor"/></svg>';
   const list = rules.map(r=>`<li>${TRI}<span class="sl-tx">${periodLines(r)}</span></li>`).join('');
-  return `<div class="card safety"><div class="safety-h">🛡️ ${title}</div><ul class="safety-list">${list}</ul>
+  return `<div class="card safety"><div class="safety-h">🛡️ ${title}</div><ul class="safety-list">${list}</ul>${hasHtn?`<div style="margin-top:8px;font-size:11px;color:var(--faint)">혈압 기준 근거: ${srcLine('htn')}</div>`:''}
     <div class="safety-note">${['위 플랜은 회원님이 입력한 정보(경험, 목표, 부상, 지병 등)를 바탕으로 AI가 자동으로 구성한 거예요.','실제 몸 상태는 사람마다 다를 수 있으니 통증이 있거나 걱정되는 부분이 있으면 무리하지 말고, 필요하면 의사나 물리치료사 등 전문가와 상담한 뒤 진행해주세요.'].map(s=>`<div class="sn-line"><span class="sn-dot">-</span><span class="sl-tx">${periodLines(s)}</span></div>`).join('')}</div></div>`;
 }
 function renderToday(){

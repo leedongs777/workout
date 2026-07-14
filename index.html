@@ -207,7 +207,6 @@
   .setcell{display:flex; flex-direction:column; gap:3px;}
   .setrow:not(.dots){flex-wrap:wrap;}
   .setrow:not(.dots) .setcell{flex:1 1 0; min-width:0;}
-  .setrow:not(.dots).q4 .setcell{flex:0 0 calc((100% - 21px)/4);}
   .setcell .sn{font-size:10.5px; color:var(--muted); font-weight:600; text-align:center;}
   /* 무게 입력 = −/+ 스텝퍼 (직접 타이핑도 가능). 입력 폰트 16px여야 iOS가 자동 확대 안 함 */
   .wtstep{display:flex; align-items:stretch; height:40px; border:1px solid var(--line); border-radius:9px; background:var(--surface-2); overflow:hidden;}
@@ -227,14 +226,12 @@
   .setrow.dots{gap:7px;}
   /* 측면당(좌/우) 무게 입력 */
   .ss-row{display:flex; align-items:center; gap:8px; margin-top:6px;}
-  .ss-lab{flex:none; width:20px; text-align:center; font-size:12.5px; font-weight:800; color:var(--muted);}
+  .ss-lab{flex:none; width:38px; text-align:center; font-size:12px; font-weight:800; color:var(--muted);}
   .ss-cells{flex:1; min-width:0; display:flex; flex-wrap:wrap; gap:7px;}
   .ss-cells .setcell{flex:1 1 0; min-width:0;}
-  .ss-cells.q4 .setcell{flex:0 0 calc((100% - 21px)/4);}
   .ss-head{margin-top:8px;}
   .ss-head .ss-num{flex:1 1 0; min-width:0; text-align:center; font-size:10.5px; font-weight:600; color:var(--muted);}
   .setrow.dots .setdot{flex:1 1 0; min-width:0;}
-  .setrow.dots.q4 .setdot{flex:0 0 calc((100% - 21px)/4);}
   .setdot{width:36px; height:34px; border-radius:9px; border:1px solid var(--line); background:var(--surface-2); color:var(--muted); font-weight:700; font-size:12px; cursor:pointer; font-family:inherit;}
   .setdot.on{background:var(--accent); border-color:var(--accent); color:var(--on-accent);}
 
@@ -271,7 +268,6 @@
   .wu-desc .wu-seg{white-space:nowrap;}
   .cardio-chips{display:flex; flex-wrap:wrap; gap:7px; margin-top:7px;}
   .cardio-chips .cardio-chip{flex:1 1 0; min-width:0;}
-  .cardio-chips.q4 .cardio-chip{flex:0 0 calc((100% - 21px)/4);}
   .cardio-chips{align-items:stretch;}
   .cardio-chip{padding:7px 8px; border-radius:9px; border:1px solid var(--line); background:var(--surface-2); color:var(--muted); font-family:inherit; font-size:12.5px; font-weight:700; cursor:pointer; text-align:center; white-space:normal; word-break:keep-all; line-height:1.3; display:flex; align-items:center; justify-content:center;}
   /* 본운동 기구 선택 버튼 — 시작 버튼 너비에 맞춰 균등 채움(최대 3) */
@@ -1582,11 +1578,12 @@ function renderSetLog(slot,r,dateStr,oi,nSets){
     return `<div class="setlog"><div class="setrow dots" style="justify-content:center">${dots}</div></div>`;
   }
   const bs=setBasis(n);
-  if(/측/.test(String(defReps(slot,r)||''))){ // 측면당 → 좌/우 각각 무게 입력 (옵션이 reps를 덮어썼으면 그 값 기준)
-    const num=Array.from({length:n},(_,k)=>`<span class="ss-num" style="${bs}">${k+1}세트</span>`).join('');
+  if(/측/.test(String(defReps(slot,r)||''))){ // 측면당 → 한 줄 = 한 세트, 열 = 좌/우. (예전: 세트 헤더가 전부 위에 몰리고 좌/우 칸이 접혀 어긋났음 — 되돌리지 말 것)
     const wstep=weightStep(r.eq);
-    const mkRow=(side,label)=>{ let c=''; for(let k=0;k<n;k++){ c+=wtCell(dateStr, oi+side, k, '', wstep, defaultWeight(r,k), bs); } return `<div class="ss-row"><span class="ss-lab">${label}</span><div class="ss-cells" style="justify-content:center">${c}</div></div>`; };
-    return `<div class="setlog"><div class="ss-row ss-head"><span class="ss-lab"></span><div class="ss-cells">${num}</div></div>${mkRow('L','좌')}${mkRow('R','우')}</div>`;
+    const head=`<div class="ss-row ss-head"><span class="ss-lab"></span><div class="ss-cells"><span class="ss-num">좌</span><span class="ss-num">우</span></div></div>`;
+    let rows='';
+    for(let k=0;k<n;k++){ rows+=`<div class="ss-row"><span class="ss-lab">${k+1}세트</span><div class="ss-cells">${wtCell(dateStr, oi+'L', k, '', wstep, defaultWeight(r,k), '')}${wtCell(dateStr, oi+'R', k, '', wstep, defaultWeight(r,k), '')}</div></div>`; }
+    return `<div class="setlog">${head}${rows}</div>`;
   }
   const last=lastLog(dateStr,oi);
   let hint='';

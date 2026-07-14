@@ -112,7 +112,7 @@
 - `isRestDow(d)` = 해당 요일이 workoutDays에 없으면 정기 휴식.
 - `buildSchedule`, `sessionFor` 모두 `isRestDow` 사용(휴식 = isRestDow || restDays). `sessionFor`는 startDate 이전엔 null.
 - **로테이션은 고정 6개가 아니라 `programFor()`가 돌려주는 순환표**다: startDate부터 비휴식일을 카운트(`rot`)해 `prog[rot % prog.length]`. 반환값에 `pos`(순환 내 위치)·`len`(순환 길이) 포함 → "순환 N/M" 라벨과 "M일 순환" 문구가 동적. **`SESSIONS[e.session]`은 여전히 유효**(session은 라이브러리 인덱스).
-- `isMon()`은 남아있지만 미사용. 하드코딩된 요일 참조 금지 — 항상 `isRestDow`. **하드코딩 `%6`·"/6"·"6일" 금지** — `programLen()`/`entry.len` 사용.
+- 하드코딩된 요일 참조 금지 — 항상 `isRestDow`. **하드코딩 `%6`·"/6"·"6일" 금지** — `programLen()`/`entry.len` 사용.
 
 ### 4.2a 빈도 티어 (`programFor` 1차 분기, 2026-07)
 
@@ -240,7 +240,7 @@
   - **길게 누르면 연속 증가**(`wtHold`, `onpointerdown`): 첫 탭 1회, 계속 누르면 420ms 후부터 가속(×0.6, 하한 45ms). `pointerup`/`pointercancel`/`pointerleave`에서 멈춘다. 멀리 갈 때 편하도록.
   - **세트 칸 배치 = 브릭(`setBasis`)**: 1~3세트는 한 줄, 4+는 두 줄 균형(4→2+2, 5→3+2, 6→3+3, 7→4+3, 8→4+4). `cellBasis`와 달리 4를 2+2로 나눔.
   - **기본값 프리필(`defaultWeight`, `.wt.pre` 흐리게)**: 저장된 기록이 없으면 시작 무게를 **모든 세트에 동일하게** 미리 채운다(자동 증량 없음 — 무게는 사용자가 올리는 게 맞다). 편집하거나 +/− 누르면 `pre` 해제되며 저장.
-  - **기본값 = 기구의 가장 가벼운 상태**: 머신·케이블 5 / 바벨 20(빈 봉) / 스미스 15 / 덤벨·케틀벨 남 5·여 3. `exCat(name,eq)`로 5개 카테고리(machine/barbell/smith/dumbbell/kettlebell) 분류. 사용자가 설정 "무게 기본값"에서 카테고리별로 직접 조절(`state.wDefaults`, 편집 단위 `_WDEF_STEP`). (`state.setInc`는 미사용 잔재)
+  - **기본값 = 기구의 가장 가벼운 상태**: 머신·케이블 5 / 바벨 20(빈 봉) / 스미스 15 / 덤벨·케틀벨 남 5·여 3. `exCat(name,eq)`로 5개 카테고리(machine/barbell/smith/dumbbell/kettlebell) 분류. 사용자가 설정 "무게 기본값"에서 카테고리별로 직접 조절(`state.wDefaults`, 편집 단위 `_WDEF_STEP`).
   - **무게 칸에 "kg" 단위 라벨을 넣지 않는다.** 3칸(3세트 한 줄)일 때 폭이 좁아 "100"·"22.5"가 잘렸던 문제 때문. 숫자만 가운데 정렬로 표시하고, 단위는 "지난 기록 … kg" 힌트와 맥락으로 전달(`aria-label="무게(kg)"`).
   - 일반: `.setcell.wtc{flex:1 1 118px}`로 폭이 좁으면 자동 줄바꿈(폰에서 보통 2칸씩). 좌/우(측면당): 헤더 칸수에 맞춰 `flex:1 1 0`로 줄바꿈 없이 균등 분할.
 - **완료된 운동에 취소선(line-through) 금지** — 색만 muted 처리.
@@ -249,7 +249,7 @@
 - **장비 아이콘 34종 = CSS mask 방식** (2026-07 교체). `EQ_SVG`(구 벡터, 300KB)는 **삭제됨**.
   - CSS: `.ic-msk{background-color:currentColor; mask-image:url(data:image/png;base64,…)}` + `.ic-eq-{id}` 34개 클래스.
   - `eqIcon(id)` → `<span class="ic-msk ic-eq-${id}">`. 색은 부모의 `color`(currentColor)를 따라가므로 **선택/미선택·다크모드 자동 대응**.
-  - 컨테이너별 크기: `.eqmodal-ill`(76px)·`.eq-tile .ill`·`.mini-fig`는 100%, `.step-fig`36px, `.ex-fig`38px, `.eq-ic`16px.
+  - 컨테이너별 크기: `.eqmodal-ill`(76px)·`.eq-tile .ill`·`.mini-fig`는 100%, `.step-fig`36px, `.eq-ic`16px.
   - 마스크 생성: 투명 PNG → 알파 bbox crop → 정사각 중앙정렬 → 160px 리샘플 → **팔레트+알파 PNG(64색)** → base64. (RGBA로 저장하면 4배 커짐)
   - 원본: `MATE_운동기구_아이콘_34종_투명배경/` (파일명 = `EQ_LABEL` 값과 1:1).
 - **하단 나브 아이콘 4종**도 같은 mask 방식(`.nav-ic.home|plan|schedule|setup`). 원본 `MATE_하단메뉴_아이콘_4종_투명배경/`.

@@ -65,7 +65,6 @@
   header{padding:14px 0 12px; display:flex; align-items:center; gap:6px; border-bottom:1px solid var(--line-2); margin-bottom:4px;}
   .ho-yt{vertical-align:-3px; margin-right:1px;}
   .brand{flex:1; min-width:0; display:flex; flex-direction:column; gap:1px;}
-  .brand .eyebrow{font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:var(--accent); font-weight:700;}
   .brand h1{font-size:22px; letter-spacing:-.02em; margin:0; font-weight:750;}
   .cyc{font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--faint); line-height:1.4;}
   .hbtn{flex:none; width:40px; height:40px; border:none; background:none; color:var(--ink); cursor:pointer; font-family:inherit; display:flex; align-items:center; justify-content:center; border-radius:10px;}
@@ -102,15 +101,8 @@
   /* exercise rows */
   .ex{padding:14px 18px; border-top:1px solid var(--line-2); display:flex; gap:13px;}
   .ex:first-child{border-top:none;}
-  .ex-idx{flex:none; width:22px; height:22px; margin-top:1px; border-radius:7px; background:var(--surface-2); border:1px solid var(--line); color:var(--muted); font-size:11px; font-weight:700; display:flex; align-items:center; justify-content:center;}
-  .ex-idx.role{background:var(--accent-soft); color:var(--accent-ink); border-color:transparent;}
-  .ex-body{flex:1; min-width:0;}
-  .ex-name{font-weight:650; font-size:15.5px; letter-spacing:-.01em;}
   .ex-meta{display:flex; flex-wrap:wrap; gap:6px 10px; margin-top:4px; align-items:center;}
-  .ex-vol{font-size:13px; font-weight:700; color:var(--accent-ink); font-variant-numeric:tabular-nums;}
   .ex-eq{font-size:12px; color:var(--muted); background:var(--surface-2); border:1px solid var(--line-2); padding:1px 7px; border-radius:6px;}
-  .ex-cue{font-size:12.5px; color:var(--muted); margin-top:6px; line-height:1.45;}
-  .ex-role{font-size:10.5px; letter-spacing:.08em; text-transform:uppercase; color:var(--faint); font-weight:700; margin-bottom:3px;}
 
   .note{padding:13px 18px; border-top:1px solid var(--line-2); font-size:13px; color:var(--muted); line-height:1.5;}
   .note b{color:var(--ink); font-weight:650;}
@@ -201,8 +193,6 @@
   .toggle-row.on .switch::after{left:21px;}
 
   /* exercise form figure in plan */
-  .ex-fig{flex:none; width:46px; height:46px; border-radius:10px; background:var(--surface-2); border:1px solid var(--line-2); color:var(--accent); display:flex; align-items:center; justify-content:center; margin-top:1px;}
-  .ex-fig svg{width:38px; height:38px;}
   .mini-fig{flex:none; width:30px; height:30px; color:var(--accent); opacity:.85;}
   .mini-fig svg{width:100%; height:100%;}
 
@@ -358,8 +348,6 @@
   /* how-to links */
   .howto{margin-top:11px; border:1px solid var(--line-2); border-radius:10px; background:var(--surface-2); overflow:hidden;}
   .howto>summary{list-style:none; cursor:pointer; padding:10px 12px; font-size:13px; font-weight:700; color:var(--accent-ink); display:flex; align-items:center; gap:7px;}
-  .howto>summary.howto-sm{font-size:11.5px;}
-  .howto>summary.howto-xs{font-size:10.5px;}
   .howto>summary .hs-txt{flex:1 1 auto; min-width:0;}
   .howto>summary::-webkit-details-marker{display:none;}
   .howto>summary .chev{flex:none; margin-left:6px; transition:.18s; color:var(--faint);}
@@ -481,7 +469,6 @@
 
   /* home dashboard */
   .home-hi{font-size:16.5px; font-weight:700; letter-spacing:-.01em; color:var(--accent-ink); margin:16px 0 15px;}
-  .home-date{font-size:13px; color:var(--muted); margin-bottom:16px;}
   .hero-pad{padding:18px;}
   .home-prog{height:8px; border-radius:99px; background:rgba(46,94,86,.14); overflow:hidden; margin-top:12px;}
   .home-prog-bar{height:100%; background:var(--accent); border-radius:99px; transition:width .3s;}
@@ -622,7 +609,6 @@
     -webkit-mask-position:center; mask-position:center;
     -webkit-mask-size:contain; mask-size:contain;}
   .step-fig .ic-msk{width:36px; height:36px;}
-  .ex-fig .ic-msk{width:38px; height:38px;}
   .eq-ic .ic-msk{width:16px; height:16px;}
   .ic-eq-treadmill{-webkit-mask-image:url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAKAAAACgCAMAAAC8EZcfAAAAwFBMVEX///////////////////////////////8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABzVbVyAAAAQHRSTlMA+c9OdC+wjwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAaoXj/gAAA8JJREFUeNrtW9l26zAItJCA///jK7Q43pS0slXRW+YhPY1P0wkaMJuXxWAwGAwGg8FgMBgMBoPBYDAYDH8WDO4AIK+I34leQtBjP+fYHxAiaTU2vDYWONJDEJcFiQCAViw+va3HgnRSoB4TsoNFDEa8IipQ3lGiQkxMoqccrKrHhCQmDDvNRc8+vKPPhKzKhJRMuA+Oihw5M9nFw2TVvVHn3uwoG+2kQiUEkz9Eo9EG2ZFZTbDmc7BmXSaUY80Q+8nPZVGkwkZ6pcWEiFsPyRnX5uynRxnYZahFilSdGQJOj4Ilg8lEJFl1AKGaUH5jPzUIAvpclgDjRb5dLnmc5h/JPFg5ni9jyCIgnElw5Qget8hugiFJ00d/mnOfW/2ZL0u8VIcG1wKEwUF6Kz3fYhHkZti+ODTb2sUScecNYkiUF5JAGfMyfwUaHM+zD1SO17UISj5BjbCNwzNHX7WEh6xrl/A0i4Dxd0Tx1Zd7wAXeXJKLNDybAbEjuU7Aj1Ql6aQ5XELy14jGVf9T2VZomoLnVnjVC6mZXE1ux1UvbHY7cHIF+pIgLovGzLocIDclSPolyDokGN51b1RLEJa5nY8PUXC+BP17GpOjoP8kQa8/Cs6WIJsE/2sJlkwK9UvQNSXI2iXotUtwmT6qeydB1h4FZ7f6TYJ/RoLul0oQ50sQ30ow6JcgmQR/swRRuwSDdgmWo93YSTr6QWbGcWAcW5MyosD5JXvcnEmsAJo93rTYJZTTWAJ/XIIHNpR2zdp8V85i5kwZx0ows+Ig/+s47JZDD3lV4D3pA+VHJei/NZ9P86dC+itm7h6JrxJ0dE9dhXJhfEGZb9VLcPrWySOST4Q0jPs28dXKKSL0TlJKLhp5hg8ntWfO1Zu/7ByhbxbFa9fo/LWrS3yFuDsSP7MOXbfMkgh8vltk4i/m9Jn3cbWgpwH1kiD3L9zkIHQZhfBuaVP/Bp5uXglrPjDsGQXVUhiGdNdw7xc9FqxNoUF1275r19Miq46Fj49pKH3y7mR6hL5+w7Sg5Z8B5pjiDm077mmCvkITu+eAeWt8b0HuOqRNaPIED/GDvOC3iWJ5aYn6RnR+8P54JAc3kgUY2L5HkjtgNmr3v0FoLpoc107Sa/kFvvYnBRTiAqW/sxU1Di+W/tZmmSQh8ogGhDY4fAZLEVge+qBEqn5/uhPu4clhw3qY5daLt+upGLJCfcyKHmn1+PR5/NR0yt+uG5pPwD330Np9oezjwoCVxwfLblxfDAaDwWAwGAwGg8FgMBgMBoPBMBz/ABKGGkRdDsCfAAAAAElFTkSuQmCC"); mask-image:url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAKAAAACgCAMAAAC8EZcfAAAAwFBMVEX///////////////////////////////8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABzVbVyAAAAQHRSTlMA+c9OdC+wjwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAaoXj/gAAA8JJREFUeNrtW9l26zAItJCA///jK7Q43pS0slXRW+YhPY1P0wkaMJuXxWAwGAwGg8FgMBgMBoPBYDAYDH8WDO4AIK+I34leQtBjP+fYHxAiaTU2vDYWONJDEJcFiQCAViw+va3HgnRSoB4TsoNFDEa8IipQ3lGiQkxMoqccrKrHhCQmDDvNRc8+vKPPhKzKhJRMuA+Oihw5M9nFw2TVvVHn3uwoG+2kQiUEkz9Eo9EG2ZFZTbDmc7BmXSaUY80Q+8nPZVGkwkZ6pcWEiFsPyRnX5uynRxnYZahFilSdGQJOj4Ilg8lEJFl1AKGaUH5jPzUIAvpclgDjRb5dLnmc5h/JPFg5ni9jyCIgnElw5Qget8hugiFJ00d/mnOfW/2ZL0u8VIcG1wKEwUF6Kz3fYhHkZti+ODTb2sUScecNYkiUF5JAGfMyfwUaHM+zD1SO17UISj5BjbCNwzNHX7WEh6xrl/A0i4Dxd0Tx1Zd7wAXeXJKLNDybAbEjuU7Aj1Ql6aQ5XELy14jGVf9T2VZomoLnVnjVC6mZXE1ux1UvbHY7cHIF+pIgLovGzLocIDclSPolyDokGN51b1RLEJa5nY8PUXC+BP17GpOjoP8kQa8/Cs6WIJsE/2sJlkwK9UvQNSXI2iXotUtwmT6qeydB1h4FZ7f6TYJ/RoLul0oQ50sQ30ow6JcgmQR/swRRuwSDdgmWo93YSTr6QWbGcWAcW5MyosD5JXvcnEmsAJo93rTYJZTTWAJ/XIIHNpR2zdp8V85i5kwZx0ows+Ig/+s47JZDD3lV4D3pA+VHJei/NZ9P86dC+itm7h6JrxJ0dE9dhXJhfEGZb9VLcPrWySOST4Q0jPs28dXKKSL0TlJKLhp5hg8ntWfO1Zu/7ByhbxbFa9fo/LWrS3yFuDsSP7MOXbfMkgh8vltk4i/m9Jn3cbWgpwH1kiD3L9zkIHQZhfBuaVP/Bp5uXglrPjDsGQXVUhiGdNdw7xc9FqxNoUF1275r19Miq46Fj49pKH3y7mR6hL5+w7Sg5Z8B5pjiDm077mmCvkITu+eAeWt8b0HuOqRNaPIED/GDvOC3iWJ5aYn6RnR+8P54JAc3kgUY2L5HkjtgNmr3v0FoLpoc107Sa/kFvvYnBRTiAqW/sxU1Di+W/tZmmSQh8ogGhDY4fAZLEVge+qBEqn5/uhPu4clhw3qY5daLt+upGLJCfcyKHmn1+PR5/NR0yt+uG5pPwD330Np9oezjwoCVxwfLblxfDAaDwWAwGAwGg8FgMBgMBoPBMBz/ABKGGkRdDsCfAAAAAElFTkSuQmCC");}
   .ic-eq-elliptical{-webkit-mask-image:url("data:image/png;base64,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"); mask-image:url("data:image/png;base64,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");}
@@ -785,9 +771,7 @@ const WD=['일','월','화','수','목','금','토'];
 function fmt(d){return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
 function parse(s){const [y,m,d]=s.split('-').map(Number);return new Date(y,m-1,d);}
 function addDays(d,n){const x=new Date(d);x.setDate(x.getDate()+n);return x;}
-function todayStr(){return fmt(new Date());}
-function isMon(d){return d.getDay()===1;}
-const DEFAULT_WORKOUT_DAYS=[1,3,5,6]; // 중립 기본값: 주 4일(월·수·금·토). 특정 개인의 일정이 아님. 한 곳에서만 정의.
+function todayStr(){return fmt(new Date());}const DEFAULT_WORKOUT_DAYS=[1,3,5,6]; // 중립 기본값: 주 4일(월·수·금·토). 특정 개인의 일정이 아님. 한 곳에서만 정의.
 function wDays(){ return (state.workoutDays && state.workoutDays.length) ? state.workoutDays : DEFAULT_WORKOUT_DAYS; } // weekday indices (0=Sun)
 function isRestDow(d){ return !wDays().includes(d.getDay()); } // recurring weekly rest if this weekday isn't a workout day
 function human(s){const d=parse(s);return `${d.getMonth()+1}월 ${d.getDate()}일 (${WD[d.getDay()]})`;}
@@ -826,42 +810,6 @@ const DEFAULT_EQUIP=[];
 
 /* ---------------- Illustrations (one consistent line-art style) ---------------- */
 function svgWrap(inner){return `<svg viewBox="0 0 48 44" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">${inner}</svg>`;}
-const EQ_ICON={
-  _fallback:'<rect x="18" y="24" width="28" height="16" rx="3"/><path d="M24 40v4M40 40v4"/>',
-  treadmill:'<path d="M8 47h38a3 3 0 0 1 0 6H8a3 3 0 0 1 0-6Z"/><path d="M14 47l26-4"/><path d="M40 45V18"/><path d="M31 18h10"/><path d="M31 18v5"/><path d="M12 53v4M16 53v4M40 53v4M44 53v4"/>',
-  elliptical:'<path d="M10 52h34"/><circle cx="46" cy="43" r="7"/><path d="M20 50l16-8"/><path d="M20 50v4"/><path d="M31 46V16"/><path d="M22 21l9-7 9 7"/><path d="M22 21v-5M40 21v-5"/><path d="M12 52v4M42 52v4"/>',
-  recumbent_bike:'<path d="M8 53h40"/><circle cx="44" cy="41" r="8"/><path d="M11 32v12"/><path d="M11 32h9"/><path d="M11 44h11"/><path d="M22 44l10-3"/><circle cx="34" cy="42" r="3"/><path d="M21 40l7-15h7"/><path d="M35 25h5"/><path d="M11 53v4M45 53v4"/>',
-  spin_bike:'<circle cx="19" cy="44" r="10"/><circle cx="45" cy="46" r="7"/><path d="M19 44l11-16h8"/><path d="M28 28l-4 16"/><circle cx="24" cy="44" r="3"/><path d="M38 28v-6h6"/><path d="M28 28l-4-6h-5"/><path d="M45 46L35 28"/>',
-  stairmaster:'<path d="M20 54V28a8 8 0 0 1 8-8h5"/><path d="M46 54V28"/><path d="M27 20h10"/><path d="M22 52h6v-6h6v-6h6v-6h4"/><path d="M14 54h38"/><path d="M17 54v4M47 54v4"/>',
-  rowing:'<path d="M11 42h29"/><rect x="40" y="34" width="12" height="12" rx="2"/><circle cx="46" cy="40" r="3"/><path d="M40 40l-7 4"/><rect x="19" y="40" width="8" height="4" rx="1.5"/><path d="M11 42v5"/><path d="M13 51h39"/><path d="M15 51v3M45 51v3"/>',
-  leg_press:'<path d="M12 50l4-9h10"/><path d="M26 41l20-15"/><path d="M18 50l3-9"/><rect x="40" y="18" width="12" height="11" rx="2"/><path d="M46 18v11"/><path d="M11 51h22"/><path d="M13 51v4M29 51v4"/>',
-  leg_extension:'<path d="M13 33v13"/><path d="M13 33h9"/><path d="M13 46h11"/><path d="M24 46l8 3"/><path d="M32 49l6-7"/><circle cx="38" cy="41" r="2"/><rect x="44" y="34" width="9" height="15" rx="1.5"/><path d="M44 38h9M44 42h9M44 46h9"/><path d="M10 51h45"/><path d="M13 51v4M51 51v4"/>',
-  leg_curl:'<path d="M13 33v13"/><path d="M13 33h9"/><path d="M13 46h11"/><path d="M24 46l8 2"/><path d="M32 48l6 3"/><circle cx="39" cy="50" r="2"/><rect x="44" y="34" width="9" height="14" rx="1.5"/><path d="M44 38h9M44 42h9M44 46h9"/><path d="M10 53h45"/><path d="M13 53v4M51 53v4"/>',
-  lying_leg_curl:'<rect x="10" y="41" width="28" height="6" rx="2.5"/><path d="M38 45l8 6"/><circle cx="47" cy="52" r="2"/><path d="M16 47v6M32 47v6"/><path d="M12 55h38"/><path d="M14 55v4M44 55v4"/>',
-  hack_squat:'<path d="M14 52l6-18"/><path d="M20 34l17 10"/><rect x="17" y="29" width="10" height="5" rx="2"/><path d="M23 44l10 6"/><path d="M12 53h28"/><path d="M15 53v4M37 53v4"/>',
-  hip_abduction:'<rect x="26" y="15" width="12" height="16" rx="3"/><path d="M20 40l6-6M44 40l-6-6"/><rect x="13" y="38" width="7" height="12" rx="2"/><rect x="44" y="38" width="7" height="12" rx="2"/><rect x="28" y="33" width="8" height="17" rx="1.5"/><path d="M28 37h8M28 41h8M28 45h8"/><path d="M12 52h40"/><path d="M15 52v4M45 52v4"/>',
-  hip_adduction:'<rect x="26" y="15" width="12" height="16" rx="3"/><rect x="21" y="38" width="7" height="12" rx="2"/><rect x="36" y="38" width="7" height="12" rx="2"/><path d="M28 42l-1-4M36 42l1-4"/><rect x="28" y="33" width="8" height="10" rx="1.5"/><path d="M28 37h8M28 41h8"/><path d="M12 52h40"/><path d="M15 52v4M45 52v4"/>',
-  lat_pulldown:'<path d="M46 14v38"/><path d="M46 14h-6"/><circle cx="40" cy="16" r="2"/><path d="M40 18v4"/><path d="M31 22h18"/><rect x="16" y="34" width="15" height="4" rx="1.5"/><path d="M18 44h12"/><path d="M22 44v9"/><rect x="41" y="30" width="9" height="17" rx="1.5"/><path d="M41 34h9M41 38h9M41 42h9"/><path d="M12 53h42"/><path d="M15 53v4M49 53v4"/>',
-  seated_row:'<path d="M10 30v22"/><circle cx="10" cy="42" r="2.5"/><path d="M13 42h20"/><path d="M33 39v6"/><rect x="18" y="45" width="11" height="4" rx="1.5"/><path d="M22 49v4"/><rect x="10" y="30" width="9" height="10" rx="1.5"/><path d="M10 34h9M10 37h9"/><path d="M8 53h44"/><path d="M12 53v4M44 53v4"/>',
-  chest_supported_row:'<path d="M20 50l7-18 7 2-7 18z"/><path d="M31 36l10 3"/><path d="M41 39v5"/><path d="M18 50h6"/><path d="M14 53h30"/><path d="M17 53v4M41 53v4"/>',
-  chest_press:'<rect x="15" y="30" width="7" height="18" rx="2.5"/><path d="M22 36h13"/><path d="M35 31v11"/><path d="M15 48h10"/><path d="M22 48v4"/><rect x="40" y="32" width="9" height="16" rx="1.5"/><path d="M40 36h9M40 40h9M40 44h9"/><path d="M12 53h40"/><path d="M15 53v4M46 53v4"/>',
-  pec_deck:'<rect x="27" y="26" width="10" height="16" rx="3"/><path d="M28 32c-9 0-13 5-14 12"/><path d="M36 32c9 0 13 5 14 12"/><rect x="9" y="42" width="6" height="9" rx="2.5"/><rect x="49" y="42" width="6" height="9" rx="2.5"/><path d="M28 46h8v6h-8z"/><path d="M18 54h28"/><path d="M20 54v4M44 54v4"/>',
-  shoulder_press:'<rect x="15" y="34" width="7" height="14" rx="2.5"/><path d="M22 40l4-14"/><path d="M22 26h8"/><path d="M15 48h9"/><path d="M22 48v4"/><rect x="40" y="30" width="9" height="17" rx="1.5"/><path d="M40 34h9M40 38h9M40 42h9"/><path d="M12 53h40"/><path d="M15 53v4M46 53v4"/>',
-  assisted_pullup:'<path d="M20 16v36M44 16v36"/><path d="M16 16h9M39 16h9"/><path d="M20 24h7M37 24h7"/><rect x="26" y="30" width="12" height="6" rx="2"/><path d="M15 52h11M38 52h11"/><path d="M18 52v4M23 52v4M41 52v4M46 52v4"/>',
-  bicep_curl:'<rect x="13" y="44" width="11" height="4" rx="1.5"/><path d="M18 48v4"/><path d="M24 45l9-12"/><path d="M29 33l8 3"/><circle cx="45" cy="40" r="7"/><circle cx="45" cy="40" r="1.8"/><path d="M37 36l6 3"/><path d="M12 53h30"/><path d="M15 53v4M38 53v4"/>',
-  cable:'<path d="M13 16v38M51 16v38"/><path d="M13 16h38"/><circle cx="20" cy="19" r="1.8"/><circle cx="44" cy="19" r="1.8"/><path d="M20 21v6"/><path d="M16 27h8l-4 6z"/><path d="M44 21v6"/><path d="M40 27h8l-4 6z"/><rect x="15" y="40" width="8" height="13" rx="1.5"/><path d="M15 44h8M15 48h8"/><rect x="41" y="40" width="8" height="13" rx="1.5"/><path d="M41 44h8M41 48h8"/>',
-  smith:'<path d="M15 14v40M49 14v40"/><path d="M15 14h34"/><path d="M11 30h42"/><circle cx="13" cy="30" r="2.2"/><circle cx="51" cy="30" r="2.2"/><path d="M15 22h7M42 22h7"/><path d="M49 20h3M49 26h3M49 32h3M49 38h3"/><path d="M11 54h9M44 54h9"/><path d="M13 54v4M50 54v4"/>',
-  barbell:'<path d="M6 32h52"/><path d="M12 22v20M17 25v14"/><path d="M52 22v20M47 25v14"/><path d="M6 30v4M58 30v4"/>',
-  dumbbell:'<path d="M20 32h24"/><path d="M18 24v16M13 27v10"/><path d="M46 24v16M51 27v10"/>',
-  kettlebell:'<path d="M25 22a7 7 0 0 1 14 0"/><path d="M25 23c-6 3-9 9-9 15a16 13 0 0 0 32 0c0-6-3-12-9-15"/><circle cx="32" cy="40" r="3.5"/>',
-  bench:'<rect x="12" y="27" width="40" height="7" rx="3.5"/><path d="M18 34l-3 15M22 34l2 15"/><path d="M42 34l3 15M46 34l-2 15"/><path d="M11 49h7M45 49h7"/>',
-  band:'<ellipse cx="32" cy="36" rx="16" ry="9"/><ellipse cx="32" cy="36" rx="9" ry="4.5"/><path d="M29 27h6v5h-6z"/>',
-  mat:'<path d="M14 36h30"/><path d="M14 44h30"/><ellipse cx="44" cy="40" rx="6" ry="8"/><ellipse cx="44" cy="40" rx="2" ry="3"/><path d="M14 36a4 4 0 0 0 0 8"/>',
-  foam_roller:'<ellipse cx="17" cy="34" rx="4" ry="10"/><path d="M17 24h29M17 44h29"/><ellipse cx="46" cy="34" rx="4" ry="10"/><path d="M25 24v20M33 24v20M41 24v20"/>',
-  step_box:'<rect x="12" y="38" width="40" height="6" rx="1.5"/><path d="M17 44v7h4v-7M43 44v7h4v-7"/>',
-  box:'<path d="M18 26l14-6 14 6-14 6-14-6z"/><path d="M18 26v18l14 6V32"/><path d="M46 26v18l-14 6"/><rect x="24" y="34" width="6" height="3" rx="1.2"/>',
-  med_ball:'<circle cx="32" cy="34" r="13"/><path d="M22 27c6 5 14 5 20 0"/><path d="M22 41c6-5 14-5 20 0"/><path d="M32 21v26"/>',
-};
 
 
 const STEP_SVG={
@@ -962,13 +910,8 @@ const ROLE_PAT={
   '수평 밀기':'chestpress','수직 밀기 (어깨)':'shoulderpress','가슴 보조':'fly','삼두':'triceps','자세교정 (하부 승모)':'ytw',
   '코어 (안티 익스텐션)':'deadbug','코어 (안정화)':'birddog','코어 (측면)':'sideplank','자세교정 종합':'facepull',
 };
-function eqWrap(inner){return `<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">${inner}</svg>`;}
-/* 기구 아이콘: 투명 PNG 알파를 CSS mask로 렌더 (색은 currentColor) */
-const _EQ_MSK=new Set(['treadmill','elliptical','recumbent_bike','spin_bike','stairmaster','rowing','leg_press','leg_extension','leg_curl','lying_leg_curl','hack_squat','hip_abduction','hip_adduction','lat_pulldown','seated_row','chest_supported_row','chest_press','pec_deck','reverse_pec_deck','shoulder_press','assisted_pullup','bicep_curl','cable','smith','barbell','dumbbell','kettlebell','bench','band','mat','foam_roller','step_box','box','med_ball']);
-function eqIcon(id){
-  if(_EQ_MSK.has(id)) return `<span class="ic-msk ic-eq-${id}" aria-hidden="true"></span>`;
-  return eqWrap(EQ_ICON[id]||EQ_ICON._fallback);
-}
+/* 기구 아이콘: 투명 PNG 알파를 CSS mask로 렌더 (색은 currentColor). 모든 기구 id가 마스크로 존재하므로 벡터 폴백은 불필요(미지의 id면 빈 span으로 무해하게 degrade) */
+function eqIcon(id){ return `<span class="ic-msk ic-eq-${id}" aria-hidden="true"></span>`; }
 /* 벡터 하단에 이름이 박힌 자세 아이콘 — viewBox 높이를 줄여 이름 부분 잘라냄 */
 const _CROP_POSE={legext:.80, stepup:.80, chestpress:.80, ytw:.82};
 function cropSvg(svg,f){ return f? svg.replace(/viewBox="([-\d.]+)\s+([-\d.]+)\s+([-\d.]+)\s+([-\d.]+)"/, (m,x,y,w,h)=>`viewBox="${x} ${y} ${w} ${((+h)*f).toFixed(2)}"`) : svg; }
@@ -979,14 +922,6 @@ function exFig(r,role){ if(r && !r.bw && r.eq && r.eq.length) return eqIcon(r.eq
    세션 배치는 주당 운동 일수(빈도 티어, programFor)가 1차로 정하고, 목표는 goalMods로 얹는다.
    부상은 제외가 아니라 CAUTION_EX로 후순위 배치(진료지침 취지, §3). back-safe 전역 고정 없음.
    Each slot: role, sets, reps, options[{name,eq,cue}], fb(fallback){name,cue}, alts?, posture?/opt? */
-const CARDIO_OPTS=[
-  {name:'리컴번트 바이크', eq:['recumbent_bike']},
-  {name:'일립티컬', eq:['elliptical']},
-  {name:'경사 걷기 (트레드밀)', eq:['treadmill']},
-  {name:'스핀 바이크', eq:['spin_bike']},
-];
-const CARDIO_FB={name:'실내 걷기/제자리 스텝'};
-
 const SESSIONS=[
  { // S0
   title:'하체 A · 둔근 중심', focus:['하체','둔근','코어','체중감량'], est:'45–55분',
@@ -1368,7 +1303,7 @@ function buildCD(s){
 }
 SESSIONS.forEach(s=>{ s.warm=buildWU(s); s.cool=buildCD(s); });
 /* ---------------- App state ---------------- */
-let state={ equipment:[...DEFAULT_EQUIP], includeBodyweight:true, includeFloor:true, workoutDays:[...DEFAULT_WORKOUT_DAYS], sessionMinutes:60, startDate:todayStr(), restDays:[], doneDays:[], log:{}, steps:{}, slotCustom:{}, wDefaults:null, setInc:1, authPassed:false, authProvider:null, consent:null, profile:null, onboarded:true };
+let state={ equipment:[...DEFAULT_EQUIP], includeBodyweight:true, includeFloor:true, workoutDays:[...DEFAULT_WORKOUT_DAYS], sessionMinutes:60, startDate:todayStr(), restDays:[], doneDays:[], log:{}, steps:{}, slotCustom:{}, wDefaults:null, authPassed:false, authProvider:null, consent:null, profile:null, onboarded:true };
 let activeTab='home';
 let openDays={}; // schedule expand state
 
@@ -1512,12 +1447,6 @@ function slotCands(slot){
                        || ((a[0].caution&&heavy(a[0].name)?1:0) - (b[0].caution&&heavy(b[0].name)?1:0))
                        || (a[1]-b[1]))
             .map(x=>x[0]);
-}
-function resolveSlot(slot, pickKey){
-  const cands=slotCands(slot);
-  if(!cands.length) return null;
-  if(pickKey && state.slotPick){ const nm=state.slotPick[pickKey]; if(nm){ const f=cands.find(c=>c.name===nm); if(f) return f; } }
-  return cands[0]; // 기본: 첫 후보(선택 안 했으면)
 }
 const _JOINT_KO={knee:'무릎',shoulder:'어깨',lower_back:'허리',ankle:'발목',wrist:'손목',neck:'목'};
 function pickSlot(si,oi,name){
@@ -1847,12 +1776,6 @@ function smartBreak(t, cap){
 }
 function periodLines(t){ return smartBreak(t, 34); }
 /* 절 안에서 쉼표/마침표 뒤를 끊음 — 짧은 조각만 nowrap로 묶어 그 지점에서만 줄바꿈, 긴 조각은 keep-all로 안전 줄바꿈 */
-function segify(t){
-  t=String(t); const parts=[]; let buf='';
-  for(let i=0;i<t.length;i++){ buf+=t[i]; if((t[i]===','||t[i]==='.') && t[i+1]===' '){ parts.push(buf); buf=''; i++; } }
-  if(buf) parts.push(buf);
-  return parts.map(p=> p.length<=20 ? `<span class="wu-seg">${p}</span>` : p).join(' ');
-}
 /* 운동 큐: " · "(공백 있는 가운뎃점)를 절 구분으로 보고 "- " 불릿 + 행잉인덴트로 렌더 */
 function fmtCue(cue){ if(!cue) return ''; return String(cue).split(/ (?:·|—|–) /).map(c=>c.trim()).filter(Boolean).map(c=>`<div class="wu-desc"><span class="wu-dash">-</span><span class="wu-dtx">${smartBreak(c,28)}</span></div>`).join(''); }
 /* 제목의 " · "를 회색 세로선으로, 날짜 상대 라벨(오늘/N일 후/N일 전), 유산소 상세의 총 시간(분) 제거 */
@@ -1917,7 +1840,6 @@ const ZONE_INFO={
    과거의 220 − 나이(Fox 1971)는 젊은 층은 과대, 고령층은 과소 추정한다. */
 function hrMax(age){ return Math.round(208 - 0.7*age); }
 function hrZone(z){ const p=ZONE_PCT[z]||[60,70]; const a=userAge(); if(!a) return {abs:false, plo:p[0], phi:p[1]}; const mhr=hrMax(a); return {abs:true, lo:Math.round(mhr*p[0]/100), hi:Math.round(mhr*p[1]/100)}; }
-function zoneTxt(s){ return String(s).replace(/존\s*([1-5])\s*강도?/g,'Zone $1'); }
 /* 고강도(Zone 3+) 인터벌은 기본 처방에서 제외한다.
    ACSM 기준 Zone 3은 이미 "고강도"이므로, 초보자·고령자에게 기본값으로 주지 않는다.
    체력 향상이나 근육 만들기를 고른 사용자만 고강도 인터벌을 받는다. */
@@ -1983,7 +1905,7 @@ let wuP=null, wuTimer=null;
 function wuTiming(it){
   if(it.cardio) return {cardio:true, n:'가벼운 유산소', a:'5분', d:'원하는 유산소 기구로 가볍게 몸 데우기', mode:'hold', dur:300};
   const a=it.a||''; let mode='hold', reps=0, dur=30;
-  const bilat=/좌\/우|앞·뒤|각각|각\s*\d/.test(a);
+  const bilat=/좌\/우|각각|각\s*\d/.test(a);
   let mm;
   if(mm=a.match(/(\d+)\s*(?:~\s*(\d+))?\s*분/)){ const v=mm[2]?((+mm[1])+(+mm[2]))/2:(+mm[1]); mode='hold'; dur=Math.round(v*60); }
   else if(mm=a.match(/(\d+)\s*초/)){ const per=+mm[1]; mode='hold'; dur=bilat?per*2:per; }
@@ -2416,7 +2338,6 @@ function renderToday(){
 /* ----- PLAN view ----- */
 let planYear=null, planMonth=null, planMode='list';
 function planShift(d){ planMonth+=d; if(planMonth<0){planMonth=11;planYear--;}else if(planMonth>11){planMonth=0;planYear++;} renderPlan(); }
-function planToggleMode(){ planMode=(planMode==='list')?'cal':'list'; renderPlan(); }
 function planSetMode(m){ planMode=m; renderPlan(); }
 /* year/month picker */
 let pickStep='year', pickYear=null;
@@ -2844,19 +2765,6 @@ function toggleRest(k){
   touch(); refresh();
 }
 
-function toggleDone(k){
-  const t=todayStr();
-  if(k>t){ toast('아직 오지 않은 날이에요'); return; }
-  const i=state.doneDays.indexOf(k);
-  if(i>=0){ state.doneDays.splice(i,1); }
-  else {
-    state.doneDays.push(k);
-    // if marking today done, ensure today isn't also a (non-fixed) rest day
-    const ri=state.restDays.indexOf(k); if(ri>=0) state.restDays.splice(ri,1);
-    toast('완료! 잘하셨어요 💪');
-  }
-  touch(); refresh();
-}
 
 function toggleEquip(id){
   const i=state.equipment.indexOf(id);
@@ -2900,16 +2808,6 @@ function toggleSetDone(date,oi,k){
   touch(); renderToday();
 }
 
-function toggleStep(date,id){
-  if(!state.steps) state.steps={};
-  if(!state.steps[date]) state.steps[date]={};
-  state.steps[date][id]=!state.steps[date][id];
-  const ids=stepIdsFor(date);
-  if(ids.length && ids.every(x=>state.steps[date][x]) && !state.doneDays.includes(date)){
-    state.doneDays.push(date); toast('오늘 운동 전체 완료! 잘하셨어요 💪');
-  }
-  touch(); renderToday();
-}
 function chgSets(si,oi,d,defSets){
   if(!state.slotCustom) state.slotCustom={};
   const key=si+':'+oi;
@@ -2944,14 +2842,13 @@ function setWDefault(cat,dir){
   touch(); renderSetup();
 }
 function resetAll(){
-  state={ equipment:[...DEFAULT_EQUIP], includeBodyweight:true, includeFloor:true, workoutDays:[...DEFAULT_WORKOUT_DAYS], sessionMinutes:60, startDate:todayStr(), restDays:[], doneDays:[], log:{}, steps:{}, slotCustom:{}, wDefaults:null, setInc:1, authPassed:false, authProvider:null, consent:null, profile:null, onboarded:true };
+  state={ equipment:[...DEFAULT_EQUIP], includeBodyweight:true, includeFloor:true, workoutDays:[...DEFAULT_WORKOUT_DAYS], sessionMinutes:60, startDate:todayStr(), restDays:[], doneDays:[], log:{}, steps:{}, slotCustom:{}, wDefaults:null, authPassed:false, authProvider:null, consent:null, profile:null, onboarded:true };
   openDays={}; touch(); toast('전체 초기화 완료'); if(typeof Auth!=='undefined') Auth.show(); refresh();
 }
 
 /* ---------------- Nav ---------------- */
 const TAB_VIEW={home:'view-home',plan:'view-today',schedule:'view-plan',setup:'view-setup'};
 const TAB_TITLE={home:'홈',plan:'오늘의 운동',schedule:'일정',setup:'설정'};
-let navHistory=[];
 function switchTab(tab,isBack){
   activeTab=tab;
   if(tab==='plan') planDate=null;

@@ -99,7 +99,7 @@
   .pill.rest-fixed{background:transparent; color:var(--sand-ink); border:1px solid var(--sand);}
 
   /* section label */
-  .sec-label{font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--faint); font-weight:700; margin:22px 4px 9px;}
+  .sec-label{font-size:11px; letter-spacing:.15em; text-transform:uppercase; color:var(--faint); font-weight:700; margin:24px 4px 9px;}
 
   /* exercise rows */
   .ex{padding:14px 18px; border-top:1px solid var(--line-2); display:flex; gap:13px;}
@@ -465,7 +465,10 @@
   .note.warn .note-t{display:block; margin-bottom:3px;}
 
   /* home dashboard */
-  .home-hi{font-size:16.5px; font-weight:700; letter-spacing:-.01em; color:var(--accent-ink); margin:16px 0 15px;}
+  .home-hi{font-size:17.5px; font-weight:700; letter-spacing:-.01em; line-height:1.45; color:var(--accent-ink); margin:16px 0 15px;}
+  /* 홈 = 콤보2(2026-07): 카드 라운드 22px(홈 한정), 히어로 타이포 확대, 일정은 카드 대신 헤어라인 리스트 */
+  #view-home .card{border-radius:22px;}
+  .home-hero .hero-title{font-size:28px; letter-spacing:-.025em;}
   .hero-pad{padding:18px;}
   .home-prog{height:8px; border-radius:99px; background:rgba(46,94,86,.14); overflow:hidden; margin-top:12px;}
   .home-prog-bar{height:100%; background:var(--accent); border-radius:99px; transition:width .3s;}
@@ -481,11 +484,15 @@
   .home-hero .home-prog-bar{background:var(--on-accent);}
   .home-stats{display:flex; gap:10px;}
   .home-stats .stat{flex:1; background:var(--accent-soft); border:1px solid transparent; border-radius:var(--radius-sm); padding:14px 8px; text-align:center;}
-  .stat-n{font-size:24px; font-weight:800; color:var(--accent-ink); font-variant-numeric:tabular-nums; line-height:1;}
+  .stat-n{font-size:27px; font-weight:800; color:var(--accent-ink); font-variant-numeric:tabular-nums; line-height:1;}
+  .home-stats .stat:nth-child(2) .stat-n{color:var(--sand-ink);} /* 연속 운동(스트릭)만 샌드색 — renderHome 통계 순서(주완료/연속/월완료)가 바뀌면 같이 옮길 것 */
   .stat-u{font-size:12.5px; font-weight:700; color:var(--muted);}
   .stat-l{font-size:11.5px; color:var(--muted); font-weight:600; margin-top:6px;}
-  .sched-card{overflow:hidden; padding:0;}
+  /* 다가오는 일정 = 박스 없는 헤어라인 리스트(에디토리얼) — 홈 밀도가 히어로(진한 카드)→통계(틴트)→일정(리스트)으로 가벼워지는 리듬 */
+  .sched-card{overflow:hidden; padding:0; background:transparent; border:none; box-shadow:none; border-radius:0;}
   .home-day{display:flex; align-items:center; gap:0; padding:12px; border-top:1px solid var(--line-2);}
+  .home-day:first-child{border-top:none;}
+  .home-day:last-child{border-bottom:1px solid var(--line-2);}
   .home-day:first-child{border-top:none;}
   .home-day.today{background:var(--accent-soft); border-top:none;}
   .home-day .hd-date{font-size:12.5px; font-weight:700; color:var(--muted); flex:none; font-variant-numeric:tabular-nums; white-space:nowrap;}

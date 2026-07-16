@@ -31,7 +31,7 @@ const doc = { getElementById:id=>{ if(!els[id])els[id]=mkEl(id); return els[id];
   querySelector:()=>mkEl('q'), querySelectorAll:()=>[], createElement:()=>mkEl('c'),
   createTreeWalker:()=>({nextNode:()=>null}), body:mkEl('body'), head:mkEl('head'), addEventListener(){} };
 
-const EXPORTS = 'SESSIONS,state,freshState,sessionFor,sessionExercises,sessionTimes,effVol,goalMods,slotCands,slotActive,isPostureSlot,programFor,weekTotal,weekPlanned,cardioGuide,cardioDetail,safetyBox,renderHome,renderToday,renderPlan,renderSetup,renderAnal,anChartKind,anUnit,anChart,anKcalFor,anWeekKcal,anExSeries,anTotals,showProfile,Auth,wByGender,esc,renderSetLog,todayStr,DEFAULT_EQUIP,isBW';
+const EXPORTS = 'SESSIONS,state,freshState,sessionFor,sessionExercises,sessionTimes,effVol,goalMods,slotCands,slotActive,isPostureSlot,programFor,weekTotal,weekPlanned,cardioGuide,cardioDetail,safetyBox,renderHome,renderToday,renderPlan,renderSetup,renderAnal,anChartKind,anChart,anKcalFor,anWeekKcal,anExSeries,anTotals,showProfile,Auth,wByGender,esc,renderSetLog,todayStr,DEFAULT_EQUIP,isBW';
 js += `\n;globalThis.__T={${EXPORTS}};globalThis.__setPlanDate=d=>{planDate=d;};`;
 
 const ctx = { console, Date, Math, JSON, Object, Array, String, Number, Boolean, RegExp, Set, Map, isNaN, parseInt, parseFloat, Promise, Function, encodeURIComponent,
@@ -141,16 +141,19 @@ section('유닛');
   // 분석 탭 유닛
   ok(T.anChartKind('machine')==='m' && T.anChartKind('barbell')==='b' && T.anChartKind('smith')==='b'
      && T.anChartKind('dumbbell')==='d' && T.anChartKind('kettlebell')==='k', 'anChartKind 기구→그래프 문법 매핑');
-  ok(T.anUnit(15)===2.5 && T.anUnit(30)===5 && T.anUnit(55)===10 && T.anUnit(120)===20, 'anUnit 아이콘 단위(최대 7개 이하)');
   T.state.profile={weightKg:70}; T.state.stepMs={'2099-01-05':{warm:600000, ex0:1800000, cardio:900000, cool:300000}}; T.state.doneDays=['2099-01-05'];
   const kc=T.anKcalFor('2099-01-05'); // 2.8·4.5·6.0·2.5 MET × 70kg × 시간
   ok(kc>150 && kc<400, `anKcalFor MET 추정 범위(${kc}kcal)`);
   ok(T.anKcalFor('2099-01-06')===0, 'anKcalFor 미완료일 0');
   ok(T.anWeekKcal().length===7, 'anWeekKcal 7일');
-  const chart=T.anChart('k',[8,12,16]); // 크기 성장형
-  ok(chart.includes('<svg') && (chart.match(/<circle/g)||[]).length===3, 'anChart 케틀벨 성장형 3개');
-  const chart2=T.anChart('m',[10,20]); // 스택형: 5kg 단위 → 2판+4판=6판
-  ok((chart2.match(/rx="1.4"/g)||[]).length===6, 'anChart 머신 스택 판 수(단위 계산)');
+  // anChart: 최근 7일형 — 무게 라벨 수 = 기록 있는 날 수, 빈 날은 점
+  const days=[{lb:'월',w:8},{lb:'화',w:null},{lb:'수',w:16}];
+  const chart=T.anChart('k',days);
+  ok(chart.includes('<svg') && (chart.match(/kg</g)||[]).length===2, 'anChart 무게 라벨 = 기록일 수');
+  const chart2=T.anChart('m',[{lb:'월',w:30}]); // 10kg/판 → 3판
+  ok((chart2.match(/rx="1.3"/g)||[]).length===3, 'anChart 머신 10kg/판');
+  const chart3=T.anChart('m',[{lb:'월',w:990}]); // 상한 120kg=12판 캡
+  ok((chart3.match(/rx="1.3"/g)||[]).length===12 && chart3.includes('990kg'), 'anChart 상한 캡 + 실값 라벨');
 }
 
 console.log('');

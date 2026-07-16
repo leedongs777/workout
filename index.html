@@ -857,6 +857,11 @@
   .an-ex svg{flex:none;}
   .an-delta{flex:none; font-size:12px; font-weight:800; color:var(--accent-ink); background:var(--accent-soft); border-radius:99px; padding:4px 9px;}
   .an-delta.flat{color:var(--muted); background:var(--surface-2); border:1px solid var(--line-2);}
+  .an-ex2{padding:13px 2px 9px; border-bottom:1px solid var(--line-2);}
+  .an-ex2:last-child{border-bottom:none;}
+  .an-ex2 .x-hd{display:flex; align-items:center; gap:8px; margin-bottom:7px;}
+  .an-ex2 .x-hd b{flex:1; min-width:0; font-size:14px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .an-ex2 .x-cat{flex:none; font-size:11px; color:var(--muted);}
   .an-heat{display:grid; grid-template-rows:repeat(7,10px); grid-auto-flow:column; grid-auto-columns:10px; gap:3px; justify-content:center; margin:6px auto 2px;}
   .an-heat i{border-radius:3px; background:var(--line-2);}
   .an-heat i.l1{background:color-mix(in srgb, var(--accent) 40%, var(--line-2));}
@@ -3212,8 +3217,6 @@ async function resetAll(){
 /* 기구 카테고리 → 그래프 문법: 머신=무게판 스택, 바벨/스미스=눕힌 원판 스택, 덤벨/케틀벨=크기 성장(실물 문법) */
 function anChartKind(cat){ return cat==='dumbbell'?'d' : cat==='kettlebell'?'k' : (cat==='barbell'||cat==='smith')?'b' : 'm'; }
 const AN_CAT_LABEL={machine:'머신', barbell:'바벨', smith:'스미스', dumbbell:'덤벨', kettlebell:'케틀벨'};
-/* 아이콘 1개당 무게 단위 — 최대 7개 이하가 되는 가장 작은 단위 */
-function anUnit(maxW){ for(const v of [2.5,5,10,15,20,25,40]){ if(maxW/v<=7) return v; } return 50; }
 
 /* 운동별 무게 시계열: log의 날짜를 그 날짜 세션 슬롯으로 해석해 (세션:슬롯)별 그날 최고 무게를 모은다.
    운동명·기구는 현재 픽 기준 근사(lastLog와 동일한 한계) */
@@ -3235,33 +3238,39 @@ function anExSeries(){
   return Object.values(map).sort((a,b)=>(b.pts.length-a.pts.length)||(b.pts[b.pts.length-1].w-a.pts[a.pts.length-1].w));
 }
 
-/* 기구 아이콘 그래프: 열=세션(최근 6), 과거는 옅고 최근이 진하게 */
-function anChart(kind, ws, W, H){
-  W=W||118; H=H||44;
-  const op=(ci,n)=>ci===n-1?1:(0.38+0.5*ci/Math.max(1,n-1));
+/* 기구별 그래프 스케일(운영자 확정 2026-07-16): 아이콘 = 실물 문법, 표현 상한 고정.
+   머신 판 1개=10kg(상한 120kg=12판) · 바벨/스미스 원판 1장=20kg(상한 200kg=10장) · 덤벨 상한 40kg · 케틀벨 상한 32kg(크기 비례).
+   상한 초과 무게는 상한 모양으로 캡 — 실제 값은 열 위 숫자 라벨이 말해준다 */
+const AN_SCALE={m:{unit:10,max:120}, b:{unit:20,max:200}, d:{max:40}, k:{max:32}};
+/* 기구 아이콘 그래프: 최근 7일(열=날짜), 각 열 위 "숫자kg" 라벨, 빈 날은 점 */
+function anChart(kind, days){
+  const W=322, H=78, top=13, bot=12, IH=H-top-bot;
+  const cw=W/days.length, sc=AN_SCALE[kind];
   let out='';
-  if(kind==='m'||kind==='b'){
-    const unit=anUnit(Math.max(...ws));
-    const eh=kind==='m'?5.2:4.6, ew=kind==='m'?15:17;
-    const gap=ws.length>1?(W-ws.length*ew)/(ws.length-1):0;
-    ws.forEach((wv,ci)=>{ const x=ci*(ew+gap), o=op(ci,ws.length), n=Math.max(1,Math.round(wv/unit));
-      for(let i=0;i<n;i++){ const y=H-(i+1)*eh;
+  days.forEach((dy,ci)=>{
+    const cx=cw*ci+cw/2;
+    out+=`<text x="${cx}" y="${H-2}" text-anchor="middle" font-size="9" fill="var(--faint)" font-family="inherit">${dy.lb}</text>`;
+    if(dy.w==null){ out+=`<circle cx="${cx}" cy="${H-bot-3}" r="1.6" fill="var(--line)"/>`; return; }
+    const wv=dy.w;
+    if(kind==='m'||kind==='b'){
+      const maxN=Math.round(sc.max/sc.unit);
+      const n=Math.max(1, Math.min(maxN, Math.round(wv/sc.unit)));
+      const eh=IH/maxN, ew=kind==='m'?15:17, x=cx-ew/2;
+      for(let i=0;i<n;i++){ const y=H-bot-(i+1)*eh, ph=eh*0.8;
         out+= kind==='m'
-          ? `<g opacity="${o}"><rect x="${x}" y="${y}" width="15" height="4.1" rx="1.4" fill="var(--accent)"/><rect x="${x+6}" y="${y+1.4}" width="3" height="1.3" rx=".65" fill="var(--surface)"/></g>`
-          : `<g opacity="${o}"><rect x="${x}" y="${y+1}" width="17" height="3.3" rx="1.65" fill="var(--accent)"/><rect x="${x+6.6}" y="${y}" width="3.8" height="5.3" rx="1.3" fill="var(--accent-ink)"/></g>`; } });
-  } else {
-    /* 덤벨·케틀벨: 무거울수록 커짐(실물처럼 더 큰 것으로 바꿔 듦) — 바닥 정렬 */
-    const mn=Math.min(...ws), mx=Math.max(...ws);
-    const gap=W/ws.length;
-    ws.forEach((wv,ci)=>{ const o=op(ci,ws.length);
-      const h=mx===mn?H*0.62:(12+(wv-mn)/(mx-mn)*(H-14));
-      const cx=gap*ci+gap/2;
-      if(kind==='k'){ const r=h*0.34, cy=H-r, hw=r*0.72;
-        out+=`<g opacity="${o}"><path d="M ${cx-hw} ${cy-r*0.55} a ${hw} ${h*0.30} 0 0 1 ${hw*2} 0" stroke="var(--accent)" stroke-width="${Math.max(1.6,h*0.13)}" fill="none" stroke-linecap="round"/><circle cx="${cx}" cy="${cy}" r="${r}" fill="var(--accent)"/></g>`;
-      } else { const bw2=h*0.30, bh=h*0.92, barw=h*0.55, y=H-bh;
-        out+=`<g opacity="${o}"><rect x="${cx-barw/2-bw2}" y="${y}" width="${bw2}" height="${bh}" rx="${bw2*0.32}" fill="var(--accent)"/><rect x="${cx+barw/2}" y="${y}" width="${bw2}" height="${bh}" rx="${bw2*0.32}" fill="var(--accent)"/><rect x="${cx-barw/2}" y="${H-bh/2-h*0.13}" width="${barw}" height="${h*0.26}" rx="${h*0.13}" fill="var(--accent)"/></g>`; } });
-  }
-  return `<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" aria-hidden="true">${out}</svg>`;
+          ? `<rect x="${x}" y="${y}" width="${ew}" height="${ph}" rx="1.3" fill="var(--accent)"/><rect x="${cx-1.5}" y="${y+ph*0.3}" width="3" height="${ph*0.36}" rx=".6" fill="var(--surface)"/>`
+          : `<rect x="${x}" y="${y}" width="${ew}" height="${ph}" rx="${ph/2}" fill="var(--accent)"/>${i===n-1?`<rect x="${cx-1.9}" y="${y-1}" width="3.8" height="${ph+2}" rx="1.3" fill="var(--accent-ink)"/>`:''}`; }
+    } else {
+      /* 덤벨·케틀벨: 무거울수록 커짐(실물처럼 더 큰 것으로 바꿔 듦) — 고정 스케일, 바닥 정렬 */
+      const h=10+Math.min(1, wv/sc.max)*(IH-10);
+      if(kind==='k'){ const r=h*0.34, cy=H-bot-r, hw=r*0.72;
+        out+=`<path d="M ${cx-hw} ${cy-r*0.55} a ${hw} ${h*0.30} 0 0 1 ${hw*2} 0" stroke="var(--accent)" stroke-width="${Math.max(1.6,h*0.13)}" fill="none" stroke-linecap="round"/><circle cx="${cx}" cy="${cy}" r="${r}" fill="var(--accent)"/>`;
+      } else { const bw2=h*0.30, bh=h*0.92, barw=h*0.55, y=H-bot-bh;
+        out+=`<rect x="${cx-barw/2-bw2}" y="${y}" width="${bw2}" height="${bh}" rx="${bw2*0.32}" fill="var(--accent)"/><rect x="${cx+barw/2}" y="${y}" width="${bw2}" height="${bh}" rx="${bw2*0.32}" fill="var(--accent)"/><rect x="${cx-barw/2}" y="${H-bot-bh/2-h*0.13}" width="${barw}" height="${h*0.26}" rx="${h*0.13}" fill="var(--accent)"/>`; }
+    }
+    out+=`<text x="${cx}" y="9.5" text-anchor="middle" font-size="9.5" font-weight="700" fill="var(--muted)" font-family="inherit">${wv%1?wv.toFixed(1):wv}kg</text>`;
+  });
+  return `<svg width="100%" viewBox="0 0 ${W} ${H}" style="display:block" aria-hidden="true">${out}</svg>`;
 }
 
 /* MET 추정 칼로리(웨어러블 연동 전 근사) — stepMs(실측 시간) 기반, 없으면 완료일은 세션 계획 분으로 근사 */
@@ -3343,14 +3352,18 @@ function renderAnal(){
     const series=anExSeries();
     const ins=anInsight(series);
     if(ins) html+=`<div class="an-insight">${ins}</div>`;
-    /* 운동 발전 */
+    /* 운동 발전 — 최근 7일(열=날짜, 열 위 무게 라벨) */
     html+=`<div class="sec-label">운동 발전</div>`;
     if(series.length){
+      const td=parse(t);
       html+=`<div class="card an-card" style="padding:4px 16px">`;
-      series.slice(0,4).forEach(o=>{ const p=o.pts.slice(-6), wsArr=p.map(x=>x.w);
-        const last=wsArr[wsArr.length-1], dw=Math.round((last-wsArr[0])*10)/10;
+      series.slice(0,4).forEach(o=>{
+        const days=Array.from({length:7},(_,i)=>{ const d=addDays(td,i-6), k=fmt(d);
+          const pt=o.pts.find(p=>p.d===k); return {lb:WD[d.getDay()], w:pt?pt.w:null}; });
+        const have=days.filter(dy=>dy.w!=null).map(dy=>dy.w);
+        const dw=have.length>=2? Math.round((have[have.length-1]-have[0])*10)/10 : 0;
         const badge= dw>0? `<span class="an-delta">+${dw}kg</span>` : `<span class="an-delta flat">유지</span>`;
-        html+=`<div class="an-ex"><div class="nm"><b>${esc(o.name)}</b><span>${AN_CAT_LABEL[o.cat]||'머신'} · 최근 ${last}kg × ${esc(String(o.reps))}</span></div>${anChart(anChartKind(o.cat),wsArr)}${badge}</div>`; });
+        html+=`<div class="an-ex2"><div class="x-hd"><b>${esc(o.name)}</b><span class="x-cat">${AN_CAT_LABEL[o.cat]||'머신'} · ${esc(String(o.reps))}</span>${badge}</div>${anChart(anChartKind(o.cat),days)}</div>`; });
       html+=`</div>`;
     } else {
       html+=`<div class="card an-empty"><div class="ae-s">운동 중 무게를 기록하면<br>기구가 차곡차곡 쌓이는 발전 그래프가 생겨요</div></div>`;

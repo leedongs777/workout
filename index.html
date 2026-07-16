@@ -2540,7 +2540,8 @@ function renderToday(){
 let planYear=null, planMonth=null, planMode='list';
 function planShift(d){ planMonth+=d; if(planMonth<0){planMonth=11;planYear--;}else if(planMonth>11){planMonth=0;planYear++;} renderPlan(); }
 let _planSlide=null; /* 모드 전환 직후 1회 슬라이드 방향('r'|'l') — 달력은 오른쪽 칸이라 cal 진입=r */
-function planSetMode(m){ if(m!==planMode) _planSlide = (m==='cal'?'r':'l'); planMode=m; renderPlan(); }
+let _planScrollTo=null; /* {k:날짜키, smooth:bool} — 리스트 렌더 후 해당 행으로 1회 스크롤(오늘 또는 달력에서 탭한 날) */
+function planSetMode(m){ if(m!==planMode){ _planSlide = (m==='cal'?'r':'l'); if(m==='list') _planScrollTo={k:todayStr(), smooth:true}; } planMode=m; renderPlan(); }
 /* year/month picker */
 let pickStep='year', pickYear=null;
 function openYM(){ pickStep='year'; pickYear=planYear; renderYM(); document.getElementById('ympick').classList.remove('hidden'); }
@@ -2573,7 +2574,7 @@ function renderYM(){
   }
   m.innerHTML=`<div class="eqmodal-card" style="max-width:320px"><button class="eqmodal-x" onclick="closeYM()" aria-label="닫기">✕</button>${inner}</div>`;
 }
-function planCalTap(k){ openDays[k]=true; if(planMode!=='list')_planSlide='l'; planMode='list'; renderPlan(); }
+function planCalTap(k){ openDays[k]=true; if(planMode!=='list')_planSlide='l'; planMode='list'; _planScrollTo={k, smooth:false}; renderPlan(); } /* 탭한 날짜로 바로 스크롤 */
 /* plan tab date navigation + picker (year → month → day) */
 let planDate=null, pdStep='year', pdYear=null, pdMonth=null;
 function planDateCtrl(t,isToday){
@@ -2623,7 +2624,7 @@ function planDayRow(k,t){
       ${done?'<span class="badge done">✓ 완료</span>':''}
       <span class="chev">▶</span></div>`;
   }
-  let html=`<div class="${cls}"><div class="day-rail"><div class="day-wd">${wd}</div><div class="day-dt num">${d.getDate()}</div></div><div style="flex:1;min-width:0">${main}</div></div>`;
+  let html=`<div class="${cls}" id="day-${k}"><div class="day-rail"><div class="day-wd">${wd}</div><div class="day-dt num">${d.getDate()}</div></div><div style="flex:1;min-width:0">${main}</div></div>`;
   if(open && !e.rest){
     const s=SESSIONS[e.session]; const steps=(state.steps&&state.steps[k])||{}; let ex='';
     sessionExercises(s, e.session).forEach(x=>{ const exDone=!!steps[x.id];
@@ -2680,6 +2681,10 @@ function renderPlan(){
   html+=`<div class="mon-sum"><div class="mon-bar">${segs}</div><span class="ms-t"><b>${ms.done}</b>/${ms.plan}</span></div>`;
   html+=`<div class="plan-body ${_planSlide?('anim-'+_planSlide):''}">${(planMode==='list')?planListHTML():planCalHTML()}</div>`;
   _planSlide=null; /* 슬라이드는 모드 전환 직후 1회만 — 월 이동 등 일반 재렌더엔 없음 */
+  /* 리스트 진입 시 목표 행(오늘/탭한 날)으로 자동 스크롤 — 1일부터 찾아 내려가지 않게 */
+  if(_planScrollTo && planMode==='list'){ const tgt=_planScrollTo; _planScrollTo=null;
+    requestAnimationFrame(()=>{ const el=document.getElementById('day-'+tgt.k); if(el){ const rm=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches; el.scrollIntoView({block:'center', behavior:(tgt.smooth&&!rm)?'smooth':'auto'}); } });
+  }
   html+=`<p class="info" style="margin-top:14px;padding:0 4px">오늘 이전은 지난 날이라 고정돼요. 앞으로의 날짜에 <b>쉬는 날</b>을 표시하면<br>이후 일정이 ${programLen()}일 순환에 맞춰 자동으로 다시 배정됩니다.</p>`;
   $('view-plan').innerHTML=html;
   $('hd-title').textContent='일정'; $('hd-cyc').innerHTML='';
@@ -3082,6 +3087,7 @@ function switchTab(tab,isBack){
   if(wuTimer){ clearInterval(wuTimer); wuTimer=null; } wuP=null; // 탭 이동 시 웜업 플레이어 중단(백그라운드 진행·stray 완료 기록 방지)
   activeTab=tab;
   if(tab==='plan') planDate=null;
+  if(tab==='schedule' && planMode==='list') _planScrollTo={k:todayStr(), smooth:false}; /* 일정 진입 시 오늘이 바로 보이게 */
   document.querySelectorAll('.nav-btn').forEach(x=>x.classList.toggle('active',x.dataset.tab===tab));
   Object.entries(TAB_VIEW).forEach(([tb,vid])=>{ const el=$(vid); if(el){ el.classList.toggle('hidden',tb!==tab); if(tb===tab){ el.classList.remove('view-anim'); void el.offsetWidth; el.classList.add('view-anim'); } } }); /* 활성 뷰 페이드+슬라이드 인(G2) */
   $('hd-title').textContent=TAB_TITLE[tab]||'';

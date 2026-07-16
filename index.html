@@ -2165,7 +2165,7 @@ function wuPlayerCard(){
     const label=wuP.idx===0?`${isWarm?'WARM-UP':'COOL-DOWN'} 첫 동작은`:'다음 동작은';
     const secs=Math.max(1,Math.ceil(wuP.cd.total));
     return `<div class="step active wu-player wu-cd" onclick="wuSkipCd()">
-      <div class="wup-head">${isWarm?'준비운동 - WARM-UP':'마무리운동 - COOL-DOWN'}<span class="vdiv"></span><b>${wuP.idx+1}/${total}</b></div>
+      <div class="wup-head">${isWarm?'WARM-UP(준비 운동)':'COOL-DOWN(마무리 운동)'}<span class="vdiv"></span><b>${wuP.idx+1}/${total}</b></div>
       <div class="wu-fig">${wuFig(it.n)}</div>
       <div class="wup-cd-num" id="wup-cd-num">${secs}</div>
       <div class="wup-cd-say">${label} <b>${it.n}</b>${josaYeyo(it.n)}!</div>
@@ -2184,7 +2184,7 @@ function wuPlayerCard(){
   const icPrev='<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 5.5a1.1 1.1 0 0 1 2.2 0v13a1.1 1.1 0 0 1-2.2 0z"/><path d="M18.6 5.9v12.2c0 .9-1 1.4-1.7.9l-8-6.1a1.1 1.1 0 0 1 0-1.8l8-6.1c.7-.5 1.7 0 1.7.9z"/></svg>';
   const icNext='<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M14.8 5.5a1.1 1.1 0 0 1 2.2 0v13a1.1 1.1 0 0 1-2.2 0z"/><path d="M5.4 5.9v12.2c0 .9 1 1.4 1.7.9l8-6.1a1.1 1.1 0 0 0 0-1.8l-8-6.1c-.7-.5-1.7 0-1.7.9z"/></svg>';
   return `<div class="step active wu-player${paused?' paused':''}" onclick="wuCardTap()">
-    <div class="wup-head">${isWarm?'준비운동 - WARM-UP':'마무리운동 - COOL-DOWN'}<span class="vdiv"></span><b>${wuP.idx+1}/${total}</b></div>
+    <div class="wup-head">${isWarm?'WARM-UP(준비 운동)':'COOL-DOWN(마무리 운동)'}<span class="vdiv"></span><b>${wuP.idx+1}/${total}</b></div>
     <div class="wup-name">${it.n}</div>
     ${it.d?`<div class="wup-desc">${it.d.replace(/\|/g,' ')}</div>`:''}
     <div class="wup-clock"><span id="wup-count">0:00</span><span class="wup-dur"> / ${fmtClock(it.dur)}</span></div>

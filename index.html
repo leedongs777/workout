@@ -473,7 +473,7 @@
   /* profile banner */
   /* 프로필 배너 v3 — 아이콘 타일 키-값 행 + 가벼운 틴트 노트 */
   .pb2{padding:6px 16px;}
-  .pb2-kv{display:flex; align-items:center; gap:11px; padding:12px 0; border-bottom:1px solid var(--line-2);}
+  .pb2-kv{display:flex; align-items:center; gap:11px; padding:12px 0; min-height:66px; box-sizing:border-box; border-bottom:1px solid var(--line-2);} /* 모든 행 같은 높이 — 구분선 기준 균등 밴드(운영자 요청). 66px = 2줄 값 행 기준 */
   .pb2-kv:last-of-type{border-bottom:none;}
   .pb2-ic{flex:none; width:30px; height:30px; border-radius:9px; background:var(--accent-soft); color:var(--accent-ink); display:flex; align-items:center; justify-content:center;}
   .pb2-ic svg{width:16px; height:16px;}

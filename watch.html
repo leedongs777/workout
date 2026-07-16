@@ -139,7 +139,7 @@
         <div class="app hidden" id="scr-cd"><div id="cd-num">3</div></div>
 
         <!-- W-C 세션 뷰 (P1/P2/P3 스와이프) -->
-        <div class="app hidden" id="scr-run" style="padding-left:0;padding-right:0;">
+        <div class="app hidden" id="scr-run">
           <div class="pages" id="pages">
             <div class="page" id="page1" onclick="p1Tap(event)">
               <div class="k" id="p1-k">운동 1/6</div>
@@ -310,7 +310,7 @@
   function wAdj(dir){ P.w=Math.max(0, Math.round((P.w+dir*2.5)*10)/10); $('p1-w').textContent=P.w%1?P.w.toFixed(1):P.w; }
   function p1Tap(ev){ setDoneP(); } /* 화면 탭 = 세트 완료 (NRC 큰 타깃) */
   function setDoneP(){
-    const it=P.items[P.idx]; it.w=P.w; P.set++; it.doneSets=P.set; P.setsDone++;
+    const it=P.items[P.idx]; if(!it||it.kind!=='ex') return; it.w=P.w; P.set++; it.doneSets=P.set; P.setsDone++;
     haptic();
     if(P.set>=it.sets){ openItem(P.idx+1); return; }
     $('p1-set').textContent='세트 '+(P.set+1)+'/'+it.sets; renderDots(it);
@@ -327,7 +327,9 @@
     clearInterval(P.restT); tick(); P.restT=setInterval(tick,200);
   }
   function restAdj(d){ P.restTotal=Math.max(15, Math.min(180, P.restTotal+d)); P.restLeft=Math.max(1, P.restLeft+d); }
-  function restSkip(){ clearInterval(P.restT); P.restT=null; go('run'); $('pages').scrollTo({left:0}); }
+  function restSkip(){ clearInterval(P.restT); P.restT=null;
+    if(P.items[P.idx]&&P.items[P.idx].kind==='hr'){ go('cardio'); return; }
+    go('run'); $('pages').scrollTo({left:0}); }
 
   /* 심박 시뮬레이션 (존2 118~142 부근 랜덤 워크) */
   let _bpm=124;

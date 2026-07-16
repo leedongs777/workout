@@ -6,8 +6,8 @@
 <title>MATE — 워치앱 프로토타입</title>
 <!-- 워치 컴패니언 앱 프로토타입 (NRC 컨셉, 구성안: MATE_워치앱_구성안.md)
      - 실제 앱(index.html)을 숨은 iframe으로 띄워 오늘 세션·운동·지난 무게를 "읽기 전용"으로 가져온다(기록에 일절 쓰지 않음)
-     - 흐름: 홈 → 3·2·1 → 세션 뷰(좌우 스와이프 P1 할 일 / P2 경과 / P3 심박) → 휴식 링 → 유산소 모드 → 축하
-     - 햅틱은 화면 펄스로, 크라운은 ± 버튼으로 대체. 심박은 존2 부근 시뮬레이션 -->
+     - 제스처: 좌로 쓸기=다음 운동, 우로 쓸기=이전 운동, 위아래=경과/심박 페이지, 탭=세트 완료
+     - 햅틱은 화면 펄스로 대체, 심박은 존2 부근 시뮬레이션 -->
 <style>
   html,body{margin:0; height:100%;}
   body{background:radial-gradient(1100px 700px at 50% 18%, #2e3138, #17181c 70%);
@@ -21,7 +21,7 @@
   .devseg button.on{background:#fff; color:#17181c;}
   .stage{transform-origin:center center;}
 
-  /* ---- Apple Watch(46mm 근사) 목업 ---- */
+  /* ---- Apple Watch(46mm 근사) ---- */
   .watch{position:relative; display:flex; flex-direction:column; align-items:center;}
   .band{width:118px; height:150px; background:linear-gradient(90deg,#23261F,#3A4034 30%,#3A4034 70%,#23261F); z-index:0;}
   .band.top{border-radius:16px 16px 30px 30px; margin-bottom:-24px;}
@@ -37,7 +37,7 @@
   .scr.pulse{animation:pulse .35s ease;}
   @keyframes pulse{0%{box-shadow:inset 0 0 0 0 rgba(155,232,176,0);} 35%{box-shadow:inset 0 0 0 5px rgba(155,232,176,.85);} 100%{box-shadow:inset 0 0 0 0 rgba(155,232,176,0);}}
 
-  /* ---- 갤럭시워치(원형, Watch7 근사) 오버라이드 ---- */
+  /* ---- 갤럭시워치(원형) 오버라이드 ---- */
   body.gx .crown, body.gx .sidebtn{display:none;}
   .gxb{display:none; position:absolute; right:-7px; width:8px; height:26px; border-radius:0 4px 4px 0; background:linear-gradient(180deg,#8e8a83,#c9c4bb 40%,#83807a);}
   body.gx .gxb{display:block;}
@@ -48,211 +48,206 @@
     box-shadow:0 0 0 2px #3f4144, 0 0 0 5px #a9adb4, 0 0 0 6px #75787d,
       0 30px 70px rgba(0,0,0,.65), 0 10px 24px rgba(0,0,0,.5);}
   body.gx .scr{width:228px; height:228px; border-radius:50%;}
-  body.gx .app{padding:32px 30px 24px;}
-  body.gx .page{width:228px; padding:0 30px;}
-  body.gx .wbtn, body.gx .hold{width:78%; margin-inline:auto; display:block;}
-  body.gx .gobtn{width:82px; height:82px;}
-  body.gx .p2-time{font-size:44px;}
-  body.gx .p3-bpm{font-size:48px;}
-  body.gx .ring{width:112px; height:112px;}
-  body.gx .ring svg{width:112px; height:112px;}
-  body.gx #scr-done{padding-top:30px;}
-  body.gx .p1-hd{margin-top:16px;} /* 원형 곡률 회피 — 넓은 구간으로 내림 */
-  body.gx .p1-meta{padding-right:2px;}
+  body.gx .app{padding:30px 34px 26px;}
+  body.gx .wbtn{width:72%;}
+  body.gx .p2-time{font-size:38px;}
+  body.gx .p3-bpm{font-size:42px;}
+  body.gx #scr-done{padding-top:28px;}
+  body.gx .p1-name{margin-top:10px;}
+  body.gx .vdots{right:14px;}
+  body.gx .hold{width:62%; margin-bottom:8px;}
+  body.gx .sum .row{padding:3px 22px;}
 
-  /* ---- NRC 문법: 검정 + 라이트 그린, 초대형 타이포 ---- */
+  /* ---- 공통 UI (NRC: 검정 + 라이트 그린, 전부 가운데 정렬) ---- */
   .clock{position:absolute; top:9px; left:0; right:0; text-align:center; font-size:12px; font-weight:600; color:#8fa89b; z-index:6; font-variant-numeric:tabular-nums; pointer-events:none;}
-  .app{position:absolute; inset:0; padding:26px 15px 13px; box-sizing:border-box; display:flex; flex-direction:column;}
+  .app{position:absolute; inset:0; padding:26px 18px 15px; box-sizing:border-box; display:flex; flex-direction:column; text-align:center;}
   .app.hidden{display:none;}
   .k{font-size:10.5px; font-weight:800; color:#8fa89b; letter-spacing:.08em; text-transform:uppercase;}
   .grow{flex:1;}
-  .center{text-align:center;}
+  .wbtn{border:none; border-radius:18px; padding:12px 0; width:100%; font-family:inherit; font-size:14px; font-weight:800; cursor:pointer; background:#9BE8B0; color:#03170c; margin-inline:auto; display:block;}
+  .wbtn.ghost{background:#1c1d1f; color:#cfd6d0;}
+  .wbtn:active{transform:scale(.97);}
 
-  /* 홈 */
-  #scr-home .date{font-size:11px; color:#8fa89b; font-weight:700;}
-  #scr-home .ttl{font-size:24px; font-weight:850; letter-spacing:-.02em; line-height:1.12; margin-top:3px;}
+  /* 홈 — 전부 가운데, 넓적한 시작 버튼(둥근 사각형) */
+  #scr-home .date{font-size:11px; color:#8fa89b; font-weight:700; margin-top:4px;}
+  #scr-home .ttl{font-size:23px; font-weight:850; letter-spacing:-.02em; line-height:1.15; margin-top:4px;}
   #scr-home .sub{font-size:12px; color:#a7b1aa; margin-top:5px;}
   #scr-home .strk{font-size:11.5px; color:#F0B95C; font-weight:800; margin-top:5px;}
-  .gobtn{width:88px; height:88px; border-radius:50%; border:none; margin:0 auto; display:flex; align-items:center; justify-content:center;
-    background:#9BE8B0; color:#03170c; font-family:inherit; font-size:17px; font-weight:900; cursor:pointer; letter-spacing:-.01em;}
-  .gobtn:active{transform:scale(.94);}
+  #scr-home .wbtn{font-size:15.5px; padding:13px 0;}
 
-  /* 3·2·1 카운트다운 */
+  /* 3·2·1 */
   #scr-cd{align-items:center; justify-content:center;}
   #cd-num{font-size:104px; font-weight:900; color:#9BE8B0; font-variant-numeric:tabular-nums; line-height:1;}
-  #cd-num.go{font-size:44px;}
+  #cd-num.go{font-size:42px;}
 
-  /* 세션 뷰: 가로 스크롤 스냅 페이지 */
-  .pages{flex:1; display:flex; overflow-x:auto; scroll-snap-type:x mandatory; scrollbar-width:none; margin:0 -15px;}
-  .pages::-webkit-scrollbar{display:none;}
-  .page{flex:none; width:205px; scroll-snap-align:start; box-sizing:border-box; padding:0 15px; display:flex; flex-direction:column;}
-  .pgdots{display:flex; gap:5px; justify-content:center; padding:7px 0 0;}
-  .pgdots i{width:5px; height:5px; border-radius:50%; background:#2a2c2e;}
-  .pgdots i.on{background:#9BE8B0;}
-  /* P1 지금 할 일: 이름(왼쪽, 길면 축소 2줄) + 오른쪽 운동/세트 카운터 */
-  .p1-hd{display:flex; align-items:flex-start; gap:8px; margin-top:2px;}
-  .p1-name{flex:1; min-width:0; font-size:22px; font-weight:850; letter-spacing:-.02em; line-height:1.15; word-break:keep-all;}
-  .p1-name.long{font-size:15px;}
-  .p1-meta{flex:none; text-align:right; display:flex; flex-direction:column; gap:3px; margin-top:3px;}
-  .p1-meta .m1{font-size:10.5px; font-weight:800; color:#8fa89b; letter-spacing:.05em;}
-  .p1-meta .m2{font-size:11px; font-weight:800; color:#9BE8B0;}
-  .p1-w{display:flex; align-items:center; justify-content:center; gap:12px; margin:12px 0 6px;}
-  .p1-w button{width:48px; height:48px; border-radius:50%; border:none; background:#1c1d1f; color:#fff; font-size:25px; font-weight:800; cursor:pointer; font-family:inherit;}
+  /* 세션 뷰: 세로 페이지(rp1 할 일 / rp2 경과 / rp3 심박), 우측 세로 점 */
+  .rpage{position:absolute; inset:0; padding:26px 20px 14px; box-sizing:border-box; display:flex; flex-direction:column; text-align:center;}
+  .rpage.hidden{display:none;}
+  .vdots{position:absolute; right:8px; top:50%; transform:translateY(-50%); display:flex; flex-direction:column; gap:5px; z-index:5;}
+  .vdots i{width:5px; height:5px; border-radius:50%; background:#2a2c2e;}
+  .vdots i.on{background:#9BE8B0;}
+  /* rp1: 이름(한 줄 우선) → 운동 N/M → 무게 → 세트 칩 — 세 블록 간격 동일(12px) */
+  .p1-name{font-size:21px; font-weight:850; letter-spacing:-.02em; line-height:1.2; margin-top:6px; white-space:nowrap; overflow:hidden;}
+  .p1-name.two{font-size:15.5px; white-space:normal; word-break:keep-all;}
+  .p1-k{font-size:11px; font-weight:800; color:#8fa89b; letter-spacing:.05em;}
+  .p1-w{display:flex; align-items:center; justify-content:center; gap:12px; margin-top:12px;}
+  .p1-w button{width:46px; height:46px; border-radius:50%; border:none; background:#1c1d1f; color:#fff; font-size:24px; font-weight:800; cursor:pointer; font-family:inherit; flex:none;}
   .p1-w button:active{transform:scale(.92); background:#2a2c2e;}
-  .p1-w .v{font-size:33px; font-weight:850; min-width:86px; text-align:center; font-variant-numeric:tabular-nums;}
+  .p1-w .v{font-size:32px; font-weight:850; min-width:82px; text-align:center; font-variant-numeric:tabular-nums;}
   .p1-w .v small{font-size:13px; color:#8fa89b; font-weight:800;}
-  .p1-tap{font-size:11px; color:#6f7a72; text-align:center; margin-top:2px;}
-  .setdots{display:flex; gap:6px; justify-content:center; margin-top:8px;}
-  .setdots i{width:9px; height:9px; border-radius:50%; background:#26282a;}
-  .setdots i.on{background:#9BE8B0;}
-  /* P2 경과 */
-  .p2-time{font-size:52px; font-weight:900; font-variant-numeric:tabular-nums; letter-spacing:-.02em; text-align:center; margin-top:14px;}
-  .p2-bar{display:flex; gap:3px; margin:12px 4px 6px;}
+  .p1-pills{display:flex; gap:5px; justify-content:center; margin-top:12px;}
+  .p1-pills .pill{border-radius:9px; padding:5px 8px; font-size:10.5px; font-weight:800; background:#17181a; color:#5f6a63;}
+  .p1-pills .pill.done{background:#9BE8B0; color:#03170c;}
+  .p1-pills .pill.cur{background:#12291d; color:#9BE8B0; box-shadow:inset 0 0 0 1.5px #2E5E56;}
+  .p1-tap{font-size:10.5px; color:#6f7a72; margin-top:4px;}
+  /* rp2 경과 */
+  .p2-time{font-size:46px; font-weight:900; font-variant-numeric:tabular-nums; letter-spacing:-.02em; margin-top:16px;}
+  .p2-bar{display:flex; gap:3px; margin:14px 8px 6px;}
   .p2-bar i{flex:1; height:6px; border-radius:99px; background:#26282a;}
   .p2-bar i.on{background:#9BE8B0;}
-  .p2-sub{font-size:12px; color:#a7b1aa; text-align:center;}
-  /* P3 심박 */
-  .p3-bpm{font-size:56px; font-weight:900; color:#ff5f6d; font-variant-numeric:tabular-nums; text-align:center; margin-top:8px; line-height:1;}
-  .p3-u{font-size:12px; color:#a7b1aa; text-align:center; font-weight:800; margin-top:2px;}
-  .zone{display:flex; gap:3px; margin:12px 6px 4px;}
+  .p2-sub{font-size:12px; color:#a7b1aa;}
+  /* rp3 심박 */
+  .p3-bpm{font-size:50px; font-weight:900; color:#ff5f6d; font-variant-numeric:tabular-nums; margin-top:12px; line-height:1;}
+  .p3-u{font-size:12px; color:#a7b1aa; font-weight:800; margin-top:2px;}
+  .zone{display:flex; gap:3px; margin:12px 10px 4px;}
   .zone i{flex:1; height:7px; border-radius:99px; background:#26282a;}
   .zone i.z2{background:#2E5E56;}
   .zone i.cur{background:#9BE8B0;}
-  .zlabel{text-align:center; font-size:12.5px; color:#9BE8B0; font-weight:800; margin-top:7px;}
+  .zlabel{font-size:12.5px; color:#9BE8B0; font-weight:800; margin-top:7px;}
 
-  /* 휴식 풀스크린 */
-  .ring{position:relative; width:126px; height:126px; margin:4px auto;}
-  .ring svg{transform:rotate(-90deg); display:block;}
-  .ring .num{position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:38px; font-weight:900; font-variant-numeric:tabular-nums;}
-  .rest-adj{display:flex; gap:7px; justify-content:center;}
-  .rest-adj button{border:none; border-radius:14px; padding:7px 12px; background:#1c1d1f; color:#cfd6d0; font-family:inherit; font-size:12px; font-weight:800; cursor:pointer;}
+  /* 휴식: 링이 화면 제일 바깥, 모든 내용이 링 안 */
+  #scr-rest{padding:0;}
+  .ringfull{position:absolute; left:50%; top:50%; transform:translate(-50%,-50%) rotate(-90deg);}
+  .rest-in{position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:0 36px; box-sizing:border-box;}
+  .rest-num{font-size:52px; font-weight:900; font-variant-numeric:tabular-nums; line-height:1; margin:6px 0 10px;}
+  .rest-adj{display:flex; gap:8px; justify-content:center;}
+  .rest-adj button{border:none; border-radius:14px; padding:8px 13px; background:#2E5E56; color:#EAF4EC; font-family:inherit; font-size:12px; font-weight:800; cursor:pointer;}
+  .rest-adj button:active{transform:scale(.95);}
+  .rest-go{font-size:10.5px; color:#8fa89b; margin-top:10px; font-weight:700;}
 
-  /* 유산소: 길게 눌러 완료 */
-  .hold{position:relative; border:none; border-radius:22px; padding:12px 0; width:100%; font-family:inherit; font-size:13.5px; font-weight:800; cursor:pointer; background:#1c1d1f; color:#cfd6d0; overflow:hidden;}
+  /* 유산소 */
+  #scr-cardio .p2-time{margin-top:6px; font-size:38px;}
+  #scr-cardio .p3-bpm{font-size:32px; margin-top:4px;}
+  .hold{position:relative; border:none; border-radius:18px; padding:11px 0; width:74%; margin-inline:auto; display:block; font-family:inherit; font-size:13px; font-weight:800; cursor:pointer; background:#1c1d1f; color:#cfd6d0; overflow:hidden;}
   .hold .fill{position:absolute; inset:0; width:0; background:#2E5E56; transition:width .1s linear;}
   .hold span{position:relative; z-index:1;}
 
-  /* 축하 — 버튼까지 온전히 들어가게 컴팩트(잘림 수정) */
-  #scr-done{padding-top:22px; padding-bottom:18px;}
-  .doneck{width:58px; height:58px; margin:0 auto 6px; border-radius:50%; background:#9BE8B0; color:#03170c; display:flex; align-items:center; justify-content:center; font-size:28px; font-weight:900; animation:pop .5s cubic-bezier(.2,1.6,.4,1);}
-  @keyframes pop{from{transform:scale(.3); opacity:0;} to{transform:scale(1); opacity:1;}}
-  .done-ttl{font-size:16.5px; font-weight:850; text-align:center;}
-  .sum{margin-top:4px;}
-  .sum .row{display:flex; justify-content:space-between; font-size:12px; font-weight:700; padding:3px 8px; color:#cfd6d0;}
+  /* 축하 — 링+체크 드로우 애니메이션 */
+  #scr-done{padding-top:24px; padding-bottom:18px;}
+  .doneart{width:66px; height:66px; margin:0 auto 8px;}
+  .doneart svg{display:block; margin:0 auto;}
+  .dc-ring{stroke-dasharray:176; stroke-dashoffset:176; animation:draw .7s ease forwards;}
+  .dc-check{stroke-dasharray:40; stroke-dashoffset:40; animation:draw .45s ease .5s forwards;}
+  @keyframes draw{to{stroke-dashoffset:0;}}
+  .done-ttl{font-size:17px; font-weight:850;}
+  .sum{margin-top:6px;}
+  .sum .row{display:flex; justify-content:space-between; font-size:12px; font-weight:700; padding:3px 12px; color:#cfd6d0;}
   .sum .row b{color:#fff; font-variant-numeric:tabular-nums;}
-  .fineprint{font-size:9.5px; color:#6f7a72; text-align:center; margin-top:3px; line-height:1.5;}
-  #scr-done .wbtn{padding:9px 0; font-size:12.5px; width:72%; margin-inline:auto; display:block;}
-
-  .wbtn{border:none; border-radius:22px; padding:11px 0; width:100%; font-family:inherit; font-size:13.5px; font-weight:800; cursor:pointer; background:#2E5E56; color:#EAF4EC;}
-  .wbtn.ghost{background:#1c1d1f; color:#cfd6d0;}
-  .wbtn:active{transform:scale(.97);}
-  .wbtn+.wbtn,.wbtn+.hold,.hold+.wbtn{margin-top:6px;}
+  #scr-done .wbtn{padding:9px 0; font-size:12.5px; width:70%; background:#1c1d1f; color:#cfd6d0;}
 </style>
 </head>
 <body>
 <div class="devseg"><button id="seg-aw" class="on" onclick="setDev('aw')">Apple Watch</button><button id="seg-gx" onclick="setDev('gx')">Galaxy Watch</button></div>
-<div class="hint">MATE 워치앱 프로토타입(NRC 컨셉) — 눌러서 진행, 세션 화면은 좌우로 넘겨보세요. 기록에는 저장되지 않아요</div>
+<div class="hint">MATE 워치앱 프로토타입 — 좌우로 쓸면 운동 이동, 위아래로 쓸면 경과와 심박이에요. 기록에는 저장되지 않아요</div>
 <div class="stage" id="stage">
   <div class="watch">
     <div class="band top"></div>
     <div class="case">
       <div class="crown"></div><div class="sidebtn"></div><div class="gxb b1"></div><div class="gxb b2"></div>
       <div class="scr" id="scr">
-        <div class="clock" id="wclock">9:41</div>
+        <div class="clock" id="wclock">--:--</div>
 
-        <!-- W-A 홈 -->
+        <!-- 홈 -->
         <div class="app" id="scr-home">
           <div class="date" id="home-date"></div>
           <div class="ttl" id="home-title">오늘의 운동</div>
           <div class="sub" id="home-sub">불러오는 중이에요</div>
           <div class="strk" id="home-strk"></div>
           <div class="grow"></div>
-          <button class="gobtn" onclick="startCd()">시작</button>
-          <div class="grow"></div>
+          <button class="wbtn" onclick="startCd()">시작</button>
         </div>
 
-        <!-- W-B 3·2·1 -->
+        <!-- 3·2·1 -->
         <div class="app hidden" id="scr-cd"><div id="cd-num">3</div></div>
 
-        <!-- W-C 세션 뷰 (P1/P2/P3 스와이프) -->
-        <div class="app hidden" id="scr-run">
-          <div class="pages" id="pages">
-            <div class="page" id="page1" onclick="p1Tap(event)">
-              <div class="p1-hd">
-                <div class="p1-name" id="p1-name">운동명</div>
-                <div class="p1-meta"><span class="m1" id="p1-k">운동 1/6</span><span class="m2" id="p1-set">세트 1/4</span></div>
-              </div>
-              <div class="grow"></div>
-              <div class="p1-w" id="p1-wrow">
-                <button onclick="event.stopPropagation();wAdj(-1)">−</button>
-                <div class="v"><span id="p1-w">20</span><small>kg</small></div>
-                <button onclick="event.stopPropagation();wAdj(1)">+</button>
-              </div>
-              <div class="setdots" id="p1-dots"></div>
-              <div class="p1-tap" id="p1-tap">화면을 탭하면 세트 완료</div>
+        <!-- 세션 뷰 -->
+        <div class="app hidden" id="scr-run" style="padding:0">
+          <div class="vdots" id="vdots"><i class="on"></i><i></i><i></i></div>
+          <div class="rpage" id="rp1">
+            <div class="p1-name" id="p1-name">운동명</div>
+            <div class="grow"></div>
+            <div class="p1-k" id="p1-k">운동 1/6</div>
+            <div class="p1-w">
+              <button data-w="-1">−</button>
+              <div class="v"><span id="p1-w">20</span><small>kg</small></div>
+              <button data-w="1">+</button>
             </div>
-            <div class="page">
-              <div class="k">경과</div>
-              <div class="p2-time" id="p2-time">00:00</div>
-              <div class="p2-bar" id="p2-bar"></div>
-              <div class="p2-sub" id="p2-sub">1/8단계</div>
-              <div class="grow"></div>
-              <div class="p2-sub" id="p2-kcal">약 0kcal</div>
-            </div>
-            <div class="page">
-              <div class="k">심박</div>
-              <div class="p3-bpm" id="p3-bpm">128</div>
-              <div class="p3-u">BPM</div>
-              <div class="zone" id="p3-zone"><i></i><i class="z2"></i><i></i><i></i><i></i></div>
-              <div class="zlabel" id="p3-label">존2 유지 중이에요</div>
-              <div class="grow"></div>
-              <div class="fineprint">실기기에서는 워치 심박 센서 실측이에요</div>
-            </div>
+            <div class="p1-pills" id="p1-pills"></div>
+            <div class="grow"></div>
+            <div class="p1-tap">화면을 탭하면 세트 완료</div>
           </div>
-          <div class="pgdots" id="pgdots"><i class="on"></i><i></i><i></i></div>
+          <div class="rpage hidden" id="rp2">
+            <div class="k" style="margin-top:4px">경과</div>
+            <div class="p2-time" id="p2-time">00:00</div>
+            <div class="p2-bar" id="p2-bar"></div>
+            <div class="p2-sub" id="p2-sub">1/8단계</div>
+            <div class="grow"></div>
+            <div class="p2-sub" id="p2-kcal"></div>
+          </div>
+          <div class="rpage hidden" id="rp3">
+            <div class="k" style="margin-top:4px">심박</div>
+            <div class="p3-bpm" id="p3-bpm">128</div>
+            <div class="p3-u">BPM</div>
+            <div class="zone" id="p3-zone"><i></i><i class="z2"></i><i></i><i></i><i></i></div>
+            <div class="zlabel" id="p3-label">존2 유지 중이에요</div>
+            <div class="grow"></div>
+          </div>
         </div>
 
-        <!-- W-D 휴식 풀스크린 -->
-        <div class="app hidden" id="scr-rest" onclick="restSkip()">
-          <div class="k center" style="margin-top:2px">휴식</div>
-          <div class="ring">
-            <svg width="126" height="126" viewBox="0 0 126 126">
-              <circle cx="63" cy="63" r="55" stroke="#1e1f21" stroke-width="10" fill="none"/>
-              <circle id="rest-arc" cx="63" cy="63" r="55" stroke="#9BE8B0" stroke-width="10" fill="none" stroke-linecap="round" stroke-dasharray="345.6" stroke-dashoffset="0"/>
-            </svg>
-            <div class="num" id="rest-num">45</div>
+        <!-- 휴식: 풀사이즈 링 -->
+        <div class="app hidden" id="scr-rest">
+          <svg class="ringfull" width="206" height="206" viewBox="0 0 206 206">
+            <circle cx="103" cy="103" r="96" stroke="#1e1f21" stroke-width="7" fill="none"/>
+            <circle id="rest-arc" cx="103" cy="103" r="96" stroke="#9BE8B0" stroke-width="7" fill="none" stroke-linecap="round" stroke-dasharray="603.2" stroke-dashoffset="0"/>
+          </svg>
+          <div class="rest-in">
+            <div class="k">휴식</div>
+            <div class="rest-num" id="rest-num">45</div>
+            <div class="rest-adj">
+              <button data-r="-15">−15초</button>
+              <button data-r="15">+15초</button>
+            </div>
+            <div class="rest-go">탭하면 바로 다음 세트 GO!</div>
           </div>
-          <div class="rest-adj">
-            <button onclick="event.stopPropagation();restAdj(-15)">−15초</button>
-            <button onclick="event.stopPropagation();restAdj(15)">+15초</button>
-          </div>
-          <div class="grow"></div>
-          <div class="p1-tap">탭하면 바로 다음 세트 GO!</div>
         </div>
 
-        <!-- W-E 유산소 -->
+        <!-- 유산소 -->
         <div class="app hidden" id="scr-cardio">
-          <div class="k" id="ca-k">유산소</div>
-          <div class="p2-time" id="ca-time" style="margin-top:6px">00:00</div>
-          <div class="p3-bpm" id="ca-bpm" style="font-size:34px;margin-top:4px">128</div>
+          <div class="k" id="ca-k" style="margin-top:2px">유산소</div>
+          <div class="p2-time" id="ca-time">00:00</div>
+          <div class="p3-bpm" id="ca-bpm">128</div>
           <div class="zone" id="ca-zone"><i></i><i class="z2"></i><i></i><i></i><i></i></div>
           <div class="zlabel" id="ca-label">존2 유지 중이에요</div>
           <div class="grow"></div>
           <button class="hold" id="ca-hold"><div class="fill"></div><span>길게 눌러 완료</span></button>
         </div>
 
-        <!-- W-F 축하 + 요약 -->
+        <!-- 축하 -->
         <div class="app hidden" id="scr-done">
-          <div class="doneck">✓</div>
+          <div class="doneart">
+            <svg width="66" height="66" viewBox="0 0 64 64">
+              <circle class="dc-ring" cx="32" cy="32" r="28" stroke="#2E5E56" stroke-width="4" fill="none" transform="rotate(-90 32 32)"/>
+              <path class="dc-check" d="M20.5 33.5 28.5 41.5 44 25.5" fill="none" stroke="#9BE8B0" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
           <div class="done-ttl">오늘도 해냈어요!</div>
           <div class="sum">
             <div class="row"><span>시간</span><b id="dn-time">00:00</b></div>
             <div class="row"><span>세트</span><b id="dn-sets">0세트</b></div>
             <div class="row"><span>칼로리</span><b id="dn-kcal">0kcal</b></div>
           </div>
-          <div class="fineprint">실기기에서는 활동 링에 기록돼요</div>
           <div class="grow"></div>
-          <button class="wbtn ghost" onclick="resetProto()">처음으로</button>
+          <button class="wbtn" onclick="resetProto()">처음으로</button>
         </div>
       </div>
     </div>
@@ -262,28 +257,25 @@
 
 <iframe id="core" src="./index.html" style="display:none" title="core"></iframe>
 <script>
-  function fit(){ const s=Math.min(1.7,(innerHeight-80)/620,(innerWidth-40)/280); document.getElementById('stage').style.transform='scale('+s+')'; }
-  fit(); addEventListener('resize',fit);
-  function setDev(d){ document.body.className=d==='gx'?'gx':'';
-    document.getElementById('seg-aw').classList.toggle('on', d!=='gx');
-    document.getElementById('seg-gx').classList.toggle('on', d==='gx');
-    try{ localStorage.setItem('watchproto:device', d); }catch(e){}
-    const run=document.getElementById('scr-run');
-    if(run && !run.classList.contains('hidden')) document.getElementById('pages').scrollTo({left:0}); }
-  try{ if(localStorage.getItem('watchproto:device')==='gx') setDev('gx'); }catch(e){}
-  function clock(){ const d=new Date(), h=d.getHours()%12||12; document.getElementById('wclock').textContent=h+':'+String(d.getMinutes()).padStart(2,'0'); }
-  clock(); setInterval(clock,15000);
   const $=id=>document.getElementById(id);
-  function haptic(){ const s=$('scr'); s.classList.remove('pulse'); void s.offsetWidth; s.classList.add('pulse'); } /* 햅틱 대체 */
+  function fit(){ const s=Math.min(1.7,(innerHeight-90)/620,(innerWidth-40)/280); $('stage').style.transform='scale('+s+')'; }
+  fit(); addEventListener('resize',fit);
+  /* 실시간 시계 */
+  function clock(){ const d=new Date(), h=d.getHours()%12||12; $('wclock').textContent=h+':'+String(d.getMinutes()).padStart(2,'0'); }
+  clock(); setInterval(clock,5000);
+  function haptic(){ const s=$('scr'); s.classList.remove('pulse'); void s.offsetWidth; s.classList.add('pulse'); }
+  /* 기기 토글 */
+  function setDev(d){ document.body.className=d==='gx'?'gx':'';
+    $('seg-aw').classList.toggle('on', d!=='gx'); $('seg-gx').classList.toggle('on', d==='gx');
+    try{ localStorage.setItem('watchproto:device', d); }catch(e){} }
+  try{ if(localStorage.getItem('watchproto:device')==='gx') setDev('gx'); }catch(e){}
 
-  /* ---- 프로토타입 상태 (실제 앱 데이터는 읽기 전용) ---- */
-  const P={items:[], idx:0, set:0, w:20, restT:null, restLeft:0, restTotal:45,
-           t0:null, elapT:null, hrT:null, caSec:0, setsDone:0, title:'오늘의 운동'};
-
+  /* ---- 상태 (실제 앱 데이터는 읽기 전용) ---- */
+  const P={items:[], idx:0, set:0, w:20, page:0, restT:null, restLeft:0, restTotal:45,
+           t0:null, elapT:null, hrT:null, setsDone:0, title:'오늘의 운동'};
   function go(name){ ['home','cd','run','rest','cardio','done'].forEach(n=>$('scr-'+n).classList.toggle('hidden', n!==name)); }
 
-  /* 실제 앱에서 오늘 세션 읽기(읽기 전용) — SESSIONS/state는 const라 contentWindow 속성으로 안 잡혀서
-     iframe 렌음(realm)에서 eval로 평가해 순수 데이터만 받아온다. 실패 시 데모 */
+  /* 실제 앱에서 오늘 세션 읽기 — iframe 렐름 eval, 실패 시 데모 */
   function loadFromCore(){
     const d=new Date(); $('home-date').textContent=(d.getMonth()+1)+'월 '+d.getDate()+'일 '+['일','월','화','수','목','금','토'][d.getDay()]+'요일';
     try{
@@ -316,14 +308,14 @@
   $('core').addEventListener('load', ()=>setTimeout(loadFromCore,900));
   setTimeout(demoItems, 4000);
 
-  /* W-B 3·2·1 */
+  /* 3·2·1 */
   function startCd(){
     go('cd'); const el=$('cd-num'); el.classList.remove('go');
     let n=3; el.textContent=n; haptic();
     const iv=setInterval(()=>{ n--;
       if(n>0){ el.textContent=n; haptic(); }
       else { clearInterval(iv); el.textContent='가자!'; el.classList.add('go'); haptic();
-        setTimeout(()=>{ startSession(); },700); }
+        setTimeout(startSession,700); }
     },800);
   }
   function startSession(){ P.t0=Date.now(); P.idx=0; P.set=0; P.setsDone=0;
@@ -334,39 +326,49 @@
     $('p2-time').textContent=fmtT(ms); $('ca-time').textContent=fmtT(ms);
     $('p2-kcal').textContent='약 '+Math.round(4.5*70*(ms/3600000))+'kcal (추정)'; }
 
-  /* W-C 세션 뷰 */
+  /* 세션 뷰 */
+  function setPage(p){ P.page=Math.max(0, Math.min(2, p));
+    ['rp1','rp2','rp3'].forEach((id,i)=>$(id).classList.toggle('hidden', i!==P.page));
+    [...$('vdots').children].forEach((el,i)=>el.classList.toggle('on', i===P.page)); }
   function openItem(i){
     if(i>=P.items.length){ finishAll(); return; }
-    P.idx=i; const it=P.items[i];
-    if(it.kind==='hr'){ go('cardio'); $('ca-k').textContent=it.name; P.caSec=0; return; }
+    P.idx=Math.max(0,i); const it=P.items[P.idx];
+    if(it.kind==='hr'){ go('cardio'); $('ca-k').textContent=it.name; return; }
     P.set=it.doneSets||0; P.w=it.w;
-    $('p1-k').textContent='운동 '+(i+1)+'/'+P.items.length;
-    $('p1-set').textContent='세트 '+(P.set+1)+'/'+it.sets;
+    $('p1-k').textContent='운동 '+(P.idx+1)+'/'+P.items.length;
     $('p1-name').textContent=it.name;
-    $('p1-name').classList.toggle('long', it.name.length>=8);
     $('p1-w').textContent=P.w%1?P.w.toFixed(1):P.w;
-    renderDots(it); renderP2(); go('run');
-    $('pages').scrollTo({left:0});
+    renderPills(it); renderP2(); setPage(0); go('run');
+    fitName($('p1-name'));
   }
-  function renderDots(it){ $('p1-dots').innerHTML=Array.from({length:it.sets},(_,k)=>'<i class="'+(k<P.set?'on':'')+'"></i>').join(''); }
-  function renderP2(){ const total=P.items.length;
+  /* 이름: 한 줄 우선, 넘치면 작게 두 줄 */
+  function fitName(el){ el.classList.remove('two');
+    if(el.scrollWidth>el.clientWidth+1) el.classList.add('two'); }
+  function renderPills(it){
+    const compact=it.sets>=5;
+    $('p1-pills').innerHTML=Array.from({length:it.sets},(_,k)=>{
+      const cls=k<P.set?' done':(k===P.set?' cur':'');
+      return '<span class="pill'+cls+'">'+(compact?(k+1):'세트'+(k+1))+'</span>'; }).join('');
+  }
+  function renderP2(){
     $('p2-bar').innerHTML=P.items.map((x,k)=>'<i class="'+(k<P.idx?'on':'')+'"></i>').join('');
-    $('p2-sub').textContent=(P.idx+1)+'/'+total+'단계'; }
+    $('p2-sub').textContent=(P.idx+1)+'/'+P.items.length+'단계'; }
   function wAdj(dir){ P.w=Math.max(0, Math.round((P.w+dir*2.5)*10)/10); $('p1-w').textContent=P.w%1?P.w.toFixed(1):P.w; }
-  function p1Tap(ev){ setDoneP(); } /* 화면 탭 = 세트 완료 (NRC 큰 타깃) */
   function setDoneP(){
-    const it=P.items[P.idx]; if(!it||it.kind!=='ex') return; it.w=P.w; P.set++; it.doneSets=P.set; P.setsDone++;
+    const it=P.items[P.idx]; if(!it||it.kind!=='ex') return;
+    it.w=P.w; P.set++; it.doneSets=P.set; P.setsDone++;
     haptic();
     if(P.set>=it.sets){ openItem(P.idx+1); return; }
-    $('p1-set').textContent='세트 '+(P.set+1)+'/'+it.sets; renderDots(it);
-    restStart(P.restTotal);
+    renderPills(it); restStart(P.restTotal);
   }
+  function nextEx(){ if(P.idx<P.items.length-1){ haptic(); openItem(P.idx+1); } }
+  function prevEx(){ if(P.idx>0){ haptic(); openItem(P.idx-1); } }
 
-  /* W-D 휴식 */
+  /* 휴식 */
   function restStart(sec){
-    go('rest'); P.restLeft=sec; const total=()=>P.restTotal;
-    const arc=$('rest-arc'), C=345.6;
-    const tick=()=>{ $('rest-num').textContent=Math.ceil(P.restLeft);
+    go('rest'); P.restLeft=sec;
+    const arc=$('rest-arc'), C=603.2;
+    const tick=()=>{ $('rest-num').textContent=Math.ceil(Math.max(0,P.restLeft));
       arc.style.strokeDashoffset=String(C*(1-Math.max(0,P.restLeft)/Math.max(P.restTotal,1)));
       if(P.restLeft<=0){ haptic(); haptic(); restSkip(); return; } P.restLeft-=0.2; };
     clearInterval(P.restT); tick(); P.restT=setInterval(tick,200);
@@ -374,9 +376,9 @@
   function restAdj(d){ P.restTotal=Math.max(15, Math.min(180, P.restTotal+d)); P.restLeft=Math.max(1, P.restLeft+d); }
   function restSkip(){ clearInterval(P.restT); P.restT=null;
     if(P.items[P.idx]&&P.items[P.idx].kind==='hr'){ go('cardio'); return; }
-    go('run'); $('pages').scrollTo({left:0}); }
+    setPage(0); go('run'); }
 
-  /* 심박 시뮬레이션 (존2 118~142 부근 랜덤 워크) */
+  /* 심박 시뮬레이션 */
   let _bpm=124;
   function hrStart(){ hrStop();
     P.hrT=setInterval(()=>{ _bpm=Math.max(96,Math.min(158,_bpm+(Math.random()*8-4)));
@@ -388,16 +390,17 @@
     },1000); }
   function hrStop(){ if(P.hrT){ clearInterval(P.hrT); P.hrT=null; } }
 
-  /* W-E 유산소: 길게 눌러 완료 */
+  /* 유산소: 길게 눌러 완료 */
   (function(){ const btn=$('ca-hold'), fill=btn.querySelector('.fill'); let hT=null, p=0;
     const down=()=>{ p=0; clearInterval(hT); hT=setInterval(()=>{ p+=0.09; fill.style.width=Math.min(100,p*100)+'%';
       if(p>=1){ clearInterval(hT); fill.style.width='0'; cardioDoneP(); } },60); };
     const up=()=>{ clearInterval(hT); fill.style.width='0'; };
     btn.addEventListener('pointerdown',down); btn.addEventListener('pointerup',up); btn.addEventListener('pointerleave',up);
   })();
-  function cardioDoneP(){ haptic(); openItem(P.idx+1); }
+  function cardioDoneP(){ haptic(); const it=P.items[P.idx]; if(it&&it.kind==='hr') it.doneSets=1;
+    openItem(P.idx+1); }
 
-  /* W-F 축하 */
+  /* 축하 */
   function finishAll(){
     hrStop(); if(P.elapT){ clearInterval(P.elapT); P.elapT=null; }
     const ms=P.t0?Date.now()-P.t0:0;
@@ -406,12 +409,30 @@
     $('dn-kcal').textContent=Math.round(4.5*70*(ms/3600000))+'kcal (추정)';
     haptic(); go('done');
   }
-  function resetProto(){ P.items.forEach(it=>{ it.doneSets=0; delete it.done; }); P.idx=0; P.set=0; P.setsDone=0; P.t0=null;
+  function resetProto(){ P.items.forEach(it=>{ it.doneSets=0; }); P.idx=0; P.set=0; P.setsDone=0; P.t0=null;
     hrStop(); if(P.elapT){clearInterval(P.elapT);P.elapT=null;} go('home'); }
 
-  /* 페이지 dots */
-  $('pages').addEventListener('scroll', ()=>{ const pg=$('pages'); const p=Math.round(pg.scrollLeft/pg.clientWidth);
-    [...$('pgdots').children].forEach((el,i)=>el.classList.toggle('on',i===p)); }, {passive:true});
+  /* ---- 제스처: 좌로 쓸기=다음 운동, 우로 쓸기=이전 운동, 상하=페이지, 탭=세트 완료 ---- */
+  function attachGestures(el, opts){
+    let sx=null, sy=0, st=0;
+    el.addEventListener('pointerdown', e=>{ if(e.target.closest('button')){ sx=null; return; } sx=e.clientX; sy=e.clientY; st=Date.now(); });
+    el.addEventListener('pointerup', e=>{
+      if(sx==null) return; const dx=e.clientX-sx, dy=e.clientY-sy; sx=null;
+      if(Math.abs(dx)>38 && Math.abs(dx)>Math.abs(dy)*1.2){ const f=dx<0?opts.left:opts.right; if(f) f(); return; }
+      if(Math.abs(dy)>38 && Math.abs(dy)>Math.abs(dx)*1.2){ const f=dy<0?opts.up:opts.down; if(f) f(); return; }
+      if(Math.abs(dx)<12 && Math.abs(dy)<12 && Date.now()-st<600 && opts.tap) opts.tap(e);
+    });
+  }
+  attachGestures($('scr-run'), {
+    left:nextEx, right:prevEx,
+    up:()=>setPage(P.page+1), down:()=>setPage(P.page-1),
+    tap:()=>{ if(P.page!==0){ setPage(0); return; } setDoneP(); }
+  });
+  attachGestures($('scr-cardio'), { right:prevEx });
+  attachGestures($('scr-rest'), { tap:restSkip });
+  /* 버튼 위임(무게 ± / 휴식 ±15초) */
+  $('scr-run').addEventListener('click', e=>{ const b=e.target.closest('button[data-w]'); if(b) wAdj(+b.dataset.w); });
+  $('scr-rest').addEventListener('click', e=>{ const b=e.target.closest('button[data-r]'); if(b) restAdj(+b.dataset.r); });
 </script>
 </body>
 </html>

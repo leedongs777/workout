@@ -14,6 +14,11 @@
     display:flex; align-items:center; justify-content:center; overflow:hidden;
     font-family:-apple-system,'SF Pro Text','Pretendard',system-ui,sans-serif; -webkit-user-select:none; user-select:none;}
   .hint{position:fixed; top:16px; left:50%; transform:translateX(-50%); color:rgba(255,255,255,.45); font-size:12.5px; white-space:nowrap;}
+  .devseg{position:fixed; top:44px; left:50%; transform:translateX(-50%); z-index:10; display:flex; gap:4px;
+    background:rgba(255,255,255,.1); border:1px solid rgba(255,255,255,.14); border-radius:99px; padding:4px;}
+  .devseg button{border:0; background:transparent; color:rgba(255,255,255,.65); font-size:12.5px; font-weight:700;
+    padding:6px 13px; border-radius:99px; cursor:pointer; font-family:inherit;}
+  .devseg button.on{background:#fff; color:#17181c;}
   .stage{transform-origin:center center;}
 
   /* ---- Apple Watch(46mm 근사) 목업 ---- */
@@ -31,6 +36,27 @@
   .scr{position:relative; width:205px; height:248px; border-radius:52px; overflow:hidden; background:#000; color:#fff;}
   .scr.pulse{animation:pulse .35s ease;}
   @keyframes pulse{0%{box-shadow:inset 0 0 0 0 rgba(155,232,176,0);} 35%{box-shadow:inset 0 0 0 5px rgba(155,232,176,.85);} 100%{box-shadow:inset 0 0 0 0 rgba(155,232,176,0);}}
+
+  /* ---- 갤럭시워치(원형, Watch7 근사) 오버라이드 ---- */
+  body.gx .crown, body.gx .sidebtn{display:none;}
+  .gxb{display:none; position:absolute; right:-7px; width:8px; height:26px; border-radius:0 4px 4px 0; background:linear-gradient(180deg,#8e8a83,#c9c4bb 40%,#83807a);}
+  body.gx .gxb{display:block;}
+  .gxb.b1{top:86px;} .gxb.b2{top:150px;}
+  body.gx .band{width:98px;}
+  body.gx .band.top{margin-bottom:-30px;} body.gx .band.bot{margin-top:-30px;}
+  body.gx .case{width:256px; height:256px; border-radius:50%;
+    box-shadow:0 0 0 2px #3f4144, 0 0 0 5px #a9adb4, 0 0 0 6px #75787d,
+      0 30px 70px rgba(0,0,0,.65), 0 10px 24px rgba(0,0,0,.5);}
+  body.gx .scr{width:228px; height:228px; border-radius:50%;}
+  body.gx .app{padding:32px 30px 24px;}
+  body.gx .page{width:228px; padding:0 30px;}
+  body.gx .wbtn, body.gx .hold{width:78%; margin-inline:auto; display:block;}
+  body.gx .gobtn{width:82px; height:82px;}
+  body.gx .p2-time{font-size:44px;}
+  body.gx .p3-bpm{font-size:48px;}
+  body.gx .ring{width:112px; height:112px;}
+  body.gx .ring svg{width:112px; height:112px;}
+  body.gx #scr-done{padding-top:30px;}
 
   /* ---- NRC 문법: 검정 + 라이트 그린, 초대형 타이포 ---- */
   .clock{position:absolute; top:9px; left:0; right:0; text-align:center; font-size:12px; font-weight:600; color:#8fa89b; z-index:6; font-variant-numeric:tabular-nums; pointer-events:none;}
@@ -61,13 +87,17 @@
   .pgdots{display:flex; gap:5px; justify-content:center; padding:7px 0 0;}
   .pgdots i{width:5px; height:5px; border-radius:50%; background:#2a2c2e;}
   .pgdots i.on{background:#9BE8B0;}
-  /* P1 지금 할 일 */
-  .p1-set{font-size:12px; font-weight:800; color:#9BE8B0; margin-top:2px;}
-  .p1-name{font-size:23px; font-weight:850; letter-spacing:-.02em; line-height:1.12; margin-top:4px; word-break:keep-all;}
-  .p1-w{display:flex; align-items:center; justify-content:center; gap:10px; margin:10px 0 4px;}
-  .p1-w button{width:36px; height:36px; border-radius:50%; border:none; background:#1c1d1f; color:#fff; font-size:19px; font-weight:800; cursor:pointer; font-family:inherit;}
-  .p1-w button:active{transform:scale(.92);}
-  .p1-w .v{font-size:30px; font-weight:850; min-width:80px; text-align:center; font-variant-numeric:tabular-nums;}
+  /* P1 지금 할 일: 이름(왼쪽, 길면 축소 2줄) + 오른쪽 운동/세트 카운터 */
+  .p1-hd{display:flex; align-items:flex-start; gap:8px; margin-top:2px;}
+  .p1-name{flex:1; min-width:0; font-size:22px; font-weight:850; letter-spacing:-.02em; line-height:1.15; word-break:keep-all;}
+  .p1-name.long{font-size:15px;}
+  .p1-meta{flex:none; text-align:right; display:flex; flex-direction:column; gap:3px; margin-top:3px;}
+  .p1-meta .m1{font-size:10.5px; font-weight:800; color:#8fa89b; letter-spacing:.05em;}
+  .p1-meta .m2{font-size:11px; font-weight:800; color:#9BE8B0;}
+  .p1-w{display:flex; align-items:center; justify-content:center; gap:12px; margin:12px 0 6px;}
+  .p1-w button{width:48px; height:48px; border-radius:50%; border:none; background:#1c1d1f; color:#fff; font-size:25px; font-weight:800; cursor:pointer; font-family:inherit;}
+  .p1-w button:active{transform:scale(.92); background:#2a2c2e;}
+  .p1-w .v{font-size:33px; font-weight:850; min-width:86px; text-align:center; font-variant-numeric:tabular-nums;}
   .p1-w .v small{font-size:13px; color:#8fa89b; font-weight:800;}
   .p1-tap{font-size:11px; color:#6f7a72; text-align:center; margin-top:2px;}
   .setdots{display:flex; gap:6px; justify-content:center; margin-top:8px;}
@@ -100,13 +130,16 @@
   .hold .fill{position:absolute; inset:0; width:0; background:#2E5E56; transition:width .1s linear;}
   .hold span{position:relative; z-index:1;}
 
-  /* 축하 */
-  .doneck{width:92px; height:92px; margin:8px auto 8px; border-radius:50%; background:#9BE8B0; color:#03170c; display:flex; align-items:center; justify-content:center; font-size:44px; font-weight:900; animation:pop .5s cubic-bezier(.2,1.6,.4,1);}
+  /* 축하 — 버튼까지 온전히 들어가게 컴팩트(잘림 수정) */
+  #scr-done{padding-top:22px; padding-bottom:18px;}
+  .doneck{width:58px; height:58px; margin:0 auto 6px; border-radius:50%; background:#9BE8B0; color:#03170c; display:flex; align-items:center; justify-content:center; font-size:28px; font-weight:900; animation:pop .5s cubic-bezier(.2,1.6,.4,1);}
   @keyframes pop{from{transform:scale(.3); opacity:0;} to{transform:scale(1); opacity:1;}}
-  .sum{margin-top:8px;}
-  .sum .row{display:flex; justify-content:space-between; font-size:13px; font-weight:700; padding:4px 6px; color:#cfd6d0;}
+  .done-ttl{font-size:16.5px; font-weight:850; text-align:center;}
+  .sum{margin-top:4px;}
+  .sum .row{display:flex; justify-content:space-between; font-size:12px; font-weight:700; padding:3px 8px; color:#cfd6d0;}
   .sum .row b{color:#fff; font-variant-numeric:tabular-nums;}
-  .fineprint{font-size:10.5px; color:#6f7a72; text-align:center; margin-top:6px; line-height:1.5;}
+  .fineprint{font-size:9.5px; color:#6f7a72; text-align:center; margin-top:3px; line-height:1.5;}
+  #scr-done .wbtn{padding:9px 0; font-size:12.5px; width:72%; margin-inline:auto; display:block;}
 
   .wbtn{border:none; border-radius:22px; padding:11px 0; width:100%; font-family:inherit; font-size:13.5px; font-weight:800; cursor:pointer; background:#2E5E56; color:#EAF4EC;}
   .wbtn.ghost{background:#1c1d1f; color:#cfd6d0;}
@@ -115,12 +148,13 @@
 </style>
 </head>
 <body>
+<div class="devseg"><button id="seg-aw" class="on" onclick="setDev('aw')">Apple Watch</button><button id="seg-gx" onclick="setDev('gx')">Galaxy Watch</button></div>
 <div class="hint">MATE 워치앱 프로토타입(NRC 컨셉) — 눌러서 진행, 세션 화면은 좌우로 넘겨보세요. 기록에는 저장되지 않아요</div>
 <div class="stage" id="stage">
   <div class="watch">
     <div class="band top"></div>
     <div class="case">
-      <div class="crown"></div><div class="sidebtn"></div>
+      <div class="crown"></div><div class="sidebtn"></div><div class="gxb b1"></div><div class="gxb b2"></div>
       <div class="scr" id="scr">
         <div class="clock" id="wclock">9:41</div>
 
@@ -142,9 +176,10 @@
         <div class="app hidden" id="scr-run">
           <div class="pages" id="pages">
             <div class="page" id="page1" onclick="p1Tap(event)">
-              <div class="k" id="p1-k">운동 1/6</div>
-              <div class="p1-set" id="p1-set">세트 1/4</div>
-              <div class="p1-name" id="p1-name">운동명</div>
+              <div class="p1-hd">
+                <div class="p1-name" id="p1-name">운동명</div>
+                <div class="p1-meta"><span class="m1" id="p1-k">운동 1/6</span><span class="m2" id="p1-set">세트 1/4</span></div>
+              </div>
               <div class="grow"></div>
               <div class="p1-w" id="p1-wrow">
                 <button onclick="event.stopPropagation();wAdj(-1)">−</button>
@@ -190,7 +225,7 @@
             <button onclick="event.stopPropagation();restAdj(15)">+15초</button>
           </div>
           <div class="grow"></div>
-          <div class="p1-tap">탭하면 바로 다음 세트, 끝나면 손목 진동</div>
+          <div class="p1-tap">탭하면 바로 다음 세트 GO!</div>
         </div>
 
         <!-- W-E 유산소 -->
@@ -207,7 +242,7 @@
         <!-- W-F 축하 + 요약 -->
         <div class="app hidden" id="scr-done">
           <div class="doneck">✓</div>
-          <div class="ttl center" style="font-size:19px;font-weight:850">오늘도 해냈어요!</div>
+          <div class="done-ttl">오늘도 해냈어요!</div>
           <div class="sum">
             <div class="row"><span>시간</span><b id="dn-time">00:00</b></div>
             <div class="row"><span>세트</span><b id="dn-sets">0세트</b></div>
@@ -227,6 +262,13 @@
 <script>
   function fit(){ const s=Math.min(1.7,(innerHeight-80)/620,(innerWidth-40)/280); document.getElementById('stage').style.transform='scale('+s+')'; }
   fit(); addEventListener('resize',fit);
+  function setDev(d){ document.body.className=d==='gx'?'gx':'';
+    document.getElementById('seg-aw').classList.toggle('on', d!=='gx');
+    document.getElementById('seg-gx').classList.toggle('on', d==='gx');
+    try{ localStorage.setItem('watchproto:device', d); }catch(e){}
+    const run=document.getElementById('scr-run');
+    if(run && !run.classList.contains('hidden')) document.getElementById('pages').scrollTo({left:0}); }
+  try{ if(localStorage.getItem('watchproto:device')==='gx') setDev('gx'); }catch(e){}
   function clock(){ const d=new Date(), h=d.getHours()%12||12; document.getElementById('wclock').textContent=h+':'+String(d.getMinutes()).padStart(2,'0'); }
   clock(); setInterval(clock,15000);
   const $=id=>document.getElementById(id);
@@ -299,6 +341,7 @@
     $('p1-k').textContent='운동 '+(i+1)+'/'+P.items.length;
     $('p1-set').textContent='세트 '+(P.set+1)+'/'+it.sets;
     $('p1-name').textContent=it.name;
+    $('p1-name').classList.toggle('long', it.name.length>=8);
     $('p1-w').textContent=P.w%1?P.w.toFixed(1):P.w;
     renderDots(it); renderP2(); go('run');
     $('pages').scrollTo({left:0});
@@ -365,7 +408,7 @@
     hrStop(); if(P.elapT){clearInterval(P.elapT);P.elapT=null;} go('home'); }
 
   /* 페이지 dots */
-  $('pages').addEventListener('scroll', ()=>{ const p=Math.round($('pages').scrollLeft/205);
+  $('pages').addEventListener('scroll', ()=>{ const pg=$('pages'); const p=Math.round(pg.scrollLeft/pg.clientWidth);
     [...$('pgdots').children].forEach((el,i)=>el.classList.toggle('on',i===p)); }, {passive:true});
 </script>
 </body>

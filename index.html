@@ -3216,7 +3216,6 @@ async function resetAll(){
    부정 프레임 금지(부족/실패 표현 대신 누적·달성). 기획: MATE_분석탭_기획.md */
 /* 기구 카테고리 → 그래프 문법: 머신=무게판 스택, 바벨/스미스=눕힌 원판 스택, 덤벨/케틀벨=크기 성장(실물 문법) */
 function anChartKind(cat){ return cat==='dumbbell'?'d' : cat==='kettlebell'?'k' : (cat==='barbell'||cat==='smith')?'b' : 'm'; }
-const AN_CAT_LABEL={machine:'머신', barbell:'바벨', smith:'스미스', dumbbell:'덤벨', kettlebell:'케틀벨'};
 
 /* 운동별 무게 시계열: log의 날짜를 그 날짜 세션 슬롯으로 해석해 (세션:슬롯)별 그날 최고 무게를 모은다.
    운동명·기구는 현재 픽 기준 근사(lastLog와 동일한 한계) */
@@ -3367,7 +3366,7 @@ function renderAnal(){
         const have=days.filter(dy=>dy.w!=null).map(dy=>dy.w);
         const dw=have.length>=2? Math.round((have[have.length-1]-have[0])*10)/10 : 0;
         const badge= dw>0? `<span class="an-delta">+${dw}kg</span>` : `<span class="an-delta flat">유지</span>`;
-        html+=`<div class="an-ex2"><div class="x-hd"><b>${esc(o.name)}</b><span class="x-cat">${AN_CAT_LABEL[o.cat]||'머신'} · ${esc(String(o.reps))}</span>${badge}</div>${anChart(anChartKind(o.cat),days)}</div>`; });
+        html+=`<div class="an-ex2"><div class="x-hd"><b>${esc(o.name)}</b><span class="x-cat">${esc(String(o.reps))}</span>${badge}</div>${anChart(anChartKind(o.cat),days)}</div>`; });
       html+=`</div>`;
     } else {
       html+=`<div class="card an-empty"><div class="ae-s">${series.length?'최근 7일에 무게 기록이 없어요.<br>다음 세션에서 기록하면 여기 다시 쌓여요':'운동 중 무게를 기록하면<br>기구가 차곡차곡 쌓이는 발전 그래프가 생겨요'}</div></div>`;
@@ -3392,7 +3391,7 @@ function renderAnal(){
       <div class="an-kpi"><div class="v">${wkSum.toLocaleString()} <small>kcal</small></div><div class="c">이번 주 소모 (추정)</div></div>
       <div class="an-kcal-bars">${bars}</div>
       ${mo>0?`<div class="an-fun">이번 달 누적 <b>${mo.toLocaleString()}kcal</b>${chick>=0.3?` = 치킨 ${chick.toFixed(1)}마리 🍗`:''}</div>`:''}
-      <div class="an-note">체중·운동 시간 기반 MET 추정치예요. 워치 연동 시 실측으로 바뀌어요.</div>
+      <div class="an-note">체중과 운동 시간 기반 MET 추정치예요. 워치 연동 시 실측으로 바뀌어요.</div>
     </div>`;
     /* 마일스톤 */
     const tot=anTotals();
@@ -3402,7 +3401,7 @@ function renderAnal(){
     const timeTxt= hrs>0? `${hrs}<small>시간 ${mins}분</small>` : `${mins}<small>분</small>`;
     html+=`<div class="sec-label">마일스톤</div><div class="an-row2" style="margin-top:0">
       <div class="card an-card an-kpi"><div class="v">${volTxt}</div><div class="c">누적 들어올린 무게${eleph>=0.5?`<br>아프리카 코끼리 ${eleph.toFixed(1)}마리 🐘`:''}</div></div>
-      <div class="card an-card an-kpi"><div class="v">${timeTxt}</div><div class="c">누적 운동 시간<br>총 ${tot.sessions}세션 · ${tot.sets}세트</div></div>
+      <div class="card an-card an-kpi"><div class="v">${timeTxt}</div><div class="c">누적 운동 시간<br>총 ${tot.sessions}세션, ${tot.sets}세트</div></div>
     </div>`;
   }
   $('view-anal').innerHTML=html;

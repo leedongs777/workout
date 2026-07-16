@@ -140,15 +140,24 @@
   .day-ttl{font-weight:650; font-size:15px; letter-spacing:-.01em; display:flex; align-items:center; gap:7px;}
   .day-focus{font-size:12px; color:var(--muted); margin-top:2px; letter-spacing:-.01em; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
   .day-focus .vdiv{margin:0 5px;}
-  /* 일정 리스트 = 7행 뷰포트(운영자 요청): 7칸만 온전히 보이고 위/아래 이웃 행은 페이드로 흐릿하게,
+  /* 일정 리스트 = 7행 뷰포트(운영자 요청): 7칸만 온전히 보이고 위/아래 이웃 행은 흐릿하게,
      스와이프는 scroll-snap으로 행 단위 이동(snap-stop:always = 한 번 쓸어올리면 정확히 한 칸).
-     위아래 패딩 30px = 페이드 깊이와 동일 → 첫/마지막 행도 스크롤 끝에서 온전히 보인다. 행 높이 65px(64+구분선 1) 전제 */
-  .plist-card{overflow-x:hidden; overflow-y:auto; height:calc(7*65px + 60px); padding:30px 0; scroll-snap-type:y mandatory; scroll-padding-top:30px; overscroll-behavior:contain; scrollbar-width:none;
-    -webkit-mask-image:linear-gradient(to bottom,transparent 0,#000 30px,#000 calc(100% - 30px),transparent 100%);
-    mask-image:linear-gradient(to bottom,transparent 0,#000 30px,#000 calc(100% - 30px),transparent 100%);}
+     위아래 패딩 30px = 이웃 행 살짝 보이는 영역 → 첫/마지막 행도 스크롤 끝에서 온전히 보인다. 행 높이 65px(64+구분선 1) 전제 */
+  .plist-card{overflow-x:hidden; overflow-y:auto; height:calc(7*65px + 60px); padding:30px 0; scroll-snap-type:y mandatory; scroll-padding-top:30px; overscroll-behavior:contain; scrollbar-width:none;}
   .plist-card::-webkit-scrollbar{display:none;}
   .plist-card .day{scroll-snap-align:start; scroll-snap-stop:always;}
   .plist-card .day-expand{scroll-snap-align:start;}
+  /* 흐림은 스크롤러에 마스크가 아니라 래퍼 고정 오버레이(배경색 안개+블러)로 — 밝은 행 위에서도 보이고,
+     iOS 사파리의 '스크롤 요소 마스크가 내용과 같이 스크롤되는' 문제도 회피. 끝(at-top/at-bottom)에서는 사라짐 */
+  .plist-wrap{position:relative;}
+  .plist-wrap::before,.plist-wrap::after{content:''; position:absolute; left:1px; right:1px; height:44px; z-index:2; pointer-events:none;
+    background:var(--bg); -webkit-backdrop-filter:blur(2px); backdrop-filter:blur(2px); transition:opacity .2s; opacity:1;}
+  .plist-wrap::before{top:1px; border-radius:var(--radius) var(--radius) 0 0;
+    -webkit-mask-image:linear-gradient(to bottom,#000 20%,transparent); mask-image:linear-gradient(to bottom,#000 20%,transparent);}
+  .plist-wrap::after{bottom:1px; border-radius:0 0 var(--radius) var(--radius);
+    -webkit-mask-image:linear-gradient(to top,#000 20%,transparent); mask-image:linear-gradient(to top,#000 20%,transparent);}
+  .plist-wrap.at-top::before{opacity:0;}
+  .plist-wrap.at-bottom::after{opacity:0;}
   .day.past, .day.before{background:var(--line-2); border-bottom-color:var(--line);}
   .day.past .day-rail, .day.before .day-rail{border-right-color:var(--line);}
   .day.today{background:var(--accent-soft);}
@@ -2639,9 +2648,9 @@ function planDayRow(k,t){
 }
 function planListHTML(){
   const t=todayStr(); const last=new Date(planYear,planMonth+1,0).getDate();
-  let html=`<div class="card plist-card" data-m="${planYear}-${planMonth}">`;
+  let html=`<div class="plist-wrap"><div class="card plist-card" data-m="${planYear}-${planMonth}">`;
   for(let i=1;i<=last;i++){ html+=planDayRow(fmt(new Date(planYear,planMonth,i)),t); }
-  html+=`</div>`; return html;
+  html+=`</div></div>`; return html;
 }
 /* 보고 있는 달의 완료/예정 집계(S2 월 요약) — monthDone/monthTotal은 '오늘의 달' 전용이라 별도 */
 function monthStatsFor(y,m){
@@ -2686,6 +2695,19 @@ function renderPlan(){
   /* 스크롤은 내부 7행 스크롤러(.plist-card) 기준: 목표 행(오늘/탭한 날)이 있으면 가운데로, 없으면 이전 위치 복원 */
   if(planMode==='list'){
     const sc=document.querySelector('.plist-card');
+    if(sc){
+      /* 높이 fit: 하단 탭바 위 공간에 맞춰 행 단위(n*65+60)로 — 기본 7행, 좁은 화면은 축소(탭바가 하단 흐림을 가리지 않게) */
+      const nav=document.querySelector('nav');
+      const avail=(nav?nav.getBoundingClientRect().top:window.innerHeight) - sc.getBoundingClientRect().top - 8;
+      const rows=Math.max(3, Math.min(7, Math.floor((avail-60)/65)));
+      sc.style.height=(rows*65+60)+'px';
+      /* 리스트 맨 위/맨 아래에서는 흐림 제거 — 그 너머에 행이 없으므로 */
+      const edge=()=>{ const w=sc.parentElement; if(!w) return;
+        w.classList.toggle('at-top', sc.scrollTop<=2);
+        w.classList.toggle('at-bottom', sc.scrollTop>=sc.scrollHeight-sc.clientHeight-2); };
+      sc.addEventListener('scroll', edge, {passive:true});
+      edge();
+    }
     if(_planScrollTo){ const tgt=_planScrollTo; _planScrollTo=null;
       requestAnimationFrame(()=>{ const el=document.getElementById('day-'+tgt.k);
         if(el&&sc){ const rm=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -2695,6 +2717,8 @@ function renderPlan(){
   }
   $('hd-title').textContent='일정'; $('hd-cyc').innerHTML='';
 }
+/* 화면 크기/회전 변경 시 7행 스크롤러 높이 재계산(fit) — 스크롤 위치는 keepScroll이 보존. (테스트 샌드박스의 가짜 window 대비 가드) */
+if(typeof window.addEventListener==='function') window.addEventListener('resize', ()=>{ if(activeTab==='schedule' && planMode==='list') renderPlan(); });
 
 /* ----- EQUIPMENT view ----- */
 function eqGridHTML(sel, toggleFn){

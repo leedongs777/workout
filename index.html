@@ -508,16 +508,26 @@
   .home-hero .btn.primary{background:var(--surface); color:var(--accent-ink); border-color:transparent;}
   .home-hero .home-prog{background:var(--accent-soft);}
   .home-hero .home-prog-bar{background:var(--on-accent);}
-  .home-stats{display:flex; gap:10px;}
-  .home-stats .stat{flex:1; background:var(--accent-soft); border:1px solid transparent; border-radius:var(--radius-sm); padding:14px 8px; text-align:center;}
-  .stat-n{font-size:27px; font-weight:800; color:var(--accent-ink); font-variant-numeric:tabular-nums; line-height:1;}
-  .home-stats .stat:nth-child(1) .stat-n{color:var(--sand-ink);} /* 연속 운동(스트릭)만 샌드색 — renderHome 통계 순서(연속/월완료)가 바뀌면 같이 옮길 것 */
-  .home-stats .stat.tap{cursor:pointer;}
-  .home-stats .stat{display:flex; flex-direction:column; justify-content:center;} /* 카드 높이가 달라도 콘텐츠 세로 중앙 — 좌우 밀도 균형 */
-  .stat-cap{font-size:10.5px; font-weight:600; color:var(--faint); margin-top:8px;} /* 연속 운동 보조 라인(최고 기록/동기부여) */
+  /* 내 운동 현황 = 통합 대시보드 카드(운영자 확정 레이아웃): 주간 도트 / 구분선 / [비주얼|텍스트] 2셀.
+     각 셀은 왼쪽 비주얼(링·히트맵, 46px 고정)과 오른쪽 텍스트 스택이 세로 중앙으로 높이 정렬 */
+  .dash-card{padding:16px;}
+  .dash-card .wk-strip{background:transparent; padding:2px 2px 14px; margin:0;}
+  .dash-div{height:1px; background:var(--line-2); margin:0 -16px 14px;}
+  .dash-row{display:flex;}
+  .dash-cell{flex:1; min-width:0; display:flex; align-items:center; gap:12px;}
+  .dash-cell+.dash-cell{border-left:1px solid var(--line-2); padding-left:14px; margin-left:2px;}
+  .dash-cell.tap{cursor:pointer;}
+  .dc-vis{flex:none; width:48px; height:46px; display:flex; align-items:center; justify-content:center;}
+  .dc-tx{flex:1; min-width:0;}
+  .dc-l{font-size:11px; font-weight:700; color:var(--faint);}
+  .dc-n{font-size:22px; font-weight:800; color:var(--accent-ink); font-variant-numeric:tabular-nums; margin-top:3px; line-height:1.1;}
+  .dc-n .u{font-size:11.5px; font-weight:700; color:var(--muted); margin-left:2px;}
+  .dc-n.sand{color:var(--sand-ink);}
+  .dc-cap{font-size:10px; font-weight:600; color:var(--faint); margin-top:4px;}
+  .strk-ring{width:46px; height:46px; display:block;}
   /* 이번 달 미니 히트맵(H3) — 7개/줄, 완료=필/운동일=옅음/휴식=거의 투명 */
-  .mini-heat{display:flex; flex-wrap:wrap; gap:2.5px; justify-content:center; max-width:60px; margin:8px auto 0;}
-  .mini-heat i{width:6px; height:6px; border-radius:2px; background:var(--line-2);}
+  .mini-heat{display:flex; flex-wrap:wrap; gap:2.6px; justify-content:flex-start; width:64px;}
+  .mini-heat i{width:6.5px; height:6.5px; border-radius:2px; background:var(--line-2);}
   .mini-heat i.on{background:var(--accent);}
   .mini-heat i.r{opacity:.3;}
   .stat-u{font-size:12.5px; font-weight:700; color:var(--muted);}
@@ -2276,6 +2286,16 @@ function bestStreak(){
   }
   return best;
 }
+/* 연속 운동 링 게이지 — 최고 기록 대비 진행(기록 경신이면 꽉 참) + 가운데 불꽃(0일=회색, 진행 중=샌드) */
+function streakRingHTML(cur,best){
+  const C=(2*Math.PI*20).toFixed(1);
+  const pct=best>0?Math.min(1,cur/best):(cur>0?1:0);
+  return `<svg class="strk-ring" viewBox="0 0 46 46" aria-hidden="true">
+    <circle cx="23" cy="23" r="20" fill="none" stroke="var(--line-2)" stroke-width="3.5"/>
+    ${pct>0?`<circle cx="23" cy="23" r="20" fill="none" stroke="var(--sand)" stroke-width="3.5" stroke-linecap="round" stroke-dasharray="${(pct*Number(C)).toFixed(1)} ${C}" transform="rotate(-90 23 23)"/>`:''}
+    <g transform="translate(6.9 9.5) scale(1.15)"><path d="M13.5 5.5c.4 2-.8 3-1.9 4.2-1 1.1-1.9 2.2-1.9 3.9a4.3 4.3 0 008.6 0c0-1.4-.6-2.5-1.4-3.5-.1 1.1-.7 1.9-1.6 2.2.9-2.3.3-4.8-1.8-6.8z" fill="${cur>0?'var(--sand)':'var(--line)'}"/></g>
+  </svg>`;
+}
 /* 이번 달 미니 히트맵(H3) — 완료=필, 운동일=옅음, 휴식=투명. 탭하면 일정 탭 */
 function monthMiniDots(){
   const t=parse(todayStr()), y=t.getFullYear(), m=t.getMonth(), last=new Date(y,m+1,0).getDate();
@@ -2309,13 +2329,17 @@ function renderHome(){
     </div></div>`;
   }
   html+=`<div class="sec-label">내 운동 현황</div>`;
-  html+=weekDotsHTML(); /* 이번 주 = 도트 트래커(숫자 카드 대체) */
-  html+=`<div class="home-stats">
-    <div class="stat">${(()=>{ const cur=streak(), best=bestStreak();
-      const cap = cur>0&&cur>=best ? '최고 기록 경신 중!' : (best>0 ? `최고 기록 ${best}일` : '오늘 시작하면 1일째예요');
-      return `<div class="stat-n">${cur}<span class="stat-u">일째</span></div><div class="stat-l">연속 운동</div><div class="stat-cap">${cap}</div>`; })()}</div>
-    <div class="stat tap" onclick="goTab('schedule')"><div class="stat-n">${monthDone()}<span class="stat-u">/${monthTotal()}일</span></div><div class="stat-l">이번 달 완료</div>${monthMiniDots()}</div>
-  </div>`;
+  { /* 통합 대시보드 카드: 주간 도트 + [링|연속] [히트맵|이번달] — 비주얼 좌, 텍스트 우(높이 정렬) */
+    const cur=streak(), best=bestStreak();
+    const cap = cur>0&&cur>=best ? '최고 기록 경신 중!' : (best>0 ? `최고 기록 ${best}일` : '오늘 시작하면 1일째예요');
+    const td=parse(t), yy=td.getFullYear(), mo=td.getMonth(), lastD=new Date(yy,mo+1,0).getDate();
+    let remain=0; for(let i=td.getDate();i<=lastD;i++){ const k=fmt(new Date(yy,mo,i)); const e=sessionFor(k); if(e&&!e.rest&&!state.doneDays.includes(k)) remain++; }
+    const mcap = remain>0?`예정 ${remain}일 남음`:'이번 달 예정 완료!';
+    html+=`<div class="card dash-card">${weekDotsHTML()}<div class="dash-div"></div><div class="dash-row">
+      <div class="dash-cell"><span class="dc-vis">${streakRingHTML(cur,best)}</span><span class="dc-tx"><span class="dc-l">연속 운동</span><div class="dc-n sand">${cur}<span class="u">일째</span></div><div class="dc-cap">${cap}</div></span></div>
+      <div class="dash-cell tap" onclick="goTab('schedule')"><span class="dc-vis">${monthMiniDots()}</span><span class="dc-tx"><span class="dc-l">이번 달 완료</span><div class="dc-n">${monthDone()}<span class="u">/${monthTotal()}일</span></div><div class="dc-cap">${mcap}</div></span></div>
+    </div></div>`;
+  }
   html+=`<div class="sec-label">다가오는 일정</div><div class="card sched-card">`;
   const end=fmt(addDays(parse(t),4)); const map=buildSchedule(t,end); const keys=Object.keys(map).sort();
   keys.forEach(k=>{ const e=map[k]; const d=parse(k); const isToday=k===t; const done=state.doneDays.includes(k);

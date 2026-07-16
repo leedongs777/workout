@@ -471,12 +471,18 @@
   .cons-next:disabled{background:var(--line); color:var(--faint); cursor:not-allowed;}
 
   /* profile banner */
-  .pbanner-h{font-size:13px; font-weight:800; color:var(--accent-ink); margin-bottom:9px;}
-  .pbanner-chips{display:flex; flex-wrap:wrap; gap:7px; margin-bottom:2px;}
-  .pbanner-chips .pchip{flex:1 1 auto; min-width:0; text-align:center;}
-  .pchip{font-size:12px; font-weight:700; color:var(--accent-ink); background:var(--accent-soft); border-radius:8px; padding:6px 10px;}
-  .note.warn{background:var(--sand-soft); border:1px solid var(--sand); color:var(--ink); border-radius:10px; padding:10px 12px; margin-top:9px; font-size:12.5px; line-height:1.55;}
-  .note.warn .note-t{display:block; margin-bottom:3px;}
+  /* 프로필 배너 v3 — 아이콘 타일 키-값 행 + 가벼운 틴트 노트 */
+  .pb2{padding:6px 16px;}
+  .pb2-kv{display:flex; align-items:center; gap:11px; padding:12px 0; border-bottom:1px solid var(--line-2);}
+  .pb2-kv:last-of-type{border-bottom:none;}
+  .pb2-ic{flex:none; width:30px; height:30px; border-radius:9px; background:var(--accent-soft); color:var(--accent-ink); display:flex; align-items:center; justify-content:center;}
+  .pb2-ic svg{width:16px; height:16px;}
+  .pb2-k{flex:none; font-size:14px; font-weight:700; color:var(--ink);}
+  .pb2-v{flex:1; text-align:right; font-size:14px; font-weight:750; color:var(--ink); line-height:1.5;}
+  .pb2-warn{display:flex; gap:9px; background:var(--sand-soft); border-radius:14px; padding:11px 13px; margin:8px 0 12px;}
+  .pb2-wi{flex:none; color:var(--sand-ink); font-size:13px; padding-top:1px;}
+  .pb2-wt{flex:1; font-size:12px; line-height:1.55; color:var(--muted);}
+  .pb2-wt b{display:block; color:var(--ink); font-weight:750; margin-bottom:3px;}
 
   /* home dashboard */
   .home-hi{font-size:19px; font-weight:700; letter-spacing:-.01em; line-height:1.4; color:var(--accent-ink); margin:12px 0 15px;} /* 인사말 = 홈의 헤더(H2, 앱바 타이틀은 비움) */
@@ -2358,27 +2364,38 @@ function renderHome(){
     html+=`<div class="home-day ${isToday?'today':''}"><span class="hd-date">${mmdd} <span class="wd">${WD[d.getDay()]}</span></span><span class="hd-sep"></span><span class="hd-label ${e.rest?'rest':''}">${e.rest?label:sessTitle(label)}</span>${done?'<span class="hd-done">✓ 완료</span>':(isToday?'<span class="hd-badge">오늘</span>':'')}</div>`;
   });
   html+=`</div>`; /* '전체 일정 보기' 큰 버튼 → 섹션 헤더 우측 '전체 보기 ›'로 흡수(2026-07) */
-  const pb=profileBanner(); if(pb) html+=`<div style="height:14px"></div>`+pb;
+  const pb=profileBanner(); if(pb) html+=pb; /* sec-head가 자체 상단 여백을 가짐 */
   $('view-home').innerHTML=html;
   $('hd-title').textContent=''; $('hd-cyc').innerHTML=''; /* 홈은 인사말이 헤더(H2) — 앱바 타이틀 비움 */
 }
 
 /* ----- TODAY view ----- */
-function warnNote(label, body){ return `<div class="note warn"><b class="note-t">${label}</b><div class="note-b">${periodLines(body)}</div></div>`; }
+/* 프로필 배너 — 섹션 헤더(수정 ›) + 아이콘 타일 키-값 행 + 가벼운 틴트 노트(2026-07 운영자 확정 v3).
+   예전 칩 나열+노란 경고 박스는 폐기. 아이콘은 원/직선 위주 안전 SVG — 라이브 렌더 검증됨 */
+const _PB_IC={
+  target:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4.2"/><circle cx="12" cy="12" r="1" fill="currentColor" stroke="none"/></svg>',
+  watch:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="13.5" r="7.5"/><path d="M12 13.5V9.5"/><path d="M9.5 3h5"/><path d="M12 3v2.5"/></svg>',
+  trend:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7l6 6 3.5-3.5L20 16"/><path d="M20 11.5V16h-4.5"/></svg>',
+  bell:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M7 10v4M17 10v4M7 12h10"/><path d="M4.5 10.5v3M19.5 10.5v3"/></svg>'
+};
+function pbRow(ic,label,value){ return `<div class="pb2-kv"><span class="pb2-ic">${_PB_IC[ic]}</span><span class="pb2-k">${label}</span><span class="pb2-v">${value}</span></div>`; }
+function pbWarn(title,bodyHtml){ return `<div class="pb2-warn"><span class="pb2-wi">⚠</span><span class="pb2-wt"><b>${title}</b>${bodyHtml}</span></div>`; }
 function profileBanner(){
   const p=state.profile; if(!p) return '';
-  const chips=[];
-  if(p.liftingExp===false) chips.push('근력 초보<span class="vdiv"></span>세트/무게 낮춰 시작');
-  if(p.goals&&p.goals.length) chips.push('목표: '+p.goals.slice(0,2).map((g,i)=>(i+1)+'순위 '+g).join('<span class="vdiv"></span>'));
-  if(p.running&&p.runPace) chips.push('러닝 1km '+esc(p.runPace)+' 기준');
-  if(p.targetWeightKg&&p.weightKg){ const d=(p.weightKg-p.targetWeightKg); if(d>0) chips.push('감량 목표 '+d.toFixed(1)+'kg'); }
+  let rows='';
+  if(p.goals&&p.goals.length) rows+=pbRow('target','목표', p.goals.slice(0,2).map((g,i)=>(i+1)+'순위 '+g).join('<br>'));
+  if(p.running&&p.runPace) rows+=pbRow('watch','러닝 기준','1km '+esc(p.runPace));
+  if(p.targetWeightKg&&p.weightKg){ const d=(p.weightKg-p.targetWeightKg); if(d>0) rows+=pbRow('trend','감량 목표', d.toFixed(1)+'kg'); }
+  if(p.liftingExp===false) rows+=pbRow('bell','경험','근력 초보(가볍게 시작)');
   const inj=(p.injuries&&p.injuries.has)?((p.injuries.list||[]).concat(p.injuries.other?[esc(p.injuries.other)]:[])):[];
   const cond=(p.conditions&&p.conditions.has)?((p.conditions.list||[]).concat(p.conditions.other?[esc(p.conditions.other)]:[])):[];
   let caution='';
-  if(inj.length) caution+=warnNote('부상 및 수술 이력 반영', `${inj.join(', ')} 관련 부위에 부담이 큰 동작은 뒤로 미뤘어요. 금지된 동작은 아니니 통증 없는 범위에서 가볍게 하고, 통증 시 즉시 중단하고 전문의와 상담하세요.`);
-  if(cond.length) caution+=warnNote('건강 주의', `${cond.join(', ')} 이력이 있어요. 무거운 중량에서 숨을 참은 채 힘주기(발살바)를 피하고, 세트 사이 충분히 쉬며 어지럼이나 통증 시 중단하세요.`);
-  if(!chips.length && !caution) return '';
-  return `<div class="card" style="margin:0 0 4px; padding:16px"><div class="pbanner-h">🤖 내 프로필 기반 맞춤 조정</div>${chips.length?`<div class="pbanner-chips">${chips.map(c=>`<span class="pchip">${c}</span>`).join('')}</div>`:''}${caution}</div>`;
+  /* 줄바꿈 = §5 규칙(마침표 뒤, 긴 문장 쉼표 뒤) 수동 적용. '통증 시 즉시'는 '시' 반복이라 '통증이 있을 때는 즉시'로(운영자 확정) */
+  if(inj.length) caution+=pbWarn('부상 및 수술 이력 반영', `${inj.join(', ')} 관련 부위에 부담이 큰 동작은 뒤로 미뤘어요.<br>금지된 동작은 아니니 통증 없는 범위에서 가볍게 하고,<br>통증이 있을 때는 즉시 중단하고 전문의와 상담하세요.`);
+  if(cond.length) caution+=pbWarn('건강 주의', `${cond.join(', ')} 이력이 있어요.<br>무거운 중량에서 숨을 참은 채 힘주기(발살바)를 피하고,<br>세트 사이 충분히 쉬며 어지럼이나 통증이 있을 때는 중단하세요.`);
+  if(!rows && !caution) return '';
+  return `<div class="sec-head"><div class="sec-label">프로필 맞춤 조정</div><button class="sec-more" onclick="Onboard.startEdit()">수정 ›</button></div>
+    <div class="card pb2">${rows}${caution}</div>`;
 }
 /* 부상 때문에 실제로 플랜에서 빠진 동작들 (보유 장비로 할 수 있었던 것만) */
 /* 부상 부위에 부담이 커서 "뒤로 밀린" 운동들 (제외된 것이 아니다) */

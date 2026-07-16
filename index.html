@@ -240,6 +240,12 @@
   .step.active{border-color:var(--accent); background:var(--accent-soft); box-shadow:0 0 0 2px var(--accent-soft);}
   .step.done{opacity:.62;}
   .step.done .step-name, .step.done .step-title{color:var(--muted);}
+  /* 완료 접힘 카드(P3) */
+  .step.collapsed{cursor:pointer; padding-top:12px; padding-bottom:12px;}
+  .step.collapsed .step-fig{width:34px; height:34px;}
+  .step.collapsed .step-fig .ic-msk, .step.collapsed .step-fig svg{width:26px; height:26px;}
+  .step.collapsed .step-name{font-size:14.5px;}
+  .step-fold{flex:none; color:var(--faint); font-size:12px; padding:2px 4px;}
   .step-head{display:flex; align-items:flex-start; gap:11px;}
   .step-fig{flex:none; width:44px; height:44px; border-radius:10px; background:var(--surface-2); border:1px solid var(--line-2); color:var(--accent); display:flex; align-items:center; justify-content:center;}
   .step.active .step-fig{background:#fff;}
@@ -250,10 +256,10 @@
   .step-hrow{display:flex; align-items:flex-start; gap:8px;}
   .step-hmain{flex:1; min-width:0;}
   .step-kicker{flex:none; font-size:11px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; color:var(--faint); white-space:nowrap; padding-top:2px;}
-  .step-title{font-weight:700; font-size:15px; display:flex; align-items:center; gap:6px;}
+  .step-title{font-weight:700; font-size:12px; letter-spacing:.05em; color:var(--muted); display:flex; align-items:center; gap:6px;} /* role = 오버라인(P2) — 운동명이 주인공 */
   .role-q{flex:none; width:16px; height:16px; border-radius:50%; border:1px solid var(--line); background:var(--surface-2); color:var(--muted); font-size:10px; font-weight:800; line-height:1; cursor:pointer; font-family:inherit; padding:0; display:inline-flex; align-items:center; justify-content:center;}
   .role-q:hover{border-color:var(--accent); color:var(--accent);}
-  .step-name{font-weight:800; font-size:16px; color:var(--accent-ink); margin-top:1px;}
+  .step-name{font-weight:800; font-size:17.5px; letter-spacing:-.01em; color:var(--accent-ink); margin-top:2px;}
   .step-list{margin:9px 0 2px; padding:0; list-style:none;}
   .step-list li{position:relative; padding:5px 0 5px 20px; font-size:13.5px; color:var(--ink); border-top:1px dashed var(--line-2);}
   .step-list li:first-child{border-top:none;}
@@ -357,7 +363,11 @@
   .howto-body a .bl{background:var(--accent-soft); color:var(--accent-ink);}
   .howto-body a .go{margin-left:auto; color:var(--faint); font-size:15px;}
   .howto-note{font-size:11px; color:var(--faint); padding:0 2px;}
-  .stepprog{font-size:12px; font-weight:700; color:var(--muted); text-align:center; margin:2px 0 12px;}
+  .stepprog{font-size:12px; font-weight:700; color:var(--muted); text-align:center; margin:6px 0 12px;}
+  /* 진행 레일(P1) */
+  .prog-rail{display:flex; gap:4px; margin:2px 2px 0;}
+  .prog-rail i{flex:1; height:5px; border-radius:99px; background:var(--line-2);}
+  .prog-rail i.on{background:var(--accent);}
   /* 심박존 배지 — 팬톤: Z1 7723C, Z2 2277C, Z3 143C, Z4 1495C, Z5 179C (그린→레드) */
   .cz{display:flex; align-items:center; gap:9px; flex-wrap:wrap;}
   .cz-badge{display:inline-flex; align-items:center; gap:4px; color:#fff; font-weight:800; font-size:12px; padding:3px 10px; border-radius:8px; letter-spacing:.03em;}
@@ -502,6 +512,12 @@
   .home-stats .stat{flex:1; background:var(--accent-soft); border:1px solid transparent; border-radius:var(--radius-sm); padding:14px 8px; text-align:center;}
   .stat-n{font-size:27px; font-weight:800; color:var(--accent-ink); font-variant-numeric:tabular-nums; line-height:1;}
   .home-stats .stat:nth-child(1) .stat-n{color:var(--sand-ink);} /* 연속 운동(스트릭)만 샌드색 — renderHome 통계 순서(연속/월완료)가 바뀌면 같이 옮길 것 */
+  .home-stats .stat.tap{cursor:pointer;}
+  /* 이번 달 미니 히트맵(H3) — 7개/줄, 완료=필/운동일=옅음/휴식=거의 투명 */
+  .mini-heat{display:flex; flex-wrap:wrap; gap:2.5px; justify-content:center; max-width:60px; margin:8px auto 0;}
+  .mini-heat i{width:6px; height:6px; border-radius:2px; background:var(--line-2);}
+  .mini-heat i.on{background:var(--accent);}
+  .mini-heat i.r{opacity:.3;}
   .stat-u{font-size:12.5px; font-weight:700; color:var(--muted);}
   .stat-l{font-size:11.5px; color:var(--muted); font-weight:600; margin-top:6px;}
   /* 다가오는 일정 = 박스 없는 헤어라인 리스트(에디토리얼) — 홈 밀도가 히어로(진한 카드)→통계(틴트)→일정(리스트)으로 가벼워지는 리듬 */
@@ -549,15 +565,37 @@
   .cal-cell.today{border-color:var(--accent); box-shadow:0 0 0 1.5px var(--accent);}
   .cal-cell .cal-n{font-size:12.5px; font-weight:700; font-variant-numeric:tabular-nums; line-height:1;}
   .cal-cell.sun .cal-n{color:#c0563f;} .cal-cell.sat .cal-n{color:#3f6bc0;}
-  .cal-dot{width:6px; height:6px; border-radius:50%; background:var(--accent); display:inline-block;}
-  .cal-dot.rest{background:var(--line);}
+  /* 달력 상태 언어(S1) = 홈 주간 도트와 동일 문법: 예정=아웃라인, 완료=필+체크, 놓침=점선, 휴식=작은 점 */
+  .cal-dot{width:7px; height:7px; border-radius:50%; background:transparent; border:1.5px solid var(--accent); display:inline-block; box-sizing:border-box;}
+  .cal-dot.rest{width:5px; height:5px; border:none; background:var(--line);}
+  .cal-dot.miss{border:1.5px dashed var(--line);}
   .cal-chk{font-size:10px; font-weight:800; color:var(--on-accent); background:var(--accent); width:14px; height:14px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; line-height:1;}
+  /* 월 요약 바(S2) */
+  .mon-sum{display:flex; align-items:center; gap:12px; margin:2px 2px 12px;}
+  .ms-t{flex:none; font-size:12.5px; font-weight:600; color:var(--muted);}
+  .ms-t b{font-size:14px; font-weight:800; color:var(--accent-ink);}
+  .mon-bar{flex:1; height:6px; border-radius:99px; background:var(--accent-soft); overflow:hidden;}
+  .mon-bar-fill{height:100%; border-radius:99px; background:var(--accent); transition:width .3s;}
   .cal-legend{display:flex; gap:16px; justify-content:center; margin-top:12px; font-size:12px; color:var(--muted);}
   .cal-legend span{display:inline-flex; align-items:center; gap:5px;}
   .cal-legend i{font-style:normal;}
 
   /* onboarding */
   .ob-prog{font-size:12px; font-weight:800; color:var(--accent-ink); letter-spacing:.03em; margin-bottom:6px;}
+  /* 설정 프로필 헤더(E2) + 그룹 카드(E1) */
+  .prof-head{display:flex; width:100%; align-items:center; gap:13px; background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); padding:15px 16px; margin-top:6px; font-family:inherit; cursor:pointer; text-align:left;}
+  .ph-av{flex:none; width:46px; height:46px; border-radius:50%; background:var(--accent-soft); color:var(--accent-ink); font-size:19px; font-weight:800; display:flex; align-items:center; justify-content:center;}
+  .ph-info{flex:1; min-width:0;}
+  .ph-name{display:block; font-size:16.5px; font-weight:800; color:var(--ink);}
+  .ph-sub{display:block; font-size:12px; color:var(--muted); margin-top:3px;}
+  .ph-arrow{flex:none; color:var(--faint); font-size:22px; font-weight:300;}
+  .set-group{padding:16px;}
+  .sg-h{font-size:13px; font-weight:800; color:var(--ink); margin-bottom:9px;}
+  .sg-div{height:1px; background:var(--line-2); margin:16px -16px;}
+  /* 온보딩 진행 = 세그먼트 바(O2). 누적 채움(2단계면 2칸 on) */
+  .ob-seg{display:flex; gap:5px; margin-bottom:9px;}
+  .ob-seg i{flex:1; height:4px; border-radius:99px; background:var(--line-2);}
+  .ob-seg i.on{background:var(--accent);}
   .ob-title{font-size:21px; font-weight:800; letter-spacing:-.02em; margin-bottom:4px;}
   .ob-sub{font-size:13px; color:var(--muted); margin-bottom:6px;}
   .ob-sec{font-size:13px; font-weight:800; color:var(--ink); margin:20px 0 9px;}
@@ -1715,12 +1753,24 @@ function howtoLinks(name){
     </div>
   </details>`;
 }
+let _openDone={}; /* 완료 카드 펼침 상태(P3) — 세션 메모리만, 저장 안 함 */
+function toggleDoneOpen(date,id){ const k=date+':'+id; _openDone[k]=!_openDone[k]; renderToday(); }
 function stepShell(figHtml,figCls,kicker,titleHtml,bodyHtml,id,dateStr,active,done,foot){
   const started=state.stepStart&&state.stepStart[dateStr]&&state.stepStart[dateStr][id];
   const elapsed=state.stepMs&&state.stepMs[dateStr]&&state.stepMs[dateStr][id];
+  /* 완료 카드는 기본 접힘(P3) — 요약 한 줄, 탭하면 펼침. 긴 세션의 스캔성 확보 */
+  if(done && !_openDone[dateStr+':'+id]){
+    return `<div class="step done collapsed" onclick="toggleDoneOpen('${dateStr}','${id}')">
+      <div class="step-head">
+        <div class="step-fig ${figCls}">${figHtml}</div>
+        <div class="step-main"><div class="step-hrow"><div class="step-hmain">${titleHtml}</div><div class="step-kicker">✓${elapsed?' '+fmtDur(elapsed):''}</div></div></div>
+        <span class="step-fold">▾</span>
+      </div>
+    </div>`;
+  }
   let btn;
   if(done){
-    btn=`<div class="step-done-row">✓ 완료${elapsed?` <b>${fmtDur(elapsed)}</b> 걸림`:''} <button class="step-reopen" onclick="resetStep('${dateStr}','${id}')">다시 열기</button></div>`;
+    btn=`<div class="step-done-row">✓ 완료${elapsed?` <b>${fmtDur(elapsed)}</b> 걸림`:''} <button class="step-reopen" onclick="resetStep('${dateStr}','${id}')">다시 열기</button> <button class="step-reopen" onclick="toggleDoneOpen('${dateStr}','${id}')">접기 ▴</button></div>`;
   } else if(started){
     btn=`<button class="step-done-btn timing" onclick="doneStep('${dateStr}','${id}')">완료 <span class="live-timer" data-start="${started}">0:00</span></button>`;
   } else {
@@ -2145,7 +2195,9 @@ function renderSessionCard(s,dateStr,si){
   const kept=sessionExercises(s,si);
   const doneCount=ids.filter(id=>completed[id]).length;
   const tm=sessionTimes(s,kept,si);
-  let html=`<div class="stepprog">진행 ${doneCount} / ${ids.length} 단계 (총 약 ${tm.total}분)</div>`;
+  /* 진행 레일(P1) — 단계 수만큼 세그먼트, 완료 칸 필 */
+  let html=`<div class="prog-rail">${ids.map(pid=>`<i class="${completed[pid]?'on':''}"></i>`).join('')}</div>`;
+  html+=`<div class="stepprog">진행 ${doneCount} / ${ids.length} 단계 (총 약 ${tm.total}분)</div>`;
 
   // warmup
   if(wuP && wuP.phase==='warm' && wuP.dateStr===dateStr) html+=wuPlayerCard();
@@ -2211,6 +2263,14 @@ function weekDotsHTML(){
   }
   return `<div class="wk-strip">${out}</div>`;
 }
+/* 이번 달 미니 히트맵(H3) — 완료=필, 운동일=옅음, 휴식=투명. 탭하면 일정 탭 */
+function monthMiniDots(){
+  const t=parse(todayStr()), y=t.getFullYear(), m=t.getMonth(), last=new Date(y,m+1,0).getDate();
+  let out='';
+  for(let i=1;i<=last;i++){ const k=fmt(new Date(y,m,i)); const e=sessionFor(k);
+    out+=`<i class="${state.doneDays.includes(k)?'on':(e&&!e.rest?'p':'r')}"></i>`; }
+  return `<div class="mini-heat">${out}</div>`;
+}
 function monthDone(){ const t=parse(todayStr()),y=t.getFullYear(),m=t.getMonth(); return state.doneDays.filter(k=>{const d=parse(k);return d.getFullYear()===y&&d.getMonth()===m;}).length; }
 function monthTotal(){ const t=parse(todayStr()),y=t.getFullYear(),m=t.getMonth(),last=new Date(y,m+1,0).getDate(); let c=0; for(let i=1;i<=last;i++){ const e=sessionFor(fmt(new Date(y,m,i))); if(e&&!e.rest)c++; } return c; }
 const MOTIV=['오늘의 땀은 내일의 자신감이 돼요.','작은 한 걸음이 큰 변화를 만들어요!','어제의 나를 이겨볼까요?','꾸준함이 재능을 이겨요.','이미 시작했으니 절반은 온 거예요!','몸은 오늘의 노력을 기억해요.','포기하지 않는 한 실패는 없어요!','건강은 가장 확실한 투자예요.','미래의 나에게 선물을 줄 시간이에요!','완벽함보다 꾸준함이에요.','움직이는 만큼 강해져요!','오늘도 나를 아껴볼까요?'];
@@ -2239,7 +2299,7 @@ function renderHome(){
   html+=weekDotsHTML(); /* 이번 주 = 도트 트래커(숫자 카드 대체) */
   html+=`<div class="home-stats">
     <div class="stat"><div class="stat-n">${streak()}<span class="stat-u">일째</span></div><div class="stat-l">연속 운동</div></div>
-    <div class="stat"><div class="stat-n">${monthDone()}<span class="stat-u">/${monthTotal()}일</span></div><div class="stat-l">이번 달 완료</div></div>
+    <div class="stat tap" onclick="goTab('schedule')"><div class="stat-n">${monthDone()}<span class="stat-u">/${monthTotal()}일</span></div><div class="stat-l">이번 달 완료</div>${monthMiniDots()}</div>
   </div>`;
   html+=`<div class="sec-label">다가오는 일정</div><div class="card sched-card">`;
   const end=fmt(addDays(parse(t),4)); const map=buildSchedule(t,end); const keys=Object.keys(map).sort();
@@ -2380,7 +2440,8 @@ function renderToday(){
     html+=`<p class="info" style="text-align:center;margin-top:18px">회복도 훈련의 일부예요. 다음 운동은 순환에 맞춰 자동 배정됩니다.</p>`;
   } else {
     const s=SESSIONS[entry.session];
-    html+=`<div class="card hero hero-card"><div class="hero-top nodiv">
+    /* 오늘이면 홈과 같은 액센트 히어로(P4) — '오늘'의 시각 언어 통일. 과거/미래 날짜는 흰 카드 유지 */
+    html+=`<div class="card hero hero-card ${isToday?'home-hero':''}"><div class="hero-top nodiv">
       ${done?`<span class="rest-mini done">✓ 완료</span>`:`<button class="rest-mini" onclick="toggleRest('${t}')">${isToday?'오늘':'이 날'} 쉬기</button>`}
       <div class="hero-date"><b>${human(t)}</b><span class="vdiv"></span><span>${relDay(t)}</span></div>
       <div class="hero-title">${sessTitle(s.title)}</div>
@@ -2505,6 +2566,12 @@ function planListHTML(){
   for(let i=1;i<=last;i++){ html+=planDayRow(fmt(new Date(planYear,planMonth,i)),t); }
   html+=`</div>`; return html;
 }
+/* 보고 있는 달의 완료/예정 집계(S2 월 요약) — monthDone/monthTotal은 '오늘의 달' 전용이라 별도 */
+function monthStatsFor(y,m){
+  const last=new Date(y,m+1,0).getDate(); let done=0,plan=0;
+  for(let i=1;i<=last;i++){ const k=fmt(new Date(y,m,i)); const e=sessionFor(k); if(e&&!e.rest){ plan++; if(state.doneDays.includes(k)) done++; } }
+  return {done,plan};
+}
 function planCalHTML(){
   const t=todayStr(); const first=new Date(planYear,planMonth,1); const offset=first.getDay(); const last=new Date(planYear,planMonth+1,0).getDate();
   const WDh=['일','월','화','수','목','금','토'];
@@ -2513,12 +2580,12 @@ function planCalHTML(){
   for(let day=1;day<=last;day++){
     const k=fmt(new Date(planYear,planMonth,day)); const e=sessionFor(k); const isToday=k===t; const done=state.doneDays.includes(k); const dow=(offset+day-1)%7;
     let cls='cal-cell'; if(isToday)cls+=' today'; if(e&&e.rest)cls+=' rest'; if(k<t)cls+=' past'; if(dow===0)cls+=' sun'; if(dow===6)cls+=' sat';
-    const mark = !e ? '' : (done?'<span class="cal-chk">✓</span>':(e.rest?'<span class="cal-dot rest"></span>':'<span class="cal-dot"></span>'));
+    const mark = !e ? '' : (done?'<span class="cal-chk">✓</span>':(e.rest?'<span class="cal-dot rest"></span>':(k<t?'<span class="cal-dot miss"></span>':'<span class="cal-dot"></span>')));
     cells+=`<div class="${cls}" onclick="planCalTap('${k}')"><span class="cal-n">${day}</span>${mark}</div>`;
   }
   return `<div class="cal-head">${WDh.map((w,i)=>`<div class="cal-wd ${i===0?'sun':''} ${i===6?'sat':''}">${w}</div>`).join('')}</div>
     <div class="cal-grid">${cells}</div>
-    <div class="cal-legend"><span><i class="cal-dot"></i>운동</span><span><i class="cal-dot rest"></i>휴식</span><span><i class="cal-chk">✓</i>완료</span></div>`;
+    <div class="cal-legend"><span><i class="cal-dot"></i>예정</span><span><i class="cal-chk">✓</i>완료</span><span><i class="cal-dot miss"></i>놓침</span><span><i class="cal-dot rest"></i>휴식</span></div>`;
 }
 function renderPlan(){
   const td=parse(todayStr());
@@ -2527,6 +2594,8 @@ function renderPlan(){
     <div class="ym"><button class="ymbtn" onclick="planShift(-1)" aria-label="이전 달">‹</button><button class="ymlabel" onclick="openYM()">${planYear}년 ${planMonth+1}월</button><button class="ymbtn" onclick="planShift(1)" aria-label="다음 달">›</button></div>
     <div class="modeseg"><button class="${planMode==='list'?'on':''}" onclick="planSetMode('list')">리스트</button><button class="${planMode==='cal'?'on':''}" onclick="planSetMode('cal')">달력</button></div>
   </div>`;
+  const ms=monthStatsFor(planYear,planMonth); const mpct=ms.plan?Math.round(ms.done/ms.plan*100):0;
+  html+=`<div class="mon-sum"><span class="ms-t"><b>${ms.done}</b>/${ms.plan}일 완료</span><div class="mon-bar"><div class="mon-bar-fill" style="width:${mpct}%"></div></div></div>`; /* 월 요약(S2) */
   html+=(planMode==='list')?planListHTML():planCalHTML();
   html+=`<p class="info" style="margin-top:14px;padding:0 4px">오늘 이전은 지난 날이라 고정돼요. 앞으로의 날짜에 <b>쉬는 날</b>을 표시하면<br>이후 일정이 ${programLen()}일 순환에 맞춰 자동으로 다시 배정됩니다.</p>`;
   $('view-plan').innerHTML=html;
@@ -2685,22 +2754,36 @@ const Drawer=(()=>{
 /* ----- SETTINGS view ----- */
 function toggleWorkoutDay(i){ if(!state.workoutDays) state.workoutDays=[...DEFAULT_WORKOUT_DAYS]; const j=state.workoutDays.indexOf(i); if(j>=0){ if(state.workoutDays.length<=1){ toast('최소 1개 요일은 운동해야 해요'); return; } state.workoutDays.splice(j,1); } else state.workoutDays.push(i); touch(); renderSetup(); }
 function setSessionMin(m){ state.sessionMinutes=m; touch(); renderSetup(); }
+/* 설정 최상단 프로필 헤더(E2) — 탭하면 회원 정보 수정. '회원 정보' 버튼 섹션을 대체 */
+function setupProfileHeader(){
+  const p=state.profile||{};
+  const nm=esc(p.nickname||p.name||'게스트');
+  const g=(p.goals&&p.goals.length)?p.goals.slice(0,2).map((x,i)=>(i+1)+'순위 '+x).join(', '):'목표를 설정해 주세요';
+  return `<button class="prof-head" onclick="Onboard.startEdit()">
+    <span class="ph-av">${esc((p.nickname||p.name||'게')[0])}</span>
+    <span class="ph-info"><span class="ph-name">${nm}</span><span class="ph-sub">${esc(g)}</span></span>
+    <span class="ph-arrow">›</span></button>
+  <p class="info" style="margin:8px 4px 0">탭하면 이름, 신체정보, 경험, 목표, 부상, 지병을 다시 입력할 수 있어요.</p>`;
+}
 function scheduleSettingsHTML(){
   const wd=state.workoutDays||DEFAULT_WORKOUT_DAYS; const n=wd.length;
   const dayList=[[1,'월'],[2,'화'],[3,'수'],[4,'목'],[5,'금'],[6,'토'],[0,'일']];
   const mins=[30,45,60,75,90,120]; const cur=state.sessionMinutes||60;
-  return `<div class="sec-label">회원 정보</div>
-    <button class="btn ghost" onclick="Onboard.startEdit()">회원 정보/목표 수정하기</button>
-    <p class="info" style="margin:8px 4px 0">이름, 신체정보, 경험, 목표, 부상, 지병을 다시 입력할 수 있어요.</p>
-    <div class="sec-label">운동 요일</div>
-    <div class="obchips">${dayList.map(([i,d])=>`<button class="chip ${wd.includes(i)?'on':''}" onclick="toggleWorkoutDay(${i})">${d}</button>`).join('')}</div>
-    <p class="info" style="margin:8px 4px 0">${n>0?`${n}일 운동 후 ${7-n}일 휴식 - 요일을 바꾸면 일정이 자동으로 재구성돼요.`:'운동할 요일을 선택하세요.'}</p>
-    <div class="sec-label">하루 운동 시간</div>
-    <div class="obchips">${mins.map(m=>`<button class="chip ${cur===m?'on':''}" onclick="setSessionMin(${m})">${m}분</button>`).join('')}</div>
-    <p class="info" style="margin:8px 4px 0">이 시간에 맞춰 워밍업, 운동, 유산소, 쿨다운 시간이 자동 배분돼요.</p>`;
+  /* 운동 요일+시간 = 한 그룹 카드(E1 그룹 톤) — 내부 행은 헤어라인으로 구분 */
+  return `<div class="sec-label">운동 설정</div>
+    <div class="card set-group">
+      <div class="sg-h">운동 요일</div>
+      <div class="obchips">${dayList.map(([i,d])=>`<button class="chip ${wd.includes(i)?'on':''}" onclick="toggleWorkoutDay(${i})">${d}</button>`).join('')}</div>
+      <p class="info" style="margin:8px 0 0">${n>0?`${n}일 운동 후 ${7-n}일 휴식 - 요일을 바꾸면 일정이 자동으로 재구성돼요.`:'운동할 요일을 선택하세요.'}</p>
+      <div class="sg-div"></div>
+      <div class="sg-h">하루 운동 시간</div>
+      <div class="obchips">${mins.map(m=>`<button class="chip ${cur===m?'on':''}" onclick="setSessionMin(${m})">${m}분</button>`).join('')}</div>
+      <p class="info" style="margin:8px 0 0">이 시간에 맞춰 워밍업, 운동, 유산소, 쿨다운 시간이 자동 배분돼요.</p>
+    </div>`;
 }
 function renderSetup(){
-  let html=scheduleSettingsHTML();
+  let html=setupProfileHeader();
+  html+=scheduleSettingsHTML();
   html+=equipSectionHTML();
   html+=`<div class="sec-label">플랜 정보</div>
   <div class="card pad info">
@@ -3242,7 +3325,8 @@ const Onboard=(()=>{
     const dayList=[[1,'월'],[2,'화'],[3,'수'],[4,'목'],[5,'금'],[6,'토'],[0,'일']];
     return `<div class="gate-inner">
       <button class="gate-back" onclick="Onboard.backStep()">← 뒤로</button>
-      <div class="ob-prog">STEP 3 / 3<span class="vdiv"></span>운동 환경/요일</div>
+      <div class="ob-seg"><i class="on"></i><i class="on"></i><i class="on"></i></div>
+      <div class="ob-prog">운동 환경/요일</div>
       <div class="ob-title">운동 요일과 환경을 정해요</div>
       <div class="ob-sub">고른 내용에 맞춰 일정과 플랜이 구성돼요.</div>
       <div class="ob-sec">운동 요일 <span class="opt">(여러 개 선택)</span></div>
@@ -3265,7 +3349,8 @@ const Onboard=(()=>{
   function step1(){
     return `<div class="gate-inner">
       ${editing?`<button class="gate-back" onclick="Onboard.backStep()">← 뒤로</button>`:''}
-      <div class="ob-prog">STEP 1 / 3<span class="vdiv"></span>개인정보</div>
+      <div class="ob-seg"><i class="on"></i><i></i><i></i></div>
+      <div class="ob-prog">개인정보</div>
       <div class="ob-title">기본 정보를 알려주세요</div>
       <div class="ob-sub">계정과 맞춤 플랜에 사용돼요.</div>
       <div class="field" style="margin-top:16px"><label>이름</label><input id="ob-name" type="text" value="${esc(ob.name||'')}" placeholder="이름"></div>
@@ -3289,7 +3374,8 @@ const Onboard=(()=>{
     const r=ob.running===true; const mins=[]; for(let i=2;i<=12;i++)mins.push(i); const secs=[]; for(let i=0;i<60;i++)secs.push(i);
     return `<div class="gate-inner">
       <button class="gate-back" onclick="Onboard.backStep()">← 뒤로</button>
-      <div class="ob-prog">STEP 2 / 3<span class="vdiv"></span>신상정보</div>
+      <div class="ob-seg"><i class="on"></i><i class="on"></i><i></i></div>
+      <div class="ob-prog">신상정보</div>
       <div class="ob-title">운동 정보를 알려주세요</div>
       <div class="ob-sub">이 정보로 플랜의 난이도, 종목, 유산소가 조정돼요.</div>
       <div class="ob-half" style="margin-top:14px">

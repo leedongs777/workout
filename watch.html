@@ -14,8 +14,12 @@
     display:flex; align-items:center; justify-content:center; overflow:hidden;
     font-family:-apple-system,'SF Pro Text','Pretendard',system-ui,sans-serif; -webkit-user-select:none; user-select:none;}
   .hint{position:fixed; top:16px; left:50%; transform:translateX(-50%); color:rgba(255,255,255,.45); font-size:12.5px; white-space:nowrap;}
-  .devseg{position:fixed; top:44px; left:50%; transform:translateX(-50%); z-index:10; display:flex; gap:4px;
-    background:rgba(255,255,255,.1); border:1px solid rgba(255,255,255,.14); border-radius:99px; padding:4px;}
+  .topbar{position:fixed; top:44px; left:50%; transform:translateX(-50%); z-index:10; display:flex; gap:10px; align-items:center;}
+  .devseg{display:flex; gap:4px; background:rgba(255,255,255,.1); border:1px solid rgba(255,255,255,.14); border-radius:99px; padding:4px;}
+  .devnav{display:flex; gap:2px; align-items:center; background:rgba(255,255,255,.1); border:1px solid rgba(255,255,255,.14); border-radius:99px; padding:4px;}
+  .devnav button{border:0; background:transparent; color:rgba(255,255,255,.85); font-size:17px; font-weight:800; width:30px; height:29px; border-radius:99px; cursor:pointer; font-family:inherit; line-height:1;}
+  .devnav button:active{background:rgba(255,255,255,.18);}
+  .devnav span{font-size:11.5px; color:rgba(255,255,255,.6); font-weight:700; min-width:52px; text-align:center;}
   .devseg button{border:0; background:transparent; color:rgba(255,255,255,.65); font-size:12.5px; font-weight:700;
     padding:6px 13px; border-radius:99px; cursor:pointer; font-family:inherit;}
   .devseg button.on{background:#fff; color:#17181c;}
@@ -50,8 +54,11 @@
   body.gx .scr{width:228px; height:228px; border-radius:50%;}
   body.gx .app{padding:30px 34px 26px;}
   body.gx .wbtn{width:72%;}
-  body.gx .p2-time{font-size:38px;}
-  body.gx .p3-bpm{font-size:42px;}
+  body.gx .p2-time{font-size:42px;}
+  body.gx .p3-bpm{font-size:46px;}
+  body.gx .p1-name{font-size:21px;}
+  body.gx .p1-w .v{font-size:31px;}
+  body.gx #scr-home .ttl{font-size:23px;}
   body.gx #scr-done{padding-top:28px;}
   body.gx .p1-name{margin-top:10px;}
   body.gx .vdots{right:14px;}
@@ -69,11 +76,11 @@
   .wbtn:active{transform:scale(.97);}
 
   /* 홈 — 전부 가운데, 넓적한 시작 버튼(둥근 사각형) */
-  #scr-home .date{font-size:11px; color:#8fa89b; font-weight:700; margin-top:4px;}
-  #scr-home .ttl{font-size:23px; font-weight:850; letter-spacing:-.02em; line-height:1.15; margin-top:4px;}
-  #scr-home .sub{font-size:12px; color:#a7b1aa; margin-top:5px;}
-  #scr-home .strk{font-size:11.5px; color:#F0B95C; font-weight:800; margin-top:5px;}
-  #scr-home .wbtn{font-size:15.5px; padding:13px 0;}
+  #scr-home .date{font-size:12.5px; color:#8fa89b; font-weight:700;}
+  #scr-home .ttl{font-size:27px; font-weight:850; letter-spacing:-.02em; line-height:1.15; margin-top:6px;}
+  #scr-home .sub{font-size:13.5px; color:#a7b1aa; margin-top:7px;}
+  #scr-home .strk{font-size:12.5px; color:#F0B95C; font-weight:800; margin-top:7px;}
+  #scr-home .wbtn{font-size:16px; padding:13px 0;}
 
   /* 3·2·1 */
   #scr-cd{align-items:center; justify-content:center;}
@@ -87,28 +94,28 @@
   .vdots i{width:5px; height:5px; border-radius:50%; background:#2a2c2e;}
   .vdots i.on{background:#9BE8B0;}
   /* rp1: 이름(한 줄 우선) → 운동 N/M → 무게 → 세트 칩 — 세 블록 간격 동일(12px) */
-  .p1-name{font-size:21px; font-weight:850; letter-spacing:-.02em; line-height:1.2; margin-top:6px; white-space:nowrap; overflow:hidden;}
-  .p1-name.two{font-size:15.5px; white-space:normal; word-break:keep-all;}
-  .p1-k{font-size:11px; font-weight:800; color:#8fa89b; letter-spacing:.05em;}
+  .p1-name{font-size:24px; font-weight:850; letter-spacing:-.02em; line-height:1.2; white-space:nowrap; overflow:hidden;}
+  .p1-name.two{font-size:17px; white-space:normal; word-break:keep-all;}
+  .p1-k{font-size:12px; font-weight:800; color:#8fa89b; letter-spacing:.05em; margin-top:10px;}
   .p1-w{display:flex; align-items:center; justify-content:center; gap:12px; margin-top:12px;}
-  .p1-w button{width:46px; height:46px; border-radius:50%; border:none; background:#1c1d1f; color:#fff; font-size:24px; font-weight:800; cursor:pointer; font-family:inherit; flex:none;}
+  .p1-w button{width:50px; height:50px; border-radius:50%; border:none; background:#1c1d1f; color:#fff; font-size:26px; font-weight:800; cursor:pointer; font-family:inherit; flex:none;}
   .p1-w button:active{transform:scale(.92); background:#2a2c2e;}
-  .p1-w .v{font-size:32px; font-weight:850; min-width:82px; text-align:center; font-variant-numeric:tabular-nums;}
-  .p1-w .v small{font-size:13px; color:#8fa89b; font-weight:800;}
+  .p1-w .v{font-size:36px; font-weight:850; min-width:88px; text-align:center; font-variant-numeric:tabular-nums;}
+  .p1-w .v small{font-size:14px; color:#8fa89b; font-weight:800;}
   .p1-pills{display:flex; gap:5px; justify-content:center; margin-top:12px;}
-  .p1-pills .pill{border-radius:9px; padding:5px 8px; font-size:10.5px; font-weight:800; background:#17181a; color:#5f6a63;}
+  .p1-pills .pill{border-radius:10px; padding:6px 9px; font-size:11.5px; font-weight:800; background:#17181a; color:#5f6a63;}
   .p1-pills .pill.done{background:#9BE8B0; color:#03170c;}
   .p1-pills .pill.cur{background:#12291d; color:#9BE8B0; box-shadow:inset 0 0 0 1.5px #2E5E56;}
   .p1-tap{font-size:10.5px; color:#6f7a72; margin-top:4px;}
   /* rp2 경과 */
-  .p2-time{font-size:46px; font-weight:900; font-variant-numeric:tabular-nums; letter-spacing:-.02em; margin-top:16px;}
+  .p2-time{font-size:52px; font-weight:900; font-variant-numeric:tabular-nums; letter-spacing:-.02em;}
   .p2-bar{display:flex; gap:3px; margin:14px 8px 6px;}
   .p2-bar i{flex:1; height:6px; border-radius:99px; background:#26282a;}
   .p2-bar i.on{background:#9BE8B0;}
   .p2-sub{font-size:12px; color:#a7b1aa;}
   /* rp3 심박 */
-  .p3-bpm{font-size:50px; font-weight:900; color:#ff5f6d; font-variant-numeric:tabular-nums; margin-top:12px; line-height:1;}
-  .p3-u{font-size:12px; color:#a7b1aa; font-weight:800; margin-top:2px;}
+  .p3-bpm{font-size:56px; font-weight:900; color:#ff5f6d; font-variant-numeric:tabular-nums; line-height:1;}
+  .p3-u{font-size:13px; color:#a7b1aa; font-weight:800; margin-top:4px;}
   .zone{display:flex; gap:3px; margin:12px 10px 4px;}
   .zone i{flex:1; height:7px; border-radius:99px; background:#26282a;}
   .zone i.z2{background:#2E5E56;}
@@ -126,8 +133,8 @@
   .rest-go{font-size:10.5px; color:#8fa89b; margin-top:10px; font-weight:700;}
 
   /* 유산소 */
-  #scr-cardio .p2-time{margin-top:6px; font-size:38px;}
-  #scr-cardio .p3-bpm{font-size:32px; margin-top:4px;}
+  #scr-cardio .p2-time{font-size:44px;}
+  #scr-cardio .p3-bpm{font-size:36px; margin-top:8px;}
   .hold{position:relative; border:none; border-radius:18px; padding:11px 0; width:74%; margin-inline:auto; display:block; font-family:inherit; font-size:13px; font-weight:800; cursor:pointer; background:#1c1d1f; color:#cfd6d0; overflow:hidden;}
   .hold .fill{position:absolute; inset:0; width:0; background:#2E5E56; transition:width .1s linear;}
   .hold span{position:relative; z-index:1;}
@@ -139,15 +146,18 @@
   .dc-ring{stroke-dasharray:176; stroke-dashoffset:176; animation:draw .7s ease forwards;}
   .dc-check{stroke-dasharray:40; stroke-dashoffset:40; animation:draw .45s ease .5s forwards;}
   @keyframes draw{to{stroke-dashoffset:0;}}
-  .done-ttl{font-size:17px; font-weight:850;}
-  .sum{margin-top:6px;}
-  .sum .row{display:flex; justify-content:space-between; font-size:12px; font-weight:700; padding:3px 12px; color:#cfd6d0;}
+  .done-ttl{font-size:18.5px; font-weight:850;}
+  .sum{margin-top:7px;}
+  .sum .row{display:flex; justify-content:space-between; font-size:13px; font-weight:700; padding:3px 14px; color:#cfd6d0;}
   .sum .row b{color:#fff; font-variant-numeric:tabular-nums;}
   #scr-done .wbtn{padding:9px 0; font-size:12.5px; width:70%; background:#1c1d1f; color:#cfd6d0;}
 </style>
 </head>
 <body>
-<div class="devseg"><button id="seg-aw" class="on" onclick="setDev('aw')">Apple Watch</button><button id="seg-gx" onclick="setDev('gx')">Galaxy Watch</button></div>
+<div class="topbar">
+  <div class="devseg"><button id="seg-aw" class="on" onclick="setDev('aw')">Apple Watch</button><button id="seg-gx" onclick="setDev('gx')">Galaxy Watch</button></div>
+  <div class="devnav"><button onclick="devGo(-1)" aria-label="이전 화면">‹</button><span id="devlbl">홈</span><button onclick="devGo(1)" aria-label="다음 화면">›</button></div>
+</div>
 <div class="hint">MATE 워치앱 프로토타입 — 좌우로 쓸면 운동 이동, 위아래로 쓸면 경과와 심박이에요. 기록에는 저장되지 않아요</div>
 <div class="stage" id="stage">
   <div class="watch">
@@ -159,6 +169,7 @@
 
         <!-- 홈 -->
         <div class="app" id="scr-home">
+          <div class="grow"></div>
           <div class="date" id="home-date"></div>
           <div class="ttl" id="home-title">오늘의 운동</div>
           <div class="sub" id="home-sub">불러오는 중이에요</div>
@@ -174,8 +185,8 @@
         <div class="app hidden" id="scr-run" style="padding:0">
           <div class="vdots" id="vdots"><i class="on"></i><i></i><i></i></div>
           <div class="rpage" id="rp1">
-            <div class="p1-name" id="p1-name">운동명</div>
             <div class="grow"></div>
+            <div class="p1-name" id="p1-name">운동명</div>
             <div class="p1-k" id="p1-k">운동 1/6</div>
             <div class="p1-w">
               <button data-w="-1">−</button>
@@ -188,6 +199,7 @@
           </div>
           <div class="rpage hidden" id="rp2">
             <div class="k" style="margin-top:4px">경과</div>
+            <div class="grow"></div>
             <div class="p2-time" id="p2-time">00:00</div>
             <div class="p2-bar" id="p2-bar"></div>
             <div class="p2-sub" id="p2-sub">1/8단계</div>
@@ -196,6 +208,7 @@
           </div>
           <div class="rpage hidden" id="rp3">
             <div class="k" style="margin-top:4px">심박</div>
+            <div class="grow"></div>
             <div class="p3-bpm" id="p3-bpm">128</div>
             <div class="p3-u">BPM</div>
             <div class="zone" id="p3-zone"><i></i><i class="z2"></i><i></i><i></i><i></i></div>
@@ -224,6 +237,7 @@
         <!-- 유산소 -->
         <div class="app hidden" id="scr-cardio">
           <div class="k" id="ca-k" style="margin-top:2px">유산소</div>
+          <div class="grow"></div>
           <div class="p2-time" id="ca-time">00:00</div>
           <div class="p3-bpm" id="ca-bpm">128</div>
           <div class="zone" id="ca-zone"><i></i><i class="z2"></i><i></i><i></i><i></i></div>
@@ -234,6 +248,7 @@
 
         <!-- 축하 -->
         <div class="app hidden" id="scr-done">
+          <div class="grow"></div>
           <div class="doneart">
             <svg width="66" height="66" viewBox="0 0 64 64">
               <circle class="dc-ring" cx="32" cy="32" r="28" stroke="#2E5E56" stroke-width="4" fill="none" transform="rotate(-90 32 32)"/>
@@ -270,6 +285,32 @@
     try{ localStorage.setItem('watchproto:device', d); }catch(e){} }
   try{ if(localStorage.getItem('watchproto:device')==='gx') setDev('gx'); }catch(e){}
 
+  /* 검수용 화면 이동 키: 토글 오른쪽 ‹ › — 모든 화면을 순서대로 훑는다 */
+  const DEVSEQ=[
+    ['홈',      ()=>{ hrStop(); go('home'); }],
+    ['카운트다운',()=>{ hrStop(); go('cd'); const el=$('cd-num'); el.classList.remove('go'); el.textContent='3'; }],
+    ['운동',    ()=>{ devRun(0); }],
+    ['경과',    ()=>{ devRun(1); }],
+    ['심박',    ()=>{ devRun(2); }],
+    ['휴식',    ()=>{ hrStop(); restStart(45); }],
+    ['유산소',  ()=>{ go('cardio'); hrStart(); if(!P.t0){ P.t0=Date.now(); if(!P.elapT) P.elapT=setInterval(tickElapsed,500); } }],
+    ['완료',    ()=>{ finishAll(); }],
+  ];
+  let devIdx=0;
+  function devRun(page){
+    if(!P.items.length) demoItems();
+    let i=P.items.findIndex(it=>it.kind==='ex');
+    if(i<0){ P.items.unshift({kind:'ex', name:'레그프레스', sets:3, w:50, doneSets:0, _dev:true}); i=0; } /* 유산소만 있는 날 미리보기용 */
+    if(!P.t0){ P.t0=Date.now(); if(!P.elapT) P.elapT=setInterval(tickElapsed,500); }
+    hrStart(); openItem(i); setPage(page);
+  }
+  function devGo(dir){
+    clearInterval(P.restT); P.restT=null;
+    devIdx=(devIdx+dir+DEVSEQ.length)%DEVSEQ.length;
+    $('devlbl').textContent=DEVSEQ[devIdx][0];
+    DEVSEQ[devIdx][1]();
+  }
+
   /* ---- 상태 (실제 앱 데이터는 읽기 전용) ---- */
   const P={items:[], idx:0, set:0, w:20, page:0, restT:null, restLeft:0, restTotal:45,
            t0:null, elapT:null, hrT:null, setsDone:0, title:'오늘의 운동'};
@@ -297,7 +338,7 @@
       P.items.push({kind:'hr', name:data.cardio});
       P.title=(data.title||'오늘의 운동').split('·')[0].trim();
       $('home-title').textContent=P.title;
-      $('home-sub').textContent=data.items.length+'개 운동, 약 '+data.mins+'분';
+      $('home-sub').textContent=(data.items.length>0? data.items.length+'개 운동, 약 '+data.mins+'분' : '유산소 세션, 약 '+data.mins+'분');
     }catch(err){ demoItems(); }
   }
   function demoItems(){

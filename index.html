@@ -99,7 +99,11 @@
   .pill.rest-fixed{background:transparent; color:var(--sand-ink); border:1px solid var(--sand);}
 
   /* section label */
-  .sec-label{font-size:11px; letter-spacing:.02em; text-transform:uppercase; color:var(--faint); font-weight:700; margin:24px 4px 9px;} /* ⚠️ 한글 라벨에 넓은 자간 금지 — 벌어져 보임(영문 전용 관습). 운영자 제보로 .15em→.02em */
+  /* 섹션 헤더 = 볼드 타이틀(토스식) — 예전의 작은 회색 캡션은 '구분선'처럼 읽혀 폐기(2026-07 운영자 확정). 한글 라벨에 넓은 자간 금지 */
+  .sec-label{font-size:16px; letter-spacing:-.01em; color:var(--ink); font-weight:800; margin:26px 4px 10px;}
+  .sec-head{display:flex; align-items:baseline; justify-content:space-between; margin:26px 4px 10px;}
+  .sec-head .sec-label{margin:0;}
+  .sec-more{font-size:12.5px; font-weight:700; color:var(--muted); background:none; border:none; font-family:inherit; cursor:pointer; padding:2px 2px;}
 
   /* exercise rows */
   .ex{padding:14px 18px; border-top:1px solid var(--line-2); display:flex; gap:13px;}
@@ -2346,14 +2350,14 @@ function renderHome(){
       <div class="dash-cell tap" onclick="goTab('schedule')"><span class="dc-vis">${monthMiniDots()}</span><span class="dc-tx"><span class="dc-l">이번 달 완료</span><div class="dc-n">${monthDone()}<span class="u">/${monthTotal()}일</span></div><div class="dc-cap">${mcap}</div></span></div>
     </div></div>`;
   }
-  html+=`<div class="sec-label">다가오는 일정</div><div class="card sched-card">`;
+  html+=`<div class="sec-head"><div class="sec-label">다가오는 일정</div><button class="sec-more" onclick="goTab('schedule')">전체 보기 ›</button></div><div class="card sched-card">`;
   const end=fmt(addDays(parse(t),4)); const map=buildSchedule(t,end); const keys=Object.keys(map).sort();
   keys.forEach(k=>{ const e=map[k]; const d=parse(k); const isToday=k===t; const done=state.doneDays.includes(k);
     const label=e.rest?'휴식':SESSIONS[e.session].title;
     const mmdd=`${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')}`;
     html+=`<div class="home-day ${isToday?'today':''}"><span class="hd-date">${mmdd} <span class="wd">${WD[d.getDay()]}</span></span><span class="hd-sep"></span><span class="hd-label ${e.rest?'rest':''}">${e.rest?label:sessTitle(label)}</span>${done?'<span class="hd-done">✓ 완료</span>':(isToday?'<span class="hd-badge">오늘</span>':'')}</div>`;
   });
-  html+=`</div><button class="btn ghost" style="margin-top:12px" onclick="goTab('schedule')">전체 일정 보기 →</button>`;
+  html+=`</div>`; /* '전체 일정 보기' 큰 버튼 → 섹션 헤더 우측 '전체 보기 ›'로 흡수(2026-07) */
   const pb=profileBanner(); if(pb) html+=`<div style="height:14px"></div>`+pb;
   $('view-home').innerHTML=html;
   $('hd-title').textContent=''; $('hd-cyc').innerHTML=''; /* 홈은 인사말이 헤더(H2) — 앱바 타이틀 비움 */

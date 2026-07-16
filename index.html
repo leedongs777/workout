@@ -609,8 +609,9 @@
   .mon-sum{display:flex; align-items:center; gap:12px; margin:2px 2px 12px;}
   .ms-t{flex:none; font-size:12.5px; font-weight:600; color:var(--muted);}
   .ms-t b{font-size:14px; font-weight:800; color:var(--accent-ink);}
-  .mon-bar{flex:1; height:6px; border-radius:99px; background:var(--accent-soft); overflow:hidden;}
-  .mon-bar-fill{height:100%; border-radius:99px; background:var(--accent); transition:width .3s;}
+  .mon-bar{flex:1; display:flex; gap:2px;} /* 세그먼트 바 — 칸 수 = 그 달 운동일 수 */
+  .mon-bar i{flex:1; height:6px; border-radius:3px; background:var(--accent-soft);}
+  .mon-bar i.on{background:var(--accent);}
   .cal-legend{display:flex; gap:16px; justify-content:center; margin-top:12px; font-size:12px; color:var(--muted);}
   .cal-legend span{display:inline-flex; align-items:center; gap:5px;}
   .cal-legend i{font-style:normal;}
@@ -2673,8 +2674,10 @@ function renderPlan(){
     <div class="ym"><button class="ymbtn" onclick="planShift(-1)" aria-label="이전 달">‹</button><button class="ymlabel" onclick="openYM()">${planYear}년 ${planMonth+1}월</button><button class="ymbtn" onclick="planShift(1)" aria-label="다음 달">›</button></div>
     <div class="modeseg ${planMode==='cal'?'cal':''} ${_planSlide?('anim-'+_planSlide):''}"><span class="seg-thumb"></span><button class="${planMode==='list'?'on':''}" onclick="planSetMode('list')">리스트</button><button class="${planMode==='cal'?'on':''}" onclick="planSetMode('cal')">달력</button></div>
   </div>`;
-  const ms=monthStatsFor(planYear,planMonth); const mpct=ms.plan?Math.round(ms.done/ms.plan*100):0;
-  html+=`<div class="mon-sum"><span class="ms-t"><b>${ms.done}</b>/${ms.plan}일 완료</span><div class="mon-bar"><div class="mon-bar-fill" style="width:${mpct}%"></div></div></div>`; /* 월 요약(S2) */
+  const ms=monthStatsFor(planYear,planMonth);
+  /* 월 요약(S2) — 그 달 운동일 수만큼 칸이 나뉜 세그먼트 바(완료 1일 = 1칸). 운동 탭 진행 레일과 같은 문법 */
+  const segs=ms.plan?Array.from({length:ms.plan},(_,i)=>`<i class="${i<ms.done?'on':''}"></i>`).join(''):'<i></i>';
+  html+=`<div class="mon-sum"><span class="ms-t"><b>${ms.done}</b>/${ms.plan}일 완료</span><div class="mon-bar">${segs}</div></div>`;
   html+=`<div class="plan-body ${_planSlide?('anim-'+_planSlide):''}">${(planMode==='list')?planListHTML():planCalHTML()}</div>`;
   _planSlide=null; /* 슬라이드는 모드 전환 직후 1회만 — 월 이동 등 일반 재렌더엔 없음 */
   html+=`<p class="info" style="margin-top:14px;padding:0 4px">오늘 이전은 지난 날이라 고정돼요. 앞으로의 날짜에 <b>쉬는 날</b>을 표시하면<br>이후 일정이 ${programLen()}일 순환에 맞춰 자동으로 다시 배정됩니다.</p>`;

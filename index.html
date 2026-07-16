@@ -526,8 +526,9 @@
   .dc-cap{font-size:10px; font-weight:600; color:var(--faint); margin-top:4px;}
   .strk-ring{width:54px; height:54px; display:block;}
   /* 이번 달 미니 히트맵(H3) — 7개/줄, 완료=필/운동일=옅음/휴식=거의 투명 */
-  .mini-heat{display:flex; flex-wrap:wrap; gap:2.8px; justify-content:flex-start; width:70px;}
+  .mini-heat{display:flex; flex-wrap:wrap; gap:2.8px; justify-content:flex-start; width:66px;} /* 정확히 7열(일~토) — 달력 격자와 동일 */
   .mini-heat i{width:7px; height:7px; border-radius:2px; background:var(--line-2);}
+  .mini-heat i.e{visibility:hidden;} /* 1일 이전 요일 오프셋 자리 */
   .mini-heat i.on{background:var(--accent);}
   .mini-heat i.r{opacity:.3;}
   .stat-u{font-size:12.5px; font-weight:700; color:var(--muted);}
@@ -2298,10 +2299,13 @@ function streakRingHTML(cur,best){
     <g transform="translate(11.4 10.4) scale(1.3)"><path fill-rule="evenodd" clip-rule="evenodd" d="${FL}" fill="${cur>0?'var(--sand)':'var(--line)'}"/></g>
   </svg>`;
 }
-/* 이번 달 미니 히트맵(H3) — 완료=필, 운동일=옅음, 휴식=투명. 탭하면 일정 탭 */
+/* 이번 달 미니 히트맵(H3) — 완료=필, 운동일=옅음, 휴식=투명. 탭하면 일정 탭.
+   일정 탭 달력과 동일한 격자(일요일 시작, 1일의 요일 오프셋 반영) — 실제 그 달의 달력 모양 그대로, 월 바뀌면 자동 갱신 */
 function monthMiniDots(){
   const t=parse(todayStr()), y=t.getFullYear(), m=t.getMonth(), last=new Date(y,m+1,0).getDate();
+  const offset=new Date(y,m,1).getDay();
   let out='';
+  for(let i=0;i<offset;i++) out+='<i class="e"></i>';
   for(let i=1;i<=last;i++){ const k=fmt(new Date(y,m,i)); const e=sessionFor(k);
     out+=`<i class="${state.doneDays.includes(k)?'on':(e&&!e.rest?'p':'r')}"></i>`; }
   return `<div class="mini-heat">${out}</div>`;

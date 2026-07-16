@@ -238,25 +238,30 @@
 
   function go(name){ ['home','cd','run','rest','cardio','done'].forEach(n=>$('scr-'+n).classList.toggle('hidden', n!==name)); }
 
-  /* 실제 앱에서 오늘 세션 읽기(읽기 전용) — 실패 시 데모 */
+  /* 실제 앱에서 오늘 세션 읽기(읽기 전용) — SESSIONS/state는 const라 contentWindow 속성으로 안 잡혀서
+     iframe 렌음(realm)에서 eval로 평가해 순수 데이터만 받아온다. 실패 시 데모 */
   function loadFromCore(){
+    const d=new Date(); $('home-date').textContent=(d.getMonth()+1)+'월 '+d.getDate()+'일 '+['일','월','화','수','목','금','토'][d.getDay()]+'요일';
     try{
-      const w=$('core').contentWindow;
-      const t=w.todayStr(); const e=w.sessionFor(t);
-      const d=new Date(); $('home-date').textContent=(d.getMonth()+1)+'월 '+d.getDate()+'일 '+['일','월','화','수','목','금','토'][d.getDay()]+'요일';
-      const st=w.streak?w.streak():0; if(st>0) $('home-strk').textContent='🔥 '+st+'일 연속';
-      if(!e||e.rest){ $('home-title').textContent='오늘은 회복하는 날'; $('home-sub').textContent='가벼운 스트레칭 어때요?'; demoItems(); return; }
-      const s=w.SESSIONS[e.session];
-      const kept=w.sessionExercises(s, e.session);
-      P.items=[];
-      kept.forEach(x=>{
-        let wv=null; try{ const ll=w.lastLog(t, x.key); if(ll&&ll.w){ const nums=ll.w.filter(v=>typeof v==='number'&&v>0); if(nums.length) wv=Math.max(...nums); } }catch(err){}
-        P.items.push({kind:'ex', name:x.r.name, sets:(x.sl.sets||3), w:(wv!=null?wv:20), doneSets:0});
-      });
-      P.items.push({kind:'hr', name:s.cardio?s.cardio.label:'유산소'});
-      P.title=(s.title||'오늘의 운동').split('·')[0].trim();
+      const data=$('core').contentWindow.eval(`(function(){
+        const t=todayStr(); const e=sessionFor(t);
+        const base={streak:(typeof streak==='function'?streak():0)};
+        if(!e||e.rest) return Object.assign(base,{rest:true});
+        const s=SESSIONS[e.session];
+        const kept=sessionExercises(s, e.session);
+        return Object.assign(base,{rest:false, title:s.title, mins:(state.sessionMinutes||60),
+          cardio:(s.cardio&&s.cardio.label)||'유산소',
+          items:kept.map(x=>{ let wv=null;
+            try{ const ll=lastLog(t,x.key); if(ll&&ll.w){ const ns=ll.w.filter(v=>typeof v==='number'&&v>0); if(ns.length) wv=Math.max(...ns); } }catch(e2){}
+            return {name:x.r.name, sets:(x.sl.sets||3), w:wv}; })});
+      })()`);
+      if(data.streak>0) $('home-strk').textContent='🔥 '+data.streak+'일 연속';
+      if(data.rest){ $('home-title').textContent='오늘은 회복하는 날'; $('home-sub').textContent='가벼운 스트레칭 어때요?'; demoItems(); return; }
+      P.items=data.items.map(x=>({kind:'ex', name:x.name, sets:x.sets, w:(x.w!=null?x.w:20), doneSets:0}));
+      P.items.push({kind:'hr', name:data.cardio});
+      P.title=(data.title||'오늘의 운동').split('·')[0].trim();
       $('home-title').textContent=P.title;
-      $('home-sub').textContent=kept.length+'개 운동, 약 '+(w.state&&w.state.sessionMinutes||60)+'분';
+      $('home-sub').textContent=data.items.length+'개 운동, 약 '+data.mins+'분';
     }catch(err){ demoItems(); }
   }
   function demoItems(){

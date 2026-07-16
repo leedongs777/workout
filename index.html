@@ -3304,6 +3304,8 @@ function anTotals(){
   const ms=Object.values(state.stepMs||{}).reduce((a,o)=>a+Object.values(o).reduce((x,y)=>x+(+y||0),0),0);
   return {sessions:state.doneDays.length, sets, vol:Math.round(vol), ms};
 }
+/* 누적 이동 거리 추정: 유산소 단계 실측 시간 × 존2 평균 속도 6km/h (기구 혼합 가정, 추정치 표기 필수) */
+function anDistKm(){ let ms=0; Object.values(state.stepMs||{}).forEach(o=>{ if(o.cardio) ms+=(+o.cardio||0); }); return Math.round(ms/3600000*6*10)/10; }
 
 function anHeatHTML(){
   const t=todayStr(); const start=addDays(parse(weekStartStr(t)),-77); /* 11주 전 월요일부터 12주 */
@@ -3393,14 +3395,18 @@ function renderAnal(){
       ${mo>0?`<div class="an-fun">이번 달 누적 <b>${mo.toLocaleString()}kcal</b>${chick>=0.3?` = 치킨 ${chick.toFixed(1)}마리 🍗`:''}</div>`:''}
       <div class="an-note">체중과 운동 시간 기반 MET 추정치예요. 워치 연동 시 실측으로 바뀌어요.</div>
     </div>`;
-    /* 마일스톤 */
+    /* 마일스톤 — 재미 환산: 무게=코끼리(6톤), 거리=풀코스 마라톤(42.195km) */
     const tot=anTotals();
     const volTxt= tot.vol>=1000? `${(tot.vol/1000).toFixed(1)}<small>톤</small>` : `${tot.vol.toLocaleString()}<small>kg</small>`;
-    const eleph=tot.vol/6000;
+    const eleph=(tot.vol/6000).toFixed(1);
+    const km=anDistKm(), mara=(km/42.195).toFixed(1);
     const hrs=Math.floor(tot.ms/3600000), mins=Math.round(tot.ms%3600000/60000);
     const timeTxt= hrs>0? `${hrs}<small>시간 ${mins}분</small>` : `${mins}<small>분</small>`;
     html+=`<div class="sec-label">마일스톤</div><div class="an-row2" style="margin-top:0">
-      <div class="card an-card an-kpi"><div class="v">${volTxt}</div><div class="c">누적 들어올린 무게${eleph>=0.5?`<br>아프리카 코끼리 ${eleph.toFixed(1)}마리 🐘`:''}</div></div>
+      <div class="card an-card an-kpi"><div class="v">${volTxt}</div><div class="c">누적 들어올린 무게<br>🐘 코끼리 × ${eleph}마리</div></div>
+      <div class="card an-card an-kpi"><div class="v">${km.toLocaleString()}<small>km</small></div><div class="c">누적 이동 거리 (추정)<br>🏃 풀코스 마라톤 × ${mara}회</div></div>
+    </div>
+    <div class="an-row2">
       <div class="card an-card an-kpi"><div class="v">${timeTxt}</div><div class="c">누적 운동 시간<br>총 ${tot.sessions}세션, ${tot.sets}세트</div></div>
     </div>`;
   }

@@ -346,9 +346,16 @@
   .wup-dot{width:8px; height:8px; border-radius:50%; background:var(--line);}
   .wup-dot.done{background:var(--accent);}
   .wup-dot.cur{background:var(--accent); box-shadow:0 0 0 3px var(--accent-soft);}
-  .wup-btns{display:flex; gap:8px; margin-top:18px;}
-  .wup-next{flex:1; height:46px; border:1px solid var(--line); background:var(--surface-2); color:var(--ink); font-family:inherit; font-size:14px; font-weight:700; border-radius:11px; cursor:pointer;}
-  .wup-fin{flex:1; height:46px; border:none; background:var(--accent); color:var(--on-accent); font-family:inherit; font-size:14px; font-weight:800; border-radius:11px; cursor:pointer;}
+  /* 플레이어 컨트롤: [이전][일시정지/재생][다음] 아이콘 + 마침 (미디어 플레이어 문법) */
+  .wup-btns{display:flex; gap:10px; margin-top:18px; align-items:center;}
+  .wup-ic{flex:none; width:46px; height:46px; border:1px solid var(--line); background:var(--surface-2); color:var(--ink); border-radius:50%; cursor:pointer; display:flex; align-items:center; justify-content:center; font-family:inherit; transition:transform .15s;}
+  .wup-ic:active{transform:scale(.94);}
+  .wup-ic svg{width:19px; height:19px;}
+  .wup-ic.main{width:54px; height:54px; border:none; background:var(--accent); color:var(--on-accent);}
+  .wup-ic.main svg{width:24px; height:24px;}
+  .wu-player.paused .wup-clock, .wu-player.paused .wup-bar{opacity:.45;}
+  /* 마침은 고스트 — 액센트 초점은 가운데 일시정지/재생 버튼 하나만 */
+  .wup-fin{flex:1; height:46px; border:1px solid var(--line); background:var(--surface-2); color:var(--ink); font-family:inherit; font-size:14px; font-weight:700; border-radius:11px; cursor:pointer;}
   /* 카운트다운(시작 전 5초 / 다음 동작 3초) */
   .wu-cd{cursor:pointer;}
   .wu-player{scroll-margin-top:8px;} /* 시작 시 상단 정렬 스크롤의 여백 */
@@ -2059,11 +2066,23 @@ function wuStart(phase,dateStr){
   /* 시작하면 플레이어 상단을 화면 위에 딱 맞춤 — 시간·동작이 바로 보이게(운영자 제보: 시작 시 화면이 아래로 밀려남) */
   if(typeof requestAnimationFrame==='function') requestAnimationFrame(()=>{ const el=document.querySelector('.wu-player'); if(el&&el.scrollIntoView) el.scrollIntoView({block:'start'}); });
 }
-function wuAdvance(){ if(!wuP) return; wuP.idx++; if(wuP.idx>=wuP.items.length){ wuFinish(); return; } wuP.cd={total:3,t0:Date.now()}; wuP.t0=Date.now(); renderToday(); }
+function wuAdvance(){ if(!wuP) return; wuP.paused=null; wuP.idx++; if(wuP.idx>=wuP.items.length){ wuFinish(); return; } wuP.cd={total:3,t0:Date.now()}; wuP.t0=Date.now(); renderToday(); }
 function wuNext(){ wuAdvance(); }
-function wuSkipCd(){ if(wuP&&wuP.cd){ wuP.cd=null; wuP.t0=Date.now(); renderToday(); } }
+/* 카드 탭: 일시정지 중이면 재개, 아니면 다음 동작(기존 동작 유지) */
+function wuCardTap(){ if(wuP&&wuP.paused){ wuTogglePause(); } else wuNext(); }
+/* 이전: 앞 동작으로(첫 동작이면 처음부터 다시). 이동은 곧 재생 재개 */
+function wuPrev(){ if(!wuP) return; wuP.paused=null; if(wuP.idx>0) wuP.idx--; wuP.cd={total:3,t0:Date.now()}; wuP.t0=Date.now(); renderToday(); }
+/* 일시정지/재생: 멈춘 시간만큼 모든 기준 시각(t0·cd·beganAt)을 뒤로 밀어 시간 계산에서 제외 */
+function wuTogglePause(){ if(!wuP) return;
+  if(wuP.paused){ const dp=Date.now()-wuP.paused; wuP.t0+=dp; if(wuP.cd) wuP.cd.t0+=dp; wuP.beganAt+=dp; wuP.paused=null; }
+  else wuP.paused=Date.now();
+  renderToday();
+}
+function wuSkipCd(){ if(wuP&&wuP.cd&&!wuP.paused){ wuP.cd=null; wuP.t0=Date.now(); renderToday(); } }
 function wuFinish(){
-  if(!wuP) return; const {phase,dateStr,beganAt}=wuP;
+  if(!wuP) return;
+  if(wuP.paused){ wuP.beganAt+=Date.now()-wuP.paused; wuP.paused=null; } /* 일시정지 중 마침 — 멈춘 시간은 소요 시간에서 제외 */
+  const {phase,dateStr,beganAt}=wuP;
   if(wuTimer){ clearInterval(wuTimer); wuTimer=null; }
   if(!state.stepMs) state.stepMs={}; if(!state.stepMs[dateStr]) state.stepMs[dateStr]={};
   state.stepMs[dateStr][phase]=Date.now()-beganAt;
@@ -2071,6 +2090,7 @@ function wuFinish(){
 }
 function wuTick(){
   if(!wuP){ if(wuTimer){clearInterval(wuTimer);wuTimer=null;} return; }
+  if(wuP.paused) return; /* 일시정지 중엔 시간이 흐르지 않음 */
   if(wuP.cd){
     const rem=wuP.cd.total-(Date.now()-wuP.cd.t0)/1000;
     if(rem<=0){ wuP.cd=null; wuP.t0=Date.now(); renderToday(); return; }
@@ -2153,10 +2173,17 @@ function wuPlayerCard(){
     </div>`;
   }
   const dots=wuP.items.map((_,i)=>`<span class="wup-dot ${i<wuP.idx?'done':''}${i===wuP.idx?' cur':''}"></span>`).join('');
-  const mid = it.mode==='reps'
-    ? `<div class="wup-reps">진행 <span id="wup-rep">0</span> <span class="wup-sub">/ ${it.reps}회, 일정한 속도로</span></div>`
-    : `<div class="wup-reps">${it.cardio?'원하는 기구로 가볍게':'자세를 유지하세요'}</div>`;
-  return `<div class="step active wu-player" onclick="wuNext()">
+  const paused=!!wuP.paused;
+  const mid = paused
+    ? `<div class="wup-reps">일시정지됨</div>`
+    : it.mode==='reps'
+      ? `<div class="wup-reps">진행 <span id="wup-rep">0</span> <span class="wup-sub">/ ${it.reps}회, 일정한 속도로</span></div>`
+      : `<div class="wup-reps">${it.cardio?'원하는 기구로 가볍게':'자세를 유지하세요'}</div>`;
+  const icPlay='<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8.2 5.6v12.8c0 .9 1 1.5 1.8 1l10-6.4a1.2 1.2 0 0 0 0-2l-10-6.4c-.8-.5-1.8.1-1.8 1z"/></svg>';
+  const icPause='<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6.6" y="5" width="3.8" height="14" rx="1.4"/><rect x="13.6" y="5" width="3.8" height="14" rx="1.4"/></svg>';
+  const icPrev='<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 5.5a1.1 1.1 0 0 1 2.2 0v13a1.1 1.1 0 0 1-2.2 0z"/><path d="M18.6 5.9v12.2c0 .9-1 1.4-1.7.9l-8-6.1a1.1 1.1 0 0 1 0-1.8l8-6.1c.7-.5 1.7 0 1.7.9z"/></svg>';
+  const icNext='<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M14.8 5.5a1.1 1.1 0 0 1 2.2 0v13a1.1 1.1 0 0 1-2.2 0z"/><path d="M5.4 5.9v12.2c0 .9 1 1.4 1.7.9l8-6.1a1.1 1.1 0 0 0 0-1.8l-8-6.1c-.7-.5-1.7 0-1.7.9z"/></svg>';
+  return `<div class="step active wu-player${paused?' paused':''}" onclick="wuCardTap()">
     <div class="wup-head">${isWarm?'준비운동 - WARM-UP':'마무리운동 - COOL-DOWN'}<span class="vdiv"></span><b>${wuP.idx+1}/${total}</b></div>
     <div class="wup-name">${it.n}</div>
     ${it.d?`<div class="wup-desc">${it.d.replace(/\|/g,' ')}</div>`:''}
@@ -2164,7 +2191,12 @@ function wuPlayerCard(){
     ${mid}
     <div class="wup-bar"><div id="wup-fill" class="wup-fill"></div></div>
     <div class="wup-dots">${dots}</div>
-    <div class="wup-btns"><button class="wup-next" onclick="event.stopPropagation();wuNext()">다음 →</button><button class="wup-fin" onclick="event.stopPropagation();wuFinish()">${isWarm?'WARM-UP':'COOL-DOWN'} 마침</button></div>
+    <div class="wup-btns">
+      <button class="wup-ic" onclick="event.stopPropagation();wuPrev()" aria-label="이전 동작">${icPrev}</button>
+      <button class="wup-ic main" onclick="event.stopPropagation();wuTogglePause()" aria-label="${paused?'재생':'일시정지'}">${paused?icPlay:icPause}</button>
+      <button class="wup-ic" onclick="event.stopPropagation();wuNext()" aria-label="다음 동작">${icNext}</button>
+      <button class="wup-fin" onclick="event.stopPropagation();wuFinish()">${isWarm?'WARM-UP':'COOL-DOWN'} 마침</button>
+    </div>
   </div>`;
 }
 function wuStepCard(phase,s,dateStr,active,done,mins){

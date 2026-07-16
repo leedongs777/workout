@@ -87,6 +87,7 @@ jobs:
         run: |
           mkdir -p _site
           cp index.html _site/
+          cp preview.html _site/   # 개발용 디바이스 미리보기(아이폰/갤럭시 목업)
           echo "--- _site 내용"
           ls -la _site
 

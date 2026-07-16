@@ -140,7 +140,15 @@
   .day-ttl{font-weight:650; font-size:15px; letter-spacing:-.01em; display:flex; align-items:center; gap:7px;}
   .day-focus{font-size:12px; color:var(--muted); margin-top:2px; letter-spacing:-.01em; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
   .day-focus .vdiv{margin:0 5px;}
-  .plist-card{overflow:hidden;}
+  /* 일정 리스트 = 7행 뷰포트(운영자 요청): 7칸만 온전히 보이고 위/아래 이웃 행은 페이드로 흐릿하게,
+     스와이프는 scroll-snap으로 행 단위 이동(snap-stop:always = 한 번 쓸어올리면 정확히 한 칸).
+     위아래 패딩 30px = 페이드 깊이와 동일 → 첫/마지막 행도 스크롤 끝에서 온전히 보인다. 행 높이 65px(64+구분선 1) 전제 */
+  .plist-card{overflow-x:hidden; overflow-y:auto; height:calc(7*65px + 60px); padding:30px 0; scroll-snap-type:y mandatory; scroll-padding-top:30px; overscroll-behavior:contain; scrollbar-width:none;
+    -webkit-mask-image:linear-gradient(to bottom,transparent 0,#000 30px,#000 calc(100% - 30px),transparent 100%);
+    mask-image:linear-gradient(to bottom,transparent 0,#000 30px,#000 calc(100% - 30px),transparent 100%);}
+  .plist-card::-webkit-scrollbar{display:none;}
+  .plist-card .day{scroll-snap-align:start; scroll-snap-stop:always;}
+  .plist-card .day-expand{scroll-snap-align:start;}
   .day.past, .day.before{background:var(--line-2); border-bottom-color:var(--line);}
   .day.past .day-rail, .day.before .day-rail{border-right-color:var(--line);}
   .day.today{background:var(--accent-soft);}
@@ -2631,7 +2639,7 @@ function planDayRow(k,t){
 }
 function planListHTML(){
   const t=todayStr(); const last=new Date(planYear,planMonth+1,0).getDate();
-  let html=`<div class="card plist-card">`;
+  let html=`<div class="card plist-card" data-m="${planYear}-${planMonth}">`;
   for(let i=1;i<=last;i++){ html+=planDayRow(fmt(new Date(planYear,planMonth,i)),t); }
   html+=`</div>`; return html;
 }
@@ -2659,6 +2667,9 @@ function planCalHTML(){
 function renderPlan(){
   const td=parse(todayStr());
   if(planYear===null){ planYear=td.getFullYear(); planMonth=td.getMonth(); }
+  /* 7행 스크롤러 위치 보존 — 행 펼침·휴식 토글 등 같은 달 재렌더에서 스크롤이 처음으로 튀지 않게(달이 바뀌면 data-m 불일치로 초기화) */
+  const sc0=document.querySelector('.plist-card');
+  const keepScroll=(sc0 && sc0.dataset.m===planYear+'-'+planMonth)? sc0.scrollTop : null;
   /* 월 헤더+토글+요약 바 = plan-head로 묶어 스크롤 고정 */
   let html=`<div class="plan-head"><div class="plan-ctrl">
     <div class="ym"><button class="ymbtn" onclick="planShift(-1)" aria-label="이전 달">‹</button><button class="ymlabel" onclick="openYM()">${planYear}년 ${planMonth+1}월</button><button class="ymbtn" onclick="planShift(1)" aria-label="다음 달">›</button></div>
@@ -2670,12 +2681,18 @@ function renderPlan(){
   html+=`<div class="mon-sum"><div class="mon-bar">${segs}</div><span class="ms-t"><b>${ms.done}</b>/${ms.plan}</span></div></div>`;
   html+=`<div class="plan-body ${_planSlide?('anim-'+_planSlide):''}">${(planMode==='list')?planListHTML():planCalHTML()}</div>`;
   _planSlide=null; /* 슬라이드는 모드 전환 직후 1회만 — 월 이동 등 일반 재렌더엔 없음 */
-  /* 리스트 진입 시 목표 행(오늘/탭한 날)으로 자동 스크롤 — 1일부터 찾아 내려가지 않게 */
-  if(_planScrollTo && planMode==='list'){ const tgt=_planScrollTo; _planScrollTo=null;
-    requestAnimationFrame(()=>{ const el=document.getElementById('day-'+tgt.k); if(el){ const rm=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches; el.scrollIntoView({block:'center', behavior:(tgt.smooth&&!rm)?'smooth':'auto'}); } });
-  }
   html+=`<p class="info" style="margin-top:14px;padding:0 4px">오늘 이전은 지난 날이라 고정돼요. 앞으로의 날짜에 <b>쉬는 날</b>을 표시하면<br>이후 일정이 ${programLen()}일 순환에 맞춰 자동으로 다시 배정됩니다.</p>`;
   $('view-plan').innerHTML=html;
+  /* 스크롤은 내부 7행 스크롤러(.plist-card) 기준: 목표 행(오늘/탭한 날)이 있으면 가운데로, 없으면 이전 위치 복원 */
+  if(planMode==='list'){
+    const sc=document.querySelector('.plist-card');
+    if(_planScrollTo){ const tgt=_planScrollTo; _planScrollTo=null;
+      requestAnimationFrame(()=>{ const el=document.getElementById('day-'+tgt.k);
+        if(el&&sc){ const rm=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+          const top=Math.max(0, el.getBoundingClientRect().top - sc.getBoundingClientRect().top + sc.scrollTop - (sc.clientHeight - el.offsetHeight)/2);
+          sc.scrollTo({top, behavior:(tgt.smooth&&!rm)?'smooth':'auto'}); } });
+    } else if(keepScroll!=null && sc){ sc.scrollTop=keepScroll; }
+  }
   $('hd-title').textContent='일정'; $('hd-cyc').innerHTML='';
 }
 

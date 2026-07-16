@@ -287,7 +287,8 @@
 - 구 파이프라인(참고): PNG → cv2 + potrace → 정사각 viewBox. **이 PC에는 cv2·potrace가 없어 재현 불가.** PIL·numpy만 있음.
 
 ### 4.9 탭/네비게이션
-- 하단 탭 [홈][플랜][일정][설정] (data-tab home/plan/schedule/setup). `switchTab(tab)`: activeTab 설정, `if(tab==='plan')planDate=null`, 뷰 토글(`.hidden{display:none!important}`), hd-title, updateBackBtn, refresh.
+- 하단 탭 [홈][운동][일정][분석][설정] (data-tab home/plan/schedule/anal/setup). `switchTab(tab)`: activeTab 설정, `if(tab==='plan')planDate=null`, 뷰 토글(`.hidden{display:none!important}`), hd-title, updateBackBtn, refresh.
+- **분석 탭(`renderAnal`, 2026-07 MVP)**: 전부 로컬 계산 — 주간 스코어(weekDone/weekPlanned), 규칙 기반 문장 인사이트, 운동 발전 그래프(`anExSeries`→`anChart`: 머신=무게판 스택·바벨/스미스=눕힌 원판 스택·덤벨/케틀벨=크기 성장, `exCat` 기준), 12주 히트맵, 스트릭/준수율, MET 추정 칼로리(`anKcalFor`, "추정" 명시 필수), 마일스톤(볼륨·코끼리/치킨 환산). 기획: 프로젝트 루트 `MATE_분석탭_기획.md`. 나브 분석 아이콘은 임시 인라인 SVG — 코덱스 PNG로 교체 예정. 지표는 워치 연동 시 추정→실측 스왑 가능 구조 유지.
 - **레이아웃**: `.wrap`에 `min-height:100vh` 쓰지 말 것(모바일에서 주소창 영역까지 잡혀 빈 스크롤 발생) → 제거하고 `body{min-height:100dvh}`.
 
 ### 4.10 화면별 핵심

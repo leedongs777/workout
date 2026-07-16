@@ -31,7 +31,7 @@ const doc = { getElementById:id=>{ if(!els[id])els[id]=mkEl(id); return els[id];
   querySelector:()=>mkEl('q'), querySelectorAll:()=>[], createElement:()=>mkEl('c'),
   createTreeWalker:()=>({nextNode:()=>null}), body:mkEl('body'), head:mkEl('head'), addEventListener(){} };
 
-const EXPORTS = 'SESSIONS,state,freshState,sessionFor,sessionExercises,sessionTimes,effVol,goalMods,slotCands,slotActive,isPostureSlot,programFor,weekTotal,weekPlanned,cardioGuide,cardioDetail,safetyBox,renderHome,renderToday,renderPlan,renderSetup,showProfile,Auth,wByGender,esc,renderSetLog,todayStr,DEFAULT_EQUIP,isBW';
+const EXPORTS = 'SESSIONS,state,freshState,sessionFor,sessionExercises,sessionTimes,effVol,goalMods,slotCands,slotActive,isPostureSlot,programFor,weekTotal,weekPlanned,cardioGuide,cardioDetail,safetyBox,renderHome,renderToday,renderPlan,renderSetup,renderAnal,anChartKind,anUnit,anChart,anKcalFor,anWeekKcal,anExSeries,anTotals,showProfile,Auth,wByGender,esc,renderSetLog,todayStr,DEFAULT_EQUIP,isBW';
 js += `\n;globalThis.__T={${EXPORTS}};globalThis.__setPlanDate=d=>{planDate=d;};`;
 
 const ctx = { console, Date, Math, JSON, Object, Array, String, Number, Boolean, RegExp, Set, Map, isNaN, parseInt, parseFloat, Promise, Function, encodeURIComponent,
@@ -105,7 +105,8 @@ section('렌더 스캔 (onclick 문법 + XSS 이스케이프)');
   T.state.equipment = ['dumbbell','bench','band','cable','barbell']; T.state.includeBodyweight=true; T.state.includeFloor=true;
   T.state.workoutDays=[1,3,5,6]; T.state.startDate=T.todayStr(); T.state.authPassed=true; T.state.consent={tos:true};
   T.state.log={}; T.state.steps={}; T.state.slotCustom={}; T.state.cardioMin={};
-  [['renderHome',()=>T.renderHome()],['renderToday',()=>{ctx.__setPlanDate(T.todayStr());T.renderToday();}],['renderPlan',()=>T.renderPlan()],['renderSetup',()=>T.renderSetup()],['showProfile',()=>T.showProfile()],['Auth.show',()=>T.Auth.show()]]
+  T.state.doneDays=[T.todayStr()]; // 분석 탭이 콜드 스타트가 아닌 실데이터 경로도 그리도록
+  [['renderHome',()=>T.renderHome()],['renderToday',()=>{ctx.__setPlanDate(T.todayStr());T.renderToday();}],['renderPlan',()=>T.renderPlan()],['renderAnal',()=>T.renderAnal()],['renderSetup',()=>T.renderSetup()],['showProfile',()=>T.showProfile()],['Auth.show',()=>T.Auth.show()]]
     .forEach(([nm,fn]) => { try { fn(); } catch(e){ fails++; console.error(`  ✗ 렌더 예외 ${nm}: ${e.message}`); } });
   const seen = new Set(); let handlers = 0;
   captured.forEach(({id,html}) => { const re=/\son\w+="([^"]*)"/g; let mm;
@@ -136,6 +137,20 @@ section('유닛');
   T.state.profile={gender:'male'};   ok(T.wByGender({m:5,f:3})===5, 'wByGender 남성=m값');
   ok(T.esc('<b>"&\'')==='&lt;b&gt;&quot;&amp;&#39;', 'esc 이스케이프 정확');
   ok(typeof T.weekPlanned==='function' && typeof T.weekTotal==='function', 'weekTotal/weekPlanned 분리 유지');
+
+  // 분석 탭 유닛
+  ok(T.anChartKind('machine')==='m' && T.anChartKind('barbell')==='b' && T.anChartKind('smith')==='b'
+     && T.anChartKind('dumbbell')==='d' && T.anChartKind('kettlebell')==='k', 'anChartKind 기구→그래프 문법 매핑');
+  ok(T.anUnit(15)===2.5 && T.anUnit(30)===5 && T.anUnit(55)===10 && T.anUnit(120)===20, 'anUnit 아이콘 단위(최대 7개 이하)');
+  T.state.profile={weightKg:70}; T.state.stepMs={'2099-01-05':{warm:600000, ex0:1800000, cardio:900000, cool:300000}}; T.state.doneDays=['2099-01-05'];
+  const kc=T.anKcalFor('2099-01-05'); // 2.8·4.5·6.0·2.5 MET × 70kg × 시간
+  ok(kc>150 && kc<400, `anKcalFor MET 추정 범위(${kc}kcal)`);
+  ok(T.anKcalFor('2099-01-06')===0, 'anKcalFor 미완료일 0');
+  ok(T.anWeekKcal().length===7, 'anWeekKcal 7일');
+  const chart=T.anChart('k',[8,12,16]); // 크기 성장형
+  ok(chart.includes('<svg') && (chart.match(/<circle/g)||[]).length===3, 'anChart 케틀벨 성장형 3개');
+  const chart2=T.anChart('m',[10,20]); // 스택형: 5kg 단위 → 2판+4판=6판
+  ok((chart2.match(/rx="1.4"/g)||[]).length===6, 'anChart 머신 스택 판 수(단위 계산)');
 }
 
 console.log('');

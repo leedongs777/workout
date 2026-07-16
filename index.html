@@ -839,6 +839,47 @@
   .divider{height:1px; background:var(--line-2); margin:18px 0;}
 
   /* bottom nav */
+  /* ---------------- 분석 탭 ---------------- */
+  .an-score{margin:10px 4px 6px;}
+  .an-score .n{font-size:32px; font-weight:800; letter-spacing:-.02em; color:var(--ink);}
+  .an-score .n b{color:var(--accent-ink);}
+  .an-score .s{font-size:13.5px; color:var(--muted); margin-top:3px;}
+  .an-wkbar{display:flex; gap:3px; margin:12px 4px 0;}
+  .an-wkbar i{flex:1; height:6px; border-radius:99px; background:var(--line-2);}
+  .an-wkbar i.on{background:var(--accent);}
+  .an-insight{background:var(--accent-soft); border-radius:16px; padding:14px 16px; margin:14px 0 0; font-size:14px; font-weight:650; color:var(--accent-ink); line-height:1.45;}
+  .an-card{padding:16px;}
+  .an-ex{display:flex; align-items:center; gap:12px; padding:14px 2px; border-bottom:1px solid var(--line-2);}
+  .an-ex:last-child{border-bottom:none;}
+  .an-ex .nm{flex:1; min-width:0;}
+  .an-ex .nm b{font-size:14px; font-weight:700; display:block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .an-ex .nm span{font-size:11.5px; color:var(--muted);}
+  .an-ex svg{flex:none;}
+  .an-delta{flex:none; font-size:12px; font-weight:800; color:var(--accent-ink); background:var(--accent-soft); border-radius:99px; padding:4px 9px;}
+  .an-delta.flat{color:var(--muted); background:var(--surface-2); border:1px solid var(--line-2);}
+  .an-heat{display:grid; grid-template-rows:repeat(7,10px); grid-auto-flow:column; grid-auto-columns:10px; gap:3px; justify-content:center; margin:6px auto 2px;}
+  .an-heat i{border-radius:3px; background:var(--line-2);}
+  .an-heat i.l1{background:color-mix(in srgb, var(--accent) 40%, var(--line-2));}
+  .an-heat i.l3{background:var(--accent);}
+  .an-heat i.f{background:transparent; border:1px solid var(--line-2); box-sizing:border-box;}
+  .an-heat-cap{display:flex; justify-content:space-between; font-size:11px; color:var(--faint); margin:8px 2px 0;}
+  .an-row2{display:flex; gap:10px; margin-top:10px;}
+  .an-row2 .an-card{flex:1;}
+  .an-kpi .v{font-size:22px; font-weight:800; letter-spacing:-.02em; font-variant-numeric:tabular-nums;}
+  .an-kpi .v small{font-size:12px; font-weight:700; color:var(--muted);}
+  .an-kpi .c{font-size:11.5px; color:var(--muted); margin-top:2px; line-height:1.45;}
+  .an-kcal-bars{display:flex; align-items:flex-end; gap:6px; height:64px; margin-top:12px;}
+  .an-kcal-bars .b{flex:1; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; gap:5px; height:100%;}
+  .an-kcal-bars .b i{width:100%; border-radius:6px 6px 3px 3px; background:var(--accent); opacity:.9;}
+  .an-kcal-bars .b.z i{background:var(--line-2); height:4px !important;}
+  .an-kcal-bars .b span{font-size:10px; color:var(--faint);}
+  .an-fun{font-size:13px; color:var(--muted); margin-top:12px; line-height:1.5;}
+  .an-fun b{color:var(--ink);}
+  .an-note{font-size:11px; color:var(--faint); margin-top:8px;}
+  .an-empty{text-align:center; padding:34px 20px;}
+  .an-empty .ae-t{font-size:16px; font-weight:750;}
+  .an-empty .ae-s{font-size:13px; color:var(--muted); margin-top:6px; line-height:1.6;}
+  .nav-btn .nav-ic-svg{width:23px; height:23px; flex:none;}
   nav{position:fixed; left:0; right:0; bottom:0; height:calc(var(--nav-h) + env(safe-area-inset-bottom)); padding-bottom:env(safe-area-inset-bottom); background:color-mix(in srgb, var(--surface) 88%, transparent); backdrop-filter:saturate(1.4) blur(14px); border-top:1px solid var(--line); z-index:40;}
   .nav-inner{max-width:430px; margin:0 auto; height:var(--nav-h); display:flex;}
   .nav-btn{flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; background:none; border:none; color:var(--muted); font-family:inherit; font-size:11px; font-weight:650; cursor:pointer; letter-spacing:.02em;}
@@ -884,6 +925,7 @@
   <main id="view-home"></main>
   <main id="view-today" class="hidden"></main>
   <main id="view-plan" class="hidden"></main>
+  <main id="view-anal" class="hidden"></main>
   <main id="view-setup" class="hidden"></main>
 </div>
 
@@ -900,6 +942,11 @@
     <button class="nav-btn" data-tab="schedule">
       <span class="nav-ic schedule" aria-hidden="true"></span>
       일정
+    </button>
+    <button class="nav-btn" data-tab="anal">
+      <!-- 분석 아이콘은 임시 인라인 SVG — 추후 코덱스 모노라인 PNG로 교체(나브 4종과 동일 파이프라인) -->
+      <svg class="nav-ic-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" aria-hidden="true"><path d="M4.5 19.5v-8M10 19.5v-15M15.5 19.5v-6M21 19.5V9"/></svg>
+      분석
     </button>
     <button class="nav-btn" data-tab="setup">
       <span class="nav-ic setup" aria-hidden="true"></span>
@@ -2899,7 +2946,7 @@ const Drawer=(()=>{
       <div class="drawer-head"><button class="hbtn" style="margin-left:auto" onclick="Drawer.close()" aria-label="닫기"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
       <button class="drawer-profile" onclick="Drawer.profile()"><div class="dp-av">${av}</div><div class="dp-info"><div class="dp-name">${name}</div><div class="dp-sub">${sub}</div></div><span class="dp-arrow">›</span></button>
       <div class="drawer-sec">메뉴</div>
-      ${mi('home','🏠','홈')}${mi('plan','🏋️','운동')}${mi('schedule','📅','일정')}${mi('setup','⚙️','설정')}
+      ${mi('home','🏠','홈')}${mi('plan','🏋️','운동')}${mi('schedule','📅','일정')}${mi('anal','📊','분석')}${mi('setup','⚙️','설정')}
       <div class="drawer-sec">더보기</div>
       <button class="drawer-item" onclick="Drawer.help()"><span class="di-ic">💬</span>도움말/문의</button>
       <button class="drawer-item" onclick="Drawer.about()"><span class="di-ic">ℹ️</span>앱 정보</button>
@@ -3061,7 +3108,7 @@ function renderSetup(){
 }
 
 /* ---------------- Actions ---------------- */
-function refresh(){ if(activeTab==='home')renderHome(); else if(activeTab==='plan')renderToday(); else if(activeTab==='schedule')renderPlan(); else renderSetup(); }
+function refresh(){ if(activeTab==='home')renderHome(); else if(activeTab==='plan')renderToday(); else if(activeTab==='schedule')renderPlan(); else if(activeTab==='anal')renderAnal(); else renderSetup(); }
 
 function toggleOpen(k){ openDays[k]=!openDays[k]; renderPlan(); }
 
@@ -3159,9 +3206,195 @@ async function resetAll(){
   openDays={}; persist(); toast('전체 초기화 완료'); if(typeof Auth!=='undefined') Auth.show(); refresh();
 }
 
+/* ---------------- 분석 탭 (Analytics MVP) ----------------
+   원칙: 전부 로컬 데이터로 계산(서버·라이브러리 없음), 칼로리는 MET 추정치임을 명시,
+   부정 프레임 금지(부족/실패 표현 대신 누적·달성). 기획: MATE_분석탭_기획.md */
+/* 기구 카테고리 → 그래프 문법: 머신=무게판 스택, 바벨/스미스=눕힌 원판 스택, 덤벨/케틀벨=크기 성장(실물 문법) */
+function anChartKind(cat){ return cat==='dumbbell'?'d' : cat==='kettlebell'?'k' : (cat==='barbell'||cat==='smith')?'b' : 'm'; }
+const AN_CAT_LABEL={machine:'머신', barbell:'바벨', smith:'스미스', dumbbell:'덤벨', kettlebell:'케틀벨'};
+/* 아이콘 1개당 무게 단위 — 최대 7개 이하가 되는 가장 작은 단위 */
+function anUnit(maxW){ for(const v of [2.5,5,10,15,20,25,40]){ if(maxW/v<=7) return v; } return 50; }
+
+/* 운동별 무게 시계열: log의 날짜를 그 날짜 세션 슬롯으로 해석해 (세션:슬롯)별 그날 최고 무게를 모은다.
+   운동명·기구는 현재 픽 기준 근사(lastLog와 동일한 한계) */
+function anExSeries(){
+  const map={};
+  Object.keys(state.log||{}).sort().forEach(dt=>{
+    const e=sessionFor(dt); if(!e||e.rest) return;
+    const s=SESSIONS[e.session]; if(!s) return;
+    const rec=state.log[dt];
+    sessionExercises(s, e.session).forEach(x=>{
+      if(typeof x.key!=='number') return; /* 기구 슬롯만(맨몸 'Nb' 키 제외) */
+      const vals=[].concat(rec[x.key]||[], rec[x.key+'L']||[], rec[x.key+'R']||[]).filter(v=>typeof v==='number'&&v>0);
+      if(!vals.length) return;
+      const id=e.session+':'+x.key;
+      if(!map[id]) map[id]={name:x.r.name, cat:exCat(x.r.name,x.r.eq||[]), reps:recReps(x.sl,x.r), pts:[]};
+      map[id].pts.push({d:dt, w:Math.max(...vals)});
+    });
+  });
+  return Object.values(map).sort((a,b)=>(b.pts.length-a.pts.length)||(b.pts[b.pts.length-1].w-a.pts[a.pts.length-1].w));
+}
+
+/* 기구 아이콘 그래프: 열=세션(최근 6), 과거는 옅고 최근이 진하게 */
+function anChart(kind, ws, W, H){
+  W=W||118; H=H||44;
+  const op=(ci,n)=>ci===n-1?1:(0.38+0.5*ci/Math.max(1,n-1));
+  let out='';
+  if(kind==='m'||kind==='b'){
+    const unit=anUnit(Math.max(...ws));
+    const eh=kind==='m'?5.2:4.6, ew=kind==='m'?15:17;
+    const gap=ws.length>1?(W-ws.length*ew)/(ws.length-1):0;
+    ws.forEach((wv,ci)=>{ const x=ci*(ew+gap), o=op(ci,ws.length), n=Math.max(1,Math.round(wv/unit));
+      for(let i=0;i<n;i++){ const y=H-(i+1)*eh;
+        out+= kind==='m'
+          ? `<g opacity="${o}"><rect x="${x}" y="${y}" width="15" height="4.1" rx="1.4" fill="var(--accent)"/><rect x="${x+6}" y="${y+1.4}" width="3" height="1.3" rx=".65" fill="var(--surface)"/></g>`
+          : `<g opacity="${o}"><rect x="${x}" y="${y+1}" width="17" height="3.3" rx="1.65" fill="var(--accent)"/><rect x="${x+6.6}" y="${y}" width="3.8" height="5.3" rx="1.3" fill="var(--accent-ink)"/></g>`; } });
+  } else {
+    /* 덤벨·케틀벨: 무거울수록 커짐(실물처럼 더 큰 것으로 바꿔 듦) — 바닥 정렬 */
+    const mn=Math.min(...ws), mx=Math.max(...ws);
+    const gap=W/ws.length;
+    ws.forEach((wv,ci)=>{ const o=op(ci,ws.length);
+      const h=mx===mn?H*0.62:(12+(wv-mn)/(mx-mn)*(H-14));
+      const cx=gap*ci+gap/2;
+      if(kind==='k'){ const r=h*0.34, cy=H-r, hw=r*0.72;
+        out+=`<g opacity="${o}"><path d="M ${cx-hw} ${cy-r*0.55} a ${hw} ${h*0.30} 0 0 1 ${hw*2} 0" stroke="var(--accent)" stroke-width="${Math.max(1.6,h*0.13)}" fill="none" stroke-linecap="round"/><circle cx="${cx}" cy="${cy}" r="${r}" fill="var(--accent)"/></g>`;
+      } else { const bw2=h*0.30, bh=h*0.92, barw=h*0.55, y=H-bh;
+        out+=`<g opacity="${o}"><rect x="${cx-barw/2-bw2}" y="${y}" width="${bw2}" height="${bh}" rx="${bw2*0.32}" fill="var(--accent)"/><rect x="${cx+barw/2}" y="${y}" width="${bw2}" height="${bh}" rx="${bw2*0.32}" fill="var(--accent)"/><rect x="${cx-barw/2}" y="${H-bh/2-h*0.13}" width="${barw}" height="${h*0.26}" rx="${h*0.13}" fill="var(--accent)"/></g>`; } });
+  }
+  return `<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" aria-hidden="true">${out}</svg>`;
+}
+
+/* MET 추정 칼로리(웨어러블 연동 전 근사) — stepMs(실측 시간) 기반, 없으면 완료일은 세션 계획 분으로 근사 */
+const AN_MET={warm:2.8, cool:2.5, cardio:6.0, ex:4.5};
+function anKcalFor(dt){
+  const bw=(state.profile&&state.profile.weightKg)||70;
+  const ms=state.stepMs&&state.stepMs[dt];
+  let kcal=0;
+  if(ms) Object.keys(ms).forEach(id=>{ const met=AN_MET[id]!=null?AN_MET[id]:AN_MET.ex; kcal+=met*bw*(ms[id]/3600000); });
+  if(kcal<10 && state.doneDays.includes(dt)) kcal=4.6*bw*((state.sessionMinutes||60)/60);
+  return Math.round(kcal);
+}
+function anWeekKcal(){ const ws=weekStartStr(todayStr()); return Array.from({length:7},(_,i)=>anKcalFor(fmt(addDays(parse(ws),i)))); }
+function anMonthKcal(){ const t=parse(todayStr()); let sum=0; for(let i=1;i<=t.getDate();i++) sum+=anKcalFor(fmt(new Date(t.getFullYear(),t.getMonth(),i))); return sum; }
+
+/* 누적 합계: 세션·세트·볼륨(무게×해당 슬롯 권장 횟수 근사)·운동 시간 */
+function anTotals(){
+  let sets=0, vol=0;
+  Object.keys(state.log||{}).forEach(dt=>{
+    const e=sessionFor(dt); if(!e||e.rest) return;
+    const s=SESSIONS[e.session]; if(!s) return;
+    const rec=state.log[dt];
+    sessionExercises(s, e.session).forEach(x=>{
+      const reps=parseInt(recReps(x.sl,x.r))||10;
+      [x.key, x.key+'L', x.key+'R'].forEach(k=>{ (rec[k]||[]).forEach(v=>{
+        if(typeof v==='number'&&v>0){ sets++; vol+=v*reps; }
+        else if(v===true) sets++; }); });
+    });
+  });
+  const ms=Object.values(state.stepMs||{}).reduce((a,o)=>a+Object.values(o).reduce((x,y)=>x+(+y||0),0),0);
+  return {sessions:state.doneDays.length, sets, vol:Math.round(vol), ms};
+}
+
+function anHeatHTML(){
+  const t=todayStr(); const start=addDays(parse(weekStartStr(t)),-77); /* 11주 전 월요일부터 12주 */
+  let cells='';
+  for(let i=0;i<84;i++){ const k=fmt(addDays(start,i));
+    let cls='';
+    if(k>t) cls='f';
+    else if(state.doneDays.includes(k)) cls='l3';
+    else if(state.steps&&state.steps[k]&&Object.values(state.steps[k]).some(Boolean)) cls='l1';
+    cells+=`<i class="${cls}"></i>`;
+  }
+  return `<div class="an-heat">${cells}</div><div class="an-heat-cap"><span>12주 전</span><span>이번 주</span></div>`;
+}
+
+function josaGa(w){ if(!w) return '가'; const c=w.charCodeAt(w.length-1); if(c>=0xAC00&&c<=0xD7A3) return ((c-0xAC00)%28)===0?'가':'이'; return '가'; }
+function anInsight(series){
+  let best=null;
+  series.forEach(o=>{ const p=o.pts.slice(-6);
+    if(p.length>=2){ const dw=p[p.length-1].w-p[0].w; if(dw>0&&(!best||dw>best.dw)) best={name:o.name,dw}; } });
+  if(best) return `🏋️ ${esc(best.name)}${josaGa(best.name)} 최근 <b>+${best.dw%1?best.dw.toFixed(1):best.dw}kg</b> 무거워졌어요`;
+  const cur=streak();
+  if(cur>=2) return `🔥 <b>${cur}일 연속</b> 운동 중이에요, 이 흐름 그대로!`;
+  if(state.doneDays.length>0) return `💪 지금까지 <b>${state.doneDays.length}세션</b> 완주 — 무게를 기록하면 발전 그래프가 생겨요`;
+  return '';
+}
+
+function renderAnal(){
+  const t=todayStr();
+  const hasData=state.doneDays.length>0 || Object.keys(state.log||{}).length>0;
+  let html='';
+  if(!hasData){
+    html=`<div class="an-score"><div class="n">아직 비어 있어요</div><div class="s">첫 세션을 완료하면 나의 발전이 여기에 쌓여요</div></div>
+      <div class="card an-empty" style="margin-top:14px"><div class="ae-t">완료하면 이렇게 보여드려요</div>
+      <div class="ae-s">주간 완료 스코어와 지난주 비교<br>운동별 무게 발전 그래프 (기구 아이콘이 쌓여요)<br>12주 운동 캘린더와 연속 기록<br>소모 칼로리 추정과 누적 마일스톤</div></div>`;
+  } else {
+    /* 주간 스코어 */
+    const planned=weekPlanned(), done=weekDone();
+    const ws=weekStartStr(t);
+    const lastWs=fmt(addDays(parse(ws),-7)), lastWe=fmt(addDays(parse(ws),-1));
+    const lastDone=state.doneDays.filter(k=>k>=lastWs&&k<=lastWe).length;
+    const diff=done-lastDone;
+    const sub= done===0? '이번 주 첫 세션이 제일 중요해요'
+      : diff>0? `지난주보다 ${diff}회 더 했어요` : diff===0? '지난주와 같은 페이스예요' : '이번 주도 차근차근 이어가요';
+    const segs=Array.from({length:Math.max(planned,done,1)},(_,i)=>`<i class="${i<done?'on':''}"></i>`).join('');
+    html+=`<div class="an-score"><div class="n">이번 주 <b>${done}</b>회 완료</div><div class="s">${sub}</div><div class="an-wkbar">${segs}</div></div>`;
+    /* 인사이트 */
+    const series=anExSeries();
+    const ins=anInsight(series);
+    if(ins) html+=`<div class="an-insight">${ins}</div>`;
+    /* 운동 발전 */
+    html+=`<div class="sec-label">운동 발전</div>`;
+    if(series.length){
+      html+=`<div class="card an-card" style="padding:4px 16px">`;
+      series.slice(0,4).forEach(o=>{ const p=o.pts.slice(-6), wsArr=p.map(x=>x.w);
+        const last=wsArr[wsArr.length-1], dw=Math.round((last-wsArr[0])*10)/10;
+        const badge= dw>0? `<span class="an-delta">+${dw}kg</span>` : `<span class="an-delta flat">유지</span>`;
+        html+=`<div class="an-ex"><div class="nm"><b>${esc(o.name)}</b><span>${AN_CAT_LABEL[o.cat]||'머신'} · 최근 ${last}kg × ${esc(String(o.reps))}</span></div>${anChart(anChartKind(o.cat),wsArr)}${badge}</div>`; });
+      html+=`</div>`;
+    } else {
+      html+=`<div class="card an-empty"><div class="ae-s">운동 중 무게를 기록하면<br>기구가 차곡차곡 쌓이는 발전 그래프가 생겨요</div></div>`;
+    }
+    /* 꾸준함 */
+    const cur=streak(), best=bestStreak();
+    const md=parse(t); let pPlan=0,pDone=0;
+    for(let i=1;i<=md.getDate();i++){ const k=fmt(new Date(md.getFullYear(),md.getMonth(),i)); const e=sessionFor(k);
+      if(e&&!e.rest){ pPlan++; if(state.doneDays.includes(k)) pDone++; } }
+    const adhere=pPlan?Math.round(pDone/pPlan*100):null;
+    html+=`<div class="sec-label">꾸준함</div><div class="card an-card">${anHeatHTML()}</div>
+      <div class="an-row2">
+        <div class="card an-card an-kpi"><div class="v">🔥 ${cur}<small>일 연속</small></div><div class="c">최고 기록 ${best}일</div></div>
+        <div class="card an-card an-kpi"><div class="v">${adhere==null?'–':adhere+'<small>%</small>'}</div><div class="c">이번 달 계획 준수율</div></div>
+      </div>`;
+    /* 칼로리 */
+    const wk=anWeekKcal(), wkSum=wk.reduce((a,b)=>a+b,0), mo=anMonthKcal();
+    const mx=Math.max(...wk,1);
+    const bars=wk.map((v,i)=>`<div class="b${v?'':' z'}"><i style="height:${Math.max(4,Math.round(v/mx*46))}px"></i><span>${'월화수목금토일'[i]}</span></div>`).join('');
+    const chick=mo/1600;
+    html+=`<div class="sec-label">칼로리</div><div class="card an-card">
+      <div class="an-kpi"><div class="v">${wkSum.toLocaleString()} <small>kcal</small></div><div class="c">이번 주 소모 (추정)</div></div>
+      <div class="an-kcal-bars">${bars}</div>
+      ${mo>0?`<div class="an-fun">이번 달 누적 <b>${mo.toLocaleString()}kcal</b>${chick>=0.3?` = 치킨 ${chick.toFixed(1)}마리 🍗`:''}</div>`:''}
+      <div class="an-note">체중·운동 시간 기반 MET 추정치예요. 워치 연동 시 실측으로 바뀌어요.</div>
+    </div>`;
+    /* 마일스톤 */
+    const tot=anTotals();
+    const volTxt= tot.vol>=1000? `${(tot.vol/1000).toFixed(1)}<small>톤</small>` : `${tot.vol.toLocaleString()}<small>kg</small>`;
+    const eleph=tot.vol/6000;
+    const hrs=Math.floor(tot.ms/3600000), mins=Math.round(tot.ms%3600000/60000);
+    const timeTxt= hrs>0? `${hrs}<small>시간 ${mins}분</small>` : `${mins}<small>분</small>`;
+    html+=`<div class="sec-label">마일스톤</div><div class="an-row2" style="margin-top:0">
+      <div class="card an-card an-kpi"><div class="v">${volTxt}</div><div class="c">누적 들어올린 무게${eleph>=0.5?`<br>아프리카 코끼리 ${eleph.toFixed(1)}마리 🐘`:''}</div></div>
+      <div class="card an-card an-kpi"><div class="v">${timeTxt}</div><div class="c">누적 운동 시간<br>총 ${tot.sessions}세션 · ${tot.sets}세트</div></div>
+    </div>`;
+  }
+  $('view-anal').innerHTML=html;
+  $('hd-title').textContent='분석'; $('hd-cyc').innerHTML='';
+}
+
 /* ---------------- Nav ---------------- */
-const TAB_VIEW={home:'view-home',plan:'view-today',schedule:'view-plan',setup:'view-setup'};
-const TAB_TITLE={home:'',plan:'오늘의 운동',schedule:'일정',setup:'설정'}; /* 홈은 인사말이 헤더 — 앱바 타이틀 없음(H2) */
+const TAB_VIEW={home:'view-home',plan:'view-today',schedule:'view-plan',anal:'view-anal',setup:'view-setup'};
+const TAB_TITLE={home:'',plan:'오늘의 운동',schedule:'일정',anal:'분석',setup:'설정'}; /* 홈은 인사말이 헤더 — 앱바 타이틀 없음(H2) */
 function switchTab(tab,isBack){
   if(wuTimer){ clearInterval(wuTimer); wuTimer=null; } wuP=null; // 탭 이동 시 웜업 플레이어 중단(백그라운드 진행·stray 완료 기록 방지)
   activeTab=tab;

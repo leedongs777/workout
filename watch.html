@@ -57,12 +57,21 @@
   body.gx .p2-time{font-size:42px;}
   body.gx .p3-bpm{font-size:46px;}
   body.gx .p1-name{font-size:21px;}
-  body.gx .p1-w .v{font-size:31px;}
+  body.gx .p1-w .v{font-size:29px;}
   body.gx #scr-home .ttl{font-size:23px;}
-  body.gx #scr-done{padding-top:28px;}
+  body.gx #scr-done{padding-top:26px; padding-bottom:26px;}
+  body.gx .doneart{width:52px; height:52px; margin-bottom:5px;}
+  body.gx .done-ttl{font-size:16px;}
+  body.gx .sum .row{font-size:12px; padding:2px 24px;}
+  body.gx #scr-done .wbtn{width:60%; padding:8px 0; font-size:12px;}
   body.gx .p1-name{margin-top:10px;}
+  body.gx .rpage{padding:28px 30px 22px;}
+  body.gx .p1-tap{margin-bottom:2px;}
   body.gx .vdots{right:14px;}
-  body.gx .hold{width:62%; margin-bottom:8px;}
+  body.gx .hold{width:58%; margin-bottom:14px; padding:9px 0; font-size:12px;}
+  body.gx #scr-cardio{padding-bottom:30px;}
+  body.gx #scr-cardio .p2-time{font-size:34px;}
+  body.gx #scr-cardio .p3-bpm{font-size:28px; margin-top:4px;}
   body.gx .sum .row{padding:3px 22px;}
 
   /* ---- 공통 UI (NRC: 검정 + 라이트 그린, 전부 가운데 정렬) ---- */
@@ -88,19 +97,19 @@
   #cd-num.go{font-size:42px;}
 
   /* 세션 뷰: 세로 페이지(rp1 할 일 / rp2 경과 / rp3 심박), 우측 세로 점 */
-  .rpage{position:absolute; inset:0; padding:26px 20px 14px; box-sizing:border-box; display:flex; flex-direction:column; text-align:center;}
+  .rpage{position:absolute; inset:0; padding:26px 18px 14px; box-sizing:border-box; display:flex; flex-direction:column; text-align:center;}
   .rpage.hidden{display:none;}
-  .vdots{position:absolute; right:8px; top:50%; transform:translateY(-50%); display:flex; flex-direction:column; gap:5px; z-index:5;}
+  .vdots{position:absolute; right:5px; top:50%; transform:translateY(-50%); display:flex; flex-direction:column; gap:5px; z-index:5;}
   .vdots i{width:5px; height:5px; border-radius:50%; background:#2a2c2e;}
   .vdots i.on{background:#9BE8B0;}
   /* rp1: 이름(한 줄 우선) → 운동 N/M → 무게 → 세트 칩 — 세 블록 간격 동일(12px) */
   .p1-name{font-size:24px; font-weight:850; letter-spacing:-.02em; line-height:1.2; white-space:nowrap; overflow:hidden;}
   .p1-name.two{font-size:17px; white-space:normal; word-break:keep-all;}
   .p1-k{font-size:12px; font-weight:800; color:#8fa89b; letter-spacing:.05em; margin-top:10px;}
-  .p1-w{display:flex; align-items:center; justify-content:center; gap:12px; margin-top:12px;}
-  .p1-w button{width:50px; height:50px; border-radius:50%; border:none; background:#1c1d1f; color:#fff; font-size:26px; font-weight:800; cursor:pointer; font-family:inherit; flex:none;}
+  .p1-w{display:flex; align-items:center; justify-content:center; gap:8px; margin-top:12px;}
+  .p1-w button{width:42px; height:42px; border-radius:50%; border:none; background:#1c1d1f; color:#fff; font-size:22px; font-weight:800; cursor:pointer; font-family:inherit; flex:none;}
   .p1-w button:active{transform:scale(.92); background:#2a2c2e;}
-  .p1-w .v{font-size:36px; font-weight:850; min-width:88px; text-align:center; font-variant-numeric:tabular-nums;}
+  .p1-w .v{font-size:31px; font-weight:850; min-width:66px; text-align:center; font-variant-numeric:tabular-nums;}
   .p1-w .v small{font-size:14px; color:#8fa89b; font-weight:800;}
   .p1-pills{display:flex; gap:5px; justify-content:center; margin-top:12px;}
   .p1-pills .pill{border-radius:10px; padding:6px 9px; font-size:11.5px; font-weight:800; background:#17181a; color:#5f6a63;}
@@ -142,7 +151,7 @@
   /* 축하 — 링+체크 드로우 애니메이션 */
   #scr-done{padding-top:24px; padding-bottom:18px;}
   .doneart{width:66px; height:66px; margin:0 auto 8px;}
-  .doneart svg{display:block; margin:0 auto;}
+  .doneart svg{display:block; margin:0 auto; width:100%; height:100%;}
   .dc-ring{stroke-dasharray:176; stroke-dashoffset:176; animation:draw .7s ease forwards;}
   .dc-check{stroke-dasharray:40; stroke-dashoffset:40; animation:draw .45s ease .5s forwards;}
   @keyframes draw{to{stroke-dashoffset:0;}}

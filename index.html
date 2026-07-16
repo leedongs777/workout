@@ -565,9 +565,21 @@
   .ymbtn:active{background:var(--surface-2);}
   .ymlabel{font-size:16px; font-weight:800; min-width:118px; text-align:center; font-variant-numeric:tabular-nums; background:none; border:none; font-family:inherit; color:var(--ink); cursor:pointer; padding:6px 4px; border-radius:8px;}
   .ymlabel:active{background:var(--surface-2);}
-  .modeseg{display:flex; gap:8px;}
-  .modeseg button{border:1px solid var(--line); background:var(--surface-2); border-radius:10px; font-family:inherit; font-size:13px; font-weight:700; color:var(--muted); cursor:pointer; padding:8px 15px;}
-  .modeseg button.on{background:var(--accent); border-color:var(--accent); color:var(--on-accent);}
+  /* 리스트/달력 토글 = 슬라이딩 세그먼트(썸이 좌우로 미끄러짐, iOS식). 재렌더 방식이라 이동은 방향 키프레임으로 표현 */
+  .modeseg{position:relative; display:flex; background:var(--surface-2); border:1px solid var(--line); border-radius:11px; padding:3px;}
+  .modeseg .seg-thumb{position:absolute; top:3px; bottom:3px; left:3px; width:calc(50% - 3px); border-radius:8px; background:var(--accent);}
+  .modeseg.cal .seg-thumb{left:50%;}
+  .modeseg button{position:relative; z-index:1; flex:1; border:none; background:none; border-radius:8px; font-family:inherit; font-size:13px; font-weight:700; color:var(--muted); cursor:pointer; padding:7px 15px; transition:color .2s;}
+  .modeseg button.on{color:var(--on-accent);}
+  @keyframes thumbR{from{transform:translateX(-100%);} to{transform:none;}}
+  @keyframes thumbL{from{transform:translateX(100%);} to{transform:none;}}
+  .modeseg.anim-r .seg-thumb{animation:thumbR .2s ease;}
+  .modeseg.anim-l .seg-thumb{animation:thumbL .2s ease;}
+  @keyframes planInR{from{opacity:0; transform:translateX(26px);} to{opacity:1; transform:none;}}
+  @keyframes planInL{from{opacity:0; transform:translateX(-26px);} to{opacity:1; transform:none;}}
+  .plan-body.anim-r{animation:planInR .22s ease;}
+  .plan-body.anim-l{animation:planInL .22s ease;}
+  @media (prefers-reduced-motion:reduce){ .modeseg .seg-thumb, .plan-body{animation:none !important;} }
   .ymp-title{font-size:15px; font-weight:800; margin-bottom:14px; display:flex; align-items:center; gap:8px;}
   .ymp-back{border:none; background:var(--surface-2); border-radius:8px; width:28px; height:28px; font-size:16px; cursor:pointer; font-family:inherit; color:var(--ink);}
   .ym-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:8px;}
@@ -2526,7 +2538,8 @@ function renderToday(){
 /* ----- PLAN view ----- */
 let planYear=null, planMonth=null, planMode='list';
 function planShift(d){ planMonth+=d; if(planMonth<0){planMonth=11;planYear--;}else if(planMonth>11){planMonth=0;planYear++;} renderPlan(); }
-function planSetMode(m){ planMode=m; renderPlan(); }
+let _planSlide=null; /* 모드 전환 직후 1회 슬라이드 방향('r'|'l') — 달력은 오른쪽 칸이라 cal 진입=r */
+function planSetMode(m){ if(m!==planMode) _planSlide = (m==='cal'?'r':'l'); planMode=m; renderPlan(); }
 /* year/month picker */
 let pickStep='year', pickYear=null;
 function openYM(){ pickStep='year'; pickYear=planYear; renderYM(); document.getElementById('ympick').classList.remove('hidden'); }
@@ -2559,7 +2572,7 @@ function renderYM(){
   }
   m.innerHTML=`<div class="eqmodal-card" style="max-width:320px"><button class="eqmodal-x" onclick="closeYM()" aria-label="닫기">✕</button>${inner}</div>`;
 }
-function planCalTap(k){ openDays[k]=true; planMode='list'; renderPlan(); }
+function planCalTap(k){ openDays[k]=true; if(planMode!=='list')_planSlide='l'; planMode='list'; renderPlan(); }
 /* plan tab date navigation + picker (year → month → day) */
 let planDate=null, pdStep='year', pdYear=null, pdMonth=null;
 function planDateCtrl(t,isToday){
@@ -2658,11 +2671,12 @@ function renderPlan(){
   if(planYear===null){ planYear=td.getFullYear(); planMonth=td.getMonth(); }
   let html=`<div class="plan-ctrl">
     <div class="ym"><button class="ymbtn" onclick="planShift(-1)" aria-label="이전 달">‹</button><button class="ymlabel" onclick="openYM()">${planYear}년 ${planMonth+1}월</button><button class="ymbtn" onclick="planShift(1)" aria-label="다음 달">›</button></div>
-    <div class="modeseg"><button class="${planMode==='list'?'on':''}" onclick="planSetMode('list')">리스트</button><button class="${planMode==='cal'?'on':''}" onclick="planSetMode('cal')">달력</button></div>
+    <div class="modeseg ${planMode==='cal'?'cal':''} ${_planSlide?('anim-'+_planSlide):''}"><span class="seg-thumb"></span><button class="${planMode==='list'?'on':''}" onclick="planSetMode('list')">리스트</button><button class="${planMode==='cal'?'on':''}" onclick="planSetMode('cal')">달력</button></div>
   </div>`;
   const ms=monthStatsFor(planYear,planMonth); const mpct=ms.plan?Math.round(ms.done/ms.plan*100):0;
   html+=`<div class="mon-sum"><span class="ms-t"><b>${ms.done}</b>/${ms.plan}일 완료</span><div class="mon-bar"><div class="mon-bar-fill" style="width:${mpct}%"></div></div></div>`; /* 월 요약(S2) */
-  html+=(planMode==='list')?planListHTML():planCalHTML();
+  html+=`<div class="plan-body ${_planSlide?('anim-'+_planSlide):''}">${(planMode==='list')?planListHTML():planCalHTML()}</div>`;
+  _planSlide=null; /* 슬라이드는 모드 전환 직후 1회만 — 월 이동 등 일반 재렌더엔 없음 */
   html+=`<p class="info" style="margin-top:14px;padding:0 4px">오늘 이전은 지난 날이라 고정돼요. 앞으로의 날짜에 <b>쉬는 날</b>을 표시하면<br>이후 일정이 ${programLen()}일 순환에 맞춰 자동으로 다시 배정됩니다.</p>`;
   $('view-plan').innerHTML=html;
   $('hd-title').textContent='일정'; $('hd-cyc').innerHTML='';

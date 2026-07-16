@@ -130,7 +130,7 @@
   /* 모든 날짜 행 = 같은 최소 높이 + 세로 중앙(운영자 제보: 행 높이 들쭉·정렬 흐트러짐). 펼친 행만 레일 상단 고정 */
   .day{display:flex; align-items:stretch; gap:0; border-bottom:1px solid var(--line-2); min-height:64px;}
   .day:last-child{border-bottom:none;}
-  .day-rail{flex:none; width:56px; padding:0 0 0 4px; text-align:center; border-right:1px solid var(--line-2); display:flex; flex-direction:column; justify-content:center;}
+  .day-rail{flex:none; width:56px; padding:0; text-align:center; border-right:1px solid var(--line-2); display:flex; flex-direction:column; justify-content:center; align-items:center;}
   .day.open .day-rail{justify-content:flex-start; padding-top:13px;}
   .day-wd{font-size:12px; font-weight:700; color:var(--muted);}
   .day-dt{font-size:19px; font-weight:750; letter-spacing:-.02em; margin-top:1px; font-variant-numeric:tabular-nums;}

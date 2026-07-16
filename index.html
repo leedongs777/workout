@@ -605,13 +605,13 @@
   .cal-dot.rest{width:5px; height:5px; border:none; background:var(--line);}
   .cal-dot.miss{border:1.5px dashed var(--line);}
   .cal-chk{font-size:10px; font-weight:800; color:var(--on-accent); background:var(--accent); width:14px; height:14px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; line-height:1;}
-  /* 월 요약 바(S2) */
-  .mon-sum{display:flex; align-items:center; gap:12px; margin:2px 2px 12px;}
-  .ms-t{flex:none; font-size:12.5px; font-weight:600; color:var(--muted);}
-  .ms-t b{font-size:14px; font-weight:800; color:var(--accent-ink);}
-  .mon-bar{flex:1; display:flex; gap:2px;} /* 세그먼트 바 — 칸 수 = 그 달 운동일 수 */
-  .mon-bar i{flex:1; height:6px; border-radius:3px; background:var(--accent-soft);}
+  /* 월 요약 바(S2) — 얇은 칸 분할(하루=한 칸) + 우측 분수. 미완료 칸은 조용한 회색(운영자 확정: C+칸) */
+  .mon-sum{display:flex; align-items:center; gap:10px; margin:2px 2px 14px;}
+  .mon-bar{flex:1; display:flex; gap:2px;}
+  .mon-bar i{flex:1; height:5px; border-radius:99px; background:var(--line-2);}
   .mon-bar i.on{background:var(--accent);}
+  .ms-t{flex:none; font-size:12.5px; font-weight:700; color:var(--muted);}
+  .ms-t b{font-size:14px; font-weight:800; color:var(--accent-ink);}
   .cal-legend{display:flex; gap:16px; justify-content:center; margin-top:12px; font-size:12px; color:var(--muted);}
   .cal-legend span{display:inline-flex; align-items:center; gap:5px;}
   .cal-legend i{font-style:normal;}
@@ -2677,7 +2677,7 @@ function renderPlan(){
   const ms=monthStatsFor(planYear,planMonth);
   /* 월 요약(S2) — 그 달 운동일 수만큼 칸이 나뉜 세그먼트 바(완료 1일 = 1칸). 운동 탭 진행 레일과 같은 문법 */
   const segs=ms.plan?Array.from({length:ms.plan},(_,i)=>`<i class="${i<ms.done?'on':''}"></i>`).join(''):'<i></i>';
-  html+=`<div class="mon-sum"><span class="ms-t"><b>${ms.done}</b>/${ms.plan}일 완료</span><div class="mon-bar">${segs}</div></div>`;
+  html+=`<div class="mon-sum"><div class="mon-bar">${segs}</div><span class="ms-t"><b>${ms.done}</b>/${ms.plan}</span></div>`;
   html+=`<div class="plan-body ${_planSlide?('anim-'+_planSlide):''}">${(planMode==='list')?planListHTML():planCalHTML()}</div>`;
   _planSlide=null; /* 슬라이드는 모드 전환 직후 1회만 — 월 이동 등 일반 재렌더엔 없음 */
   html+=`<p class="info" style="margin-top:14px;padding:0 4px">오늘 이전은 지난 날이라 고정돼요. 앞으로의 날짜에 <b>쉬는 날</b>을 표시하면<br>이후 일정이 ${programLen()}일 순환에 맞춰 자동으로 다시 배정됩니다.</p>`;

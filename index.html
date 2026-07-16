@@ -29,7 +29,7 @@
     --sand:#B78B20; --sand-soft:#F3ECDB; --sand-ink:#6F5310; /* 배경 위 읽히는 진한 샌드(라이트) */
     /* 7599 C */
     --danger:#B33D26;
-    --radius:16px; --radius-sm:11px;
+    --radius:22px; --radius-sm:11px; /* 카드 라운드 22px 전역 통일(2026-07 1차 디자인 배치) */
     --shadow:0 1px 2px rgba(29,33,30,.04), 0 8px 24px -18px rgba(29,33,30,.35);
     --nav-h:64px;
   }
@@ -465,10 +465,26 @@
   .note.warn .note-t{display:block; margin-bottom:3px;}
 
   /* home dashboard */
-  .home-hi{font-size:17.5px; font-weight:700; letter-spacing:-.01em; line-height:1.45; color:var(--accent-ink); margin:16px 0 15px;}
-  /* 홈 = 콤보2(2026-07): 카드 라운드 22px(홈 한정), 히어로 타이포 확대, 일정은 카드 대신 헤어라인 리스트 */
-  #view-home .card{border-radius:22px;}
+  .home-hi{font-size:19px; font-weight:700; letter-spacing:-.01em; line-height:1.4; color:var(--accent-ink); margin:12px 0 15px;} /* 인사말 = 홈의 헤더(H2, 앱바 타이틀은 비움) */
+  /* 프레스 피드백(G1) + 탭 전환 모션(G2) — 네이티브 감각. 모션 축소 설정 존중 */
+  button{transition:transform .15s ease;}
+  button:active{transform:scale(.96);}
+  @keyframes viewIn{from{opacity:0; transform:translateY(8px);} to{opacity:1; transform:none;}}
+  .view-anim{animation:viewIn .22s ease both;}
+  @media (prefers-reduced-motion:reduce){ button{transition:none;} button:active{transform:none;} .view-anim{animation:none;} }
+  /* 홈 = 콤보2(2026-07): 히어로 타이포 확대, 일정은 카드 대신 헤어라인 리스트 (라운드는 --radius 전역 22px) */
   .home-hero .hero-title{font-size:28px; letter-spacing:-.025em;}
+  /* 주간 도트 트래커 — 위 요일, 아래 도트: 완료=액센트 필+체크, 오늘=링, 예정=아웃라인, 지난 미완료=점선, 휴식=작은 점 */
+  .wk-strip{display:flex; justify-content:space-between; background:var(--accent-soft); border-radius:18px; padding:12px 16px 14px; margin-bottom:10px;}
+  .wk-d{display:flex; flex-direction:column; align-items:center; gap:7px;}
+  .wk-lab{font-size:10.5px; font-weight:700; color:var(--faint);}
+  .wk-d.now .wk-lab{color:var(--accent-ink);}
+  .wk-dot{width:26px; height:26px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:800; box-sizing:border-box;}
+  .wk-dot.done{background:var(--accent); color:var(--on-accent);}
+  .wk-dot.today{border:2px solid var(--accent);}
+  .wk-dot.plan{border:1.5px solid var(--line);}
+  .wk-dot.miss{border:1.5px dashed var(--line);}
+  .wk-dot.rest::before{content:''; width:5px; height:5px; border-radius:50%; background:var(--line);}
   .hero-pad{padding:18px;}
   .home-prog{height:8px; border-radius:99px; background:rgba(46,94,86,.14); overflow:hidden; margin-top:12px;}
   .home-prog-bar{height:100%; background:var(--accent); border-radius:99px; transition:width .3s;}
@@ -485,7 +501,7 @@
   .home-stats{display:flex; gap:10px;}
   .home-stats .stat{flex:1; background:var(--accent-soft); border:1px solid transparent; border-radius:var(--radius-sm); padding:14px 8px; text-align:center;}
   .stat-n{font-size:27px; font-weight:800; color:var(--accent-ink); font-variant-numeric:tabular-nums; line-height:1;}
-  .home-stats .stat:nth-child(2) .stat-n{color:var(--sand-ink);} /* 연속 운동(스트릭)만 샌드색 — renderHome 통계 순서(주완료/연속/월완료)가 바뀌면 같이 옮길 것 */
+  .home-stats .stat:nth-child(1) .stat-n{color:var(--sand-ink);} /* 연속 운동(스트릭)만 샌드색 — renderHome 통계 순서(연속/월완료)가 바뀌면 같이 옮길 것 */
   .stat-u{font-size:12.5px; font-weight:700; color:var(--muted);}
   .stat-l{font-size:11.5px; color:var(--muted); font-weight:600; margin-top:6px;}
   /* 다가오는 일정 = 박스 없는 헤어라인 리스트(에디토리얼) — 홈 밀도가 히어로(진한 카드)→통계(틴트)→일정(리스트)으로 가벼워지는 리듬 */
@@ -2179,6 +2195,22 @@ function streak(){ let n=0,guard=0; let d=parse(todayStr()); const today=todaySt
 }
 function weekTotal(){ return wDays().length; } // 주당 운동일 수 — programFor 빈도 티어용(구조값). 홈 통계엔 쓰지 말 것(수동 휴식 미반영)
 function weekPlanned(){ const ws=weekStartStr(todayStr()); let c=0; for(let i=0;i<7;i++){ const e=sessionFor(fmt(addDays(parse(ws),i))); if(e&&!e.rest)c++; } return c; } // 이번 주 실제 예정일(수동 휴식·시작일 반영) — weekDone의 분모
+/* 주간 도트 트래커(H1) — 월~일 각 날의 상태를 도트로: done(완료)/today(오늘 링)/plan(예정)/miss(지난 미완료)/rest(휴식) */
+function weekDotsHTML(){
+  const t=todayStr(); const ws=parse(weekStartStr(t));
+  let out='';
+  for(let i=0;i<7;i++){
+    const d=addDays(ws,i); const k=fmt(d); const e=sessionFor(k);
+    const isDone=state.doneDays.includes(k), isToday=k===t, isRest=(!e||e.rest);
+    let cls='plan', inner='';
+    if(isDone){ cls='done'; inner='✓'; }
+    else if(isToday){ cls='today'; }
+    else if(isRest){ cls='rest'; }
+    else if(k<t){ cls='miss'; }
+    out+=`<span class="wk-d ${isToday?'now':''}"><span class="wk-lab">${WD[d.getDay()]}</span><span class="wk-dot ${cls}">${inner}</span></span>`;
+  }
+  return `<div class="wk-strip">${out}</div>`;
+}
 function monthDone(){ const t=parse(todayStr()),y=t.getFullYear(),m=t.getMonth(); return state.doneDays.filter(k=>{const d=parse(k);return d.getFullYear()===y&&d.getMonth()===m;}).length; }
 function monthTotal(){ const t=parse(todayStr()),y=t.getFullYear(),m=t.getMonth(),last=new Date(y,m+1,0).getDate(); let c=0; for(let i=1;i<=last;i++){ const e=sessionFor(fmt(new Date(y,m,i))); if(e&&!e.rest)c++; } return c; }
 const MOTIV=['오늘의 땀은 내일의 자신감이 돼요.','작은 한 걸음이 큰 변화를 만들어요!','어제의 나를 이겨볼까요?','꾸준함이 재능을 이겨요.','이미 시작했으니 절반은 온 거예요!','몸은 오늘의 노력을 기억해요.','포기하지 않는 한 실패는 없어요!','건강은 가장 확실한 투자예요.','미래의 나에게 선물을 줄 시간이에요!','완벽함보다 꾸준함이에요.','움직이는 만큼 강해져요!','오늘도 나를 아껴볼까요?'];
@@ -2203,8 +2235,9 @@ function renderHome(){
       <button class="btn primary" style="margin-top:14px" onclick="goTab('plan')">${dayDone?'✓ 오늘 완료<span class="vdiv"></span>다시 보기':(dn>0?'이어서 운동하기 →':'오늘 운동 시작하기 →')}</button>
     </div></div>`;
   }
-  html+=`<div class="sec-label">내 운동 현황</div><div class="home-stats">
-    <div class="stat"><div class="stat-n">${weekDone()}<span class="stat-u">/${weekPlanned()}일</span></div><div class="stat-l">이번 주 완료</div></div>
+  html+=`<div class="sec-label">내 운동 현황</div>`;
+  html+=weekDotsHTML(); /* 이번 주 = 도트 트래커(숫자 카드 대체) */
+  html+=`<div class="home-stats">
     <div class="stat"><div class="stat-n">${streak()}<span class="stat-u">일째</span></div><div class="stat-l">연속 운동</div></div>
     <div class="stat"><div class="stat-n">${monthDone()}<span class="stat-u">/${monthTotal()}일</span></div><div class="stat-l">이번 달 완료</div></div>
   </div>`;
@@ -2218,7 +2251,7 @@ function renderHome(){
   html+=`</div><button class="btn ghost" style="margin-top:12px" onclick="goTab('schedule')">전체 일정 보기 →</button>`;
   const pb=profileBanner(); if(pb) html+=`<div style="height:14px"></div>`+pb;
   $('view-home').innerHTML=html;
-  $('hd-title').textContent='홈'; $('hd-cyc').innerHTML='';
+  $('hd-title').textContent=''; $('hd-cyc').innerHTML=''; /* 홈은 인사말이 헤더(H2) — 앱바 타이틀 비움 */
 }
 
 /* ----- TODAY view ----- */
@@ -2878,13 +2911,13 @@ async function resetAll(){
 
 /* ---------------- Nav ---------------- */
 const TAB_VIEW={home:'view-home',plan:'view-today',schedule:'view-plan',setup:'view-setup'};
-const TAB_TITLE={home:'홈',plan:'오늘의 운동',schedule:'일정',setup:'설정'};
+const TAB_TITLE={home:'',plan:'오늘의 운동',schedule:'일정',setup:'설정'}; /* 홈은 인사말이 헤더 — 앱바 타이틀 없음(H2) */
 function switchTab(tab,isBack){
   if(wuTimer){ clearInterval(wuTimer); wuTimer=null; } wuP=null; // 탭 이동 시 웜업 플레이어 중단(백그라운드 진행·stray 완료 기록 방지)
   activeTab=tab;
   if(tab==='plan') planDate=null;
   document.querySelectorAll('.nav-btn').forEach(x=>x.classList.toggle('active',x.dataset.tab===tab));
-  Object.entries(TAB_VIEW).forEach(([tb,vid])=>{ const el=$(vid); if(el) el.classList.toggle('hidden',tb!==tab); });
+  Object.entries(TAB_VIEW).forEach(([tb,vid])=>{ const el=$(vid); if(el){ el.classList.toggle('hidden',tb!==tab); if(tb===tab){ el.classList.remove('view-anim'); void el.offsetWidth; el.classList.add('view-anim'); } } }); /* 활성 뷰 페이드+슬라이드 인(G2) */
   $('hd-title').textContent=TAB_TITLE[tab]||'';
   $('hd-cyc').innerHTML = tab==='schedule'?'요일별 휴식 설정':'';
   updateBackBtn();

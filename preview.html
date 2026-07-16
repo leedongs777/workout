@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MATE — 디바이스 미리보기</title>
+<!-- 개발용 디바이스 미리보기: 실제 앱(index.html)을 아이폰 16 프로(402×874pt) / 갤럭시 S26(384×832dp) 프레임 안에 띄운다.
+     우상단 토글로 기기 전환(선택은 localStorage에 저장). 쿼리스트링은 앱 iframe에 그대로 전달(예: preview.html?v=123 → index.html?v=123). -->
+<style>
+  html,body{margin:0; height:100%;}
+  body{background:radial-gradient(1200px 800px at 50% 20%, #2e3138, #17181c 70%);
+    display:flex; align-items:center; justify-content:center; overflow:hidden;
+    font-family:-apple-system,'SF Pro Text','Pretendard',system-ui,sans-serif;}
+
+  /* ---- 기기 전환 토글 ---- */
+  .devseg{position:fixed; top:16px; right:18px; z-index:10; display:flex; gap:4px;
+    background:rgba(255,255,255,.1); border:1px solid rgba(255,255,255,.14); border-radius:99px; padding:4px;}
+  .devseg button{border:0; background:transparent; color:rgba(255,255,255,.65); font-size:13px; font-weight:600;
+    padding:7px 14px; border-radius:99px; cursor:pointer; font-family:inherit;}
+  .devseg button.on{background:#fff; color:#17181c;}
+
+  .stage{transform-origin:center center;}
+  .phone-wrap{position:relative;}
+  .phone{position:relative; z-index:1; box-sizing:border-box; background:#0b0b0c;}
+  .screen{position:relative; overflow:hidden; background:#F4F1E8;}
+  iframe{position:absolute; left:0; border:0; background:#F4F1E8;}
+  .statusbar{position:absolute; top:0; left:0; right:0; z-index:4; pointer-events:none; box-sizing:border-box;
+    display:flex; align-items:center; justify-content:space-between; color:#1F241F; font-weight:600;}
+  .sb-icons{display:flex; align-items:center; gap:7px;}
+  .sb-icons svg{display:block;}
+  .home{position:absolute; left:50%; transform:translateX(-50%); border-radius:99px; background:#111; opacity:.8; z-index:5; pointer-events:none;}
+  .btn{position:absolute; z-index:0;} /* 사이드 버튼: 폰 몸체(z-index:1) 뒤에 깔려 바깥으로 ~3px만 돌출 */
+
+  /* ================ iPhone 16 Pro (내추럴 티타늄) ================ */
+  body.ip .phone{width:426px; height:898px; border-radius:76px; padding:12px;
+    box-shadow:0 0 0 2.5px #5a5a5e, 0 0 0 6px #b9b4ac, 0 0 0 7px #8e8a83,
+      0 40px 90px rgba(0,0,0,.6), 0 12px 30px rgba(0,0,0,.5);}
+  body.ip .screen{width:402px; height:874px; border-radius:64px;}
+  body.ip .statusbar{height:59px; padding:14px 36px 0 44px; font-size:17px; letter-spacing:.2px;}
+  body.ip iframe{top:59px; width:402px; height:calc(874px - 59px);}
+  body.ip .home{bottom:9px; width:144px; height:5px;}
+  body.ip .btn{background:linear-gradient(180deg,#96918a,#c9c4bb 25%,#c9c4bb 75%,#8e8981);}
+  body.ip .btn.action{left:-10px; top:186px; width:16px; height:30px; border-radius:3px 0 0 3px;}
+  body.ip .btn.volup {left:-10px; top:248px; width:16px; height:58px; border-radius:3px 0 0 3px;}
+  body.ip .btn.voldn {left:-10px; top:318px; width:16px; height:58px; border-radius:3px 0 0 3px;}
+  body.ip .btn.power {right:-10px; top:290px; width:16px; height:92px; border-radius:0 3px 3px 0;}
+  body.ip .btn.camera{right:-10px; top:452px; width:16px; height:30px; border-radius:0 3px 3px 0;}
+  body.ip .island{position:absolute; top:11px; left:50%; transform:translateX(-50%); width:125px; height:37px;
+    border-radius:20px; background:#000; z-index:5; box-shadow:inset 0 0 2px rgba(255,255,255,.06);}
+  body.ip .island::before{content:''; position:absolute; right:13px; top:50%; transform:translateY(-50%);
+    width:9px; height:9px; border-radius:50%; background:#0d0d10; box-shadow:inset 0 0 2px #1d2a3a;}
+  body.ip .punch{display:none;}
+  body.gx .island{display:none;}
+
+  /* ================ Galaxy S26 (티타늄 실버, 펀치홀) ================ */
+  body.gx .phone{width:400px; height:848px; border-radius:38px; padding:8px;
+    box-shadow:0 0 0 2px #4c4f54, 0 0 0 5.5px #b6bbc2, 0 0 0 6.5px #878c93,
+      0 40px 90px rgba(0,0,0,.6), 0 12px 30px rgba(0,0,0,.5);}
+  body.gx .screen{width:384px; height:832px; border-radius:30px;}
+  body.gx .statusbar{height:38px; padding:6px 22px 0 26px; font-size:14px; font-family:'Roboto','Pretendard',sans-serif;}
+  body.gx iframe{top:38px; width:384px; height:calc(832px - 38px);}
+  body.gx .home{bottom:7px; width:104px; height:4px; opacity:.55;}
+  body.gx .btn{background:linear-gradient(180deg,#8f949b,#c3c8cf 25%,#c3c8cf 75%,#83888f);}
+  body.gx .btn.action,body.gx .btn.camera{display:none;} /* 갤럭시는 우측에 볼륨+전원만 */
+  body.gx .btn.volup{left:auto; right:-9px; top:206px; width:15px; height:96px; border-radius:0 3px 3px 0;}
+  body.gx .btn.voldn{display:none;}
+  body.gx .btn.power{right:-9px; top:316px; width:15px; height:52px; border-radius:0 3px 3px 0;}
+  body.gx .punch{position:absolute; top:14px; left:50%; transform:translateX(-50%); width:13px; height:13px;
+    border-radius:50%; background:#000; z-index:5; box-shadow:inset 0 0 2px #1d2a3a;}
+</style>
+</head>
+<body class="ip">
+<div class="devseg" role="tablist">
+  <button id="seg-ip" class="on" onclick="setDevice('ip')">iPhone 16 Pro</button>
+  <button id="seg-gx" onclick="setDevice('gx')">Galaxy S26</button>
+</div>
+<div class="stage" id="stage">
+  <div class="phone-wrap">
+    <div class="btn action"></div><div class="btn volup"></div><div class="btn voldn"></div>
+    <div class="btn power"></div><div class="btn camera"></div>
+    <div class="phone">
+      <div class="screen">
+        <div class="statusbar">
+          <span>9:41</span>
+          <span class="sb-icons">
+            <svg width="19" height="12" viewBox="0 0 19 12" fill="#1F241F"><rect x="0" y="8" width="3" height="4" rx="1"/><rect x="5" y="5.5" width="3" height="6.5" rx="1"/><rect x="10" y="3" width="3" height="9" rx="1"/><rect x="15" y="0" width="3" height="12" rx="1"/></svg>
+            <svg width="17" height="12" viewBox="0 0 17 12" fill="#1F241F"><path d="M8.5 12 5.6 8.9a4.4 4.4 0 0 1 5.8 0Z"/><path d="M3.4 6.6a7.6 7.6 0 0 1 10.2 0l-1.7 1.8a5.2 5.2 0 0 0-6.8 0Z"/><path d="M.9 4A11 11 0 0 1 16.1 4l-1.7 1.8a8.6 8.6 0 0 0-11.8 0Z"/></svg>
+            <svg width="27" height="13" viewBox="0 0 27 13"><rect x="0.5" y="0.5" width="23" height="12" rx="4" fill="none" stroke="#1F241F" stroke-opacity=".4"/><rect x="2" y="2" width="17" height="9" rx="2.5" fill="#1F241F"/><path d="M25 4.5v4a2.2 2.2 0 0 0 0-4Z" fill="#1F241F" fill-opacity=".4"/></svg>
+          </span>
+        </div>
+        <div class="island"></div>
+        <div class="punch"></div>
+        <iframe id="app" title="MATE"></iframe>
+        <div class="home"></div>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+  document.getElementById('app').src='./index.html'+location.search; /* 쿼리스트링 전달(캐시 무력화 등) */
+  const DEV={ip:{w:450,h:920}, gx:{w:420,h:865}};
+  function setDevice(d){
+    document.body.className=d;
+    document.getElementById('seg-ip').classList.toggle('on', d==='ip');
+    document.getElementById('seg-gx').classList.toggle('on', d==='gx');
+    try{ localStorage.setItem('preview:device', d); }catch(e){}
+    fit();
+  }
+  function fit(){
+    const d=DEV[document.body.className]||DEV.ip, m=40;
+    const s=Math.min(1,(innerHeight-m)/d.h,(innerWidth-m)/d.w);
+    document.getElementById('stage').style.transform='scale('+s+')';
+  }
+  addEventListener('resize',fit);
+  let saved='ip'; try{ saved=localStorage.getItem('preview:device')||'ip'; }catch(e){}
+  setDevice(saved==='gx'?'gx':'ip');
+  /* 같은 출처라 데스크톱 스크롤바 숨김 주입 가능 */
+  const ifr=document.getElementById('app');
+  ifr.addEventListener('load',()=>{ try{
+    const doc=ifr.contentDocument;
+    if(doc && doc.head && !doc.getElementById('nosb')){
+      const s=doc.createElement('style'); s.id='nosb';
+      s.textContent='::-webkit-scrollbar{display:none} html{scrollbar-width:none}';
+      doc.head.appendChild(s);
+    }
+  }catch(e){} });
+</script>
+</body>
+</html>

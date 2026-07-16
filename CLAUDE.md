@@ -21,7 +21,7 @@
 ---
 
 ## 1. 파일 구조 (단일 파일)
-- 앱 전체가 **하나의 HTML 파일 `index.html`**에 들어 있음(임베드된 SVG 아이콘 때문에 ~560KB). 바닐라 JS(`<script>` 인라인) + `<style>` 인라인.
+- 앱 전체가 **하나의 HTML 파일 `index.html`**에 들어 있음(임베드된 아이콘 마스크 때문에 ~580KB). 바닐라 JS(`<script>` 인라인) + `<style>` 인라인.
 - **`index.html`을 직접 편집**한다. 이게 곧 배포본이자 사이트.
 - 배포용 자동화: `.github/workflows/deploy.yml` (push 시 JS 문법검사 → 통과하면 Pages 자동 배포).
 - 참고: 과거 채팅 작업 환경에서는 `workout-planner.html`이라는 검증용 사본을 두고 `index.html`로 복사하는 2파일 방식을 썼으나, **이 저장소에는 `index.html` 하나만 존재**한다. 사본·동기화 개념은 필요 없다.
@@ -271,8 +271,10 @@
   - 마스크 생성: 투명 PNG → 알파 bbox crop → 정사각 중앙정렬 → 160px 리샘플 → **팔레트+알파 PNG(64색)** → base64. (RGBA로 저장하면 4배 커짐)
   - 원본: `MATE_운동기구_아이콘_34종_투명배경/` (파일명 = `EQ_LABEL` 값과 1:1).
 - **하단 나브 아이콘 4종**도 같은 mask 방식(`.nav-ic.home|plan|schedule|setup`). 원본 `MATE_하단메뉴_아이콘_4종_투명배경/`.
-- `POSE_SVG`: 자세 아이콘 15종 — **아직 구 벡터**. `legext·stepup·chestpress·ytw` 4개는 원본 하단에 한글 이름이 박혀 있어 `_CROP_POSE` + `cropSvg()`로 viewBox 높이를 줄여 잘라 쓰는 중. **새 아이콘으로 교체하면 이 crop 코드를 제거할 것.**
-- `patIcon(role)` = `cropSvg(POSE_SVG[ROLE_PAT[role]]) || svgWrap(PAT_ICON[pat])`.
+- **동작 아이콘 24종 + 단계 대표 3종(웜업/쿨다운/유산소)도 같은 mask 방식** (2026-07 교체 완료). `.ic-pose-{키}` 24개 + `.ic-step-{warmup|cooldown|cardio}` 3개 클래스. 원본 `MATE_동작_아이콘_27종_투명배경/` (파일명 = `pose_{ROLE_PAT 키}` / `step_{키}`).
+  - 구 벡터 `POSE_SVG`/`STEP_SVG`와 이름 잘라내기(`_CROP_POSE`/`cropSvg`)는 **삭제됨**. `PAT_ICON`은 폴백용 `strength` 1종만 남음.
+  - 게이트(로그인) 로고 = `stepIcon('warmup')`.
+- `patIcon(role)` = `ROLE_PAT[role]` 있으면 `poseIcon(pat)`(마스크), 없으면 `svgWrap(PAT_ICON.strength)` 폴백. `poseIcon(key)`/`stepIcon(key)`가 마스크 span 생성.
 - `exFig(r,role)`는 **반드시 `patIcon(role)` 경유**(과거 버그: svgWrap(PAT_ICON[...]) 직접 호출로 새 아이콘 무시됨).
 - ⚠️ **역할명(`slot.role`)을 바꾸면 `ROLE_PAT` 키도 같이 바꿀 것.** 안 그러면 아이콘이 폴백된다.
 - 구 파이프라인(참고): PNG → cv2 + potrace → 정사각 viewBox. **이 PC에는 cv2·potrace가 없어 재현 불가.** PIL·numpy만 있음.
@@ -362,7 +364,7 @@
 2. **"바닥 운동 제외" 시 일부 슬롯이 빈다.** (부분 해결) S5·S2의 코어 안정/측면 슬롯에 **서서 하는 로디드 캐리**(파머스 캐리 `eq:['dumbbell'/'kettlebell']` 40초, 수트케이스 캐리 30초/측)를 `options`로 넣어, 장비 보유자는 바닥 off여도 코어 3패턴이 유지된다. 맨몸 fb(버드독/사이드 플랭크)는 무장비 폴백으로 남김. **남은 과제**: 하체·기타 세션에도 바닥 동작만 있는 슬롯이 있으면 같은 방식(서서 하는 장비 대안)으로 보강할 것. ⚠️ 옵션이 `reps`를 덮어쓰면 좌/우(측면) 판정은 `slot.reps`가 아니라 `defReps(slot,r)` 기준이어야 한다(캐리 40초는 좌/우 없음).
 3. **지병(conditions)은 운동 선택에 영향 없음** — 경고 문구만 나옴.
 4. ~~어깨 부상자는 수직 밀기 슬롯이 빈다~~ → **해결됨**(caution 재설계: 제외가 아니라 후순위라 슬롯이 비지 않음. 2026-07-13 실측 확인).
-5. `POSE_SVG` 4종의 이름 crop(§4.8) — 새 아이콘 받으면 제거.
+5. ~~`POSE_SVG` 4종의 이름 crop(§4.8)~~ → **해결됨(2026-07)**: 동작 아이콘 27종 마스크 교체로 POSE_SVG/STEP_SVG/crop 코드 전부 삭제.
 6. **메디신볼은 선택해도 쓰이는 운동이 없다.** (케틀벨은 S5·S2 코어 캐리에서 사용됨)
 7. **`러닝 경험`·`목표 체중`은 여전히 표시만 되고 플랜에 반영되지 않는다.**
 

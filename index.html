@@ -560,6 +560,8 @@
 
   /* schedule controls + calendar */
   .plan-ctrl{display:flex; align-items:center; justify-content:space-between; gap:10px; margin:2px 0 14px;}
+  /* 월 헤더+토글+요약 바 = 스크롤 고정(운영자 요청). 배경으로 지나가는 리스트를 덮는다 */
+  .plan-head{position:sticky; top:0; z-index:30; background:var(--bg); padding-top:8px; margin-top:-8px;}
   .ym{display:flex; align-items:center; gap:6px;}
   .ymbtn{width:34px; height:34px; border-radius:9px; border:1px solid var(--line); background:var(--surface); color:var(--ink); font-size:18px; cursor:pointer; font-family:inherit;}
   .ymbtn:active{background:var(--surface-2);}
@@ -2671,14 +2673,15 @@ function planCalHTML(){
 function renderPlan(){
   const td=parse(todayStr());
   if(planYear===null){ planYear=td.getFullYear(); planMonth=td.getMonth(); }
-  let html=`<div class="plan-ctrl">
+  /* 월 헤더+토글+요약 바 = plan-head로 묶어 스크롤 고정 */
+  let html=`<div class="plan-head"><div class="plan-ctrl">
     <div class="ym"><button class="ymbtn" onclick="planShift(-1)" aria-label="이전 달">‹</button><button class="ymlabel" onclick="openYM()">${planYear}년 ${planMonth+1}월</button><button class="ymbtn" onclick="planShift(1)" aria-label="다음 달">›</button></div>
     <div class="modeseg ${planMode==='cal'?'cal':''} ${_planSlide?('anim-'+_planSlide):''}"><span class="seg-thumb"></span><button class="${planMode==='list'?'on':''}" onclick="planSetMode('list')">리스트</button><button class="${planMode==='cal'?'on':''}" onclick="planSetMode('cal')">달력</button></div>
   </div>`;
   const ms=monthStatsFor(planYear,planMonth);
   /* 월 요약(S2) — 그 달 운동일 수만큼 칸이 나뉜 세그먼트 바(완료 1일 = 1칸). 운동 탭 진행 레일과 같은 문법 */
   const segs=ms.plan?Array.from({length:ms.plan},(_,i)=>`<i class="${i<ms.done?'on':''}"></i>`).join(''):'<i></i>';
-  html+=`<div class="mon-sum"><div class="mon-bar">${segs}</div><span class="ms-t"><b>${ms.done}</b>/${ms.plan}</span></div>`;
+  html+=`<div class="mon-sum"><div class="mon-bar">${segs}</div><span class="ms-t"><b>${ms.done}</b>/${ms.plan}</span></div></div>`;
   html+=`<div class="plan-body ${_planSlide?('anim-'+_planSlide):''}">${(planMode==='list')?planListHTML():planCalHTML()}</div>`;
   _planSlide=null; /* 슬라이드는 모드 전환 직후 1회만 — 월 이동 등 일반 재렌더엔 없음 */
   /* 리스트 진입 시 목표 행(오늘/탭한 날)으로 자동 스크롤 — 1일부터 찾아 내려가지 않게 */

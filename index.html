@@ -873,6 +873,11 @@
   .an-kpi .v{font-size:22px; font-weight:800; letter-spacing:-.02em; font-variant-numeric:tabular-nums;}
   .an-kpi .v small{font-size:12px; font-weight:700; color:var(--muted);}
   .an-kpi .c{font-size:11.5px; color:var(--muted); margin-top:2px; line-height:1.45;}
+  /* 마일스톤 3카드 한 줄 — 좁아진 폭에 맞춰 축소 */
+  .an-mile .an-card{padding:12px 10px;}
+  .an-mile .an-kpi .v{font-size:16.5px; white-space:nowrap;}
+  .an-mile .an-kpi .v small{font-size:10.5px;}
+  .an-mile .an-kpi .c{font-size:10.5px;}
   .an-kcal-bars{display:flex; align-items:flex-end; gap:6px; height:64px; margin-top:12px;}
   .an-kcal-bars .b{flex:1; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; gap:5px; height:100%;}
   .an-kcal-bars .b i{width:100%; border-radius:6px 6px 3px 3px; background:var(--accent); opacity:.9;}
@@ -3402,13 +3407,13 @@ function renderAnal(){
     const km=anDistKm(), mara=(km/42.195).toFixed(1);
     const hrs=Math.floor(tot.ms/3600000), mins=Math.round(tot.ms%3600000/60000);
     const timeTxt= hrs>0? `${hrs}<small>시간 ${mins}분</small>` : `${mins}<small>분</small>`;
-    html+=`<div class="sec-label">마일스톤</div><div class="an-row2" style="margin-top:0">
-      <div class="card an-card an-kpi"><div class="v">${volTxt}</div><div class="c">누적 들어올린 무게<br>🐘 코끼리 × ${eleph}마리</div></div>
-      <div class="card an-card an-kpi"><div class="v">${km.toLocaleString()}<small>km</small></div><div class="c">누적 이동 거리 (추정)<br>🏃 풀코스 마라톤 × ${mara}회</div></div>
+    const movie=(tot.ms/3600000/2).toFixed(1); /* 영화 1편 = 2시간 */
+    html+=`<div class="sec-label">마일스톤</div><div class="an-row2 an-mile" style="margin-top:0">
+      <div class="card an-card an-kpi"><div class="v">${volTxt}</div><div class="c">누적 무게<br>🐘 × ${eleph}마리</div></div>
+      <div class="card an-card an-kpi"><div class="v">${km.toLocaleString()}<small>km</small></div><div class="c">이동 거리 (추정)<br>🏃 × ${mara}회</div></div>
+      <div class="card an-card an-kpi"><div class="v">${timeTxt}</div><div class="c">운동 시간<br>🎬 × ${movie}편</div></div>
     </div>
-    <div class="an-row2">
-      <div class="card an-card an-kpi"><div class="v">${timeTxt}</div><div class="c">누적 운동 시간<br>총 ${tot.sessions}세션, ${tot.sets}세트</div></div>
-    </div>`;
+    <div class="an-note" style="margin:8px 4px 0">🐘 아프리카 코끼리 6톤, 🏃 풀코스 마라톤 42.195km, 🎬 영화 1편 2시간 기준이에요. 총 ${tot.sessions}세션, ${tot.sets}세트를 함께했어요.</div>`;
   }
   $('view-anal').innerHTML=html;
   $('hd-title').textContent='분석'; $('hd-cyc').innerHTML='';

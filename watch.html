@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MATE — 워치앱 프로토타입</title>
+<!-- 워치 컴패니언 앱 프로토타입 (NRC 컨셉, 구성안: MATE_워치앱_구성안.md)
+     - 실제 앱(index.html)을 숨은 iframe으로 띄워 오늘 세션·운동·지난 무게를 "읽기 전용"으로 가져온다(기록에 일절 쓰지 않음)
+     - 흐름: 홈 → 3·2·1 → 세션 뷰(좌우 스와이프 P1 할 일 / P2 경과 / P3 심박) → 휴식 링 → 유산소 모드 → 축하
+     - 햅틱은 화면 펄스로, 크라운은 ± 버튼으로 대체. 심박은 존2 부근 시뮬레이션 -->
+<style>
+  html,body{margin:0; height:100%;}
+  body{background:radial-gradient(1100px 700px at 50% 18%, #2e3138, #17181c 70%);
+    display:flex; align-items:center; justify-content:center; overflow:hidden;
+    font-family:-apple-system,'SF Pro Text','Pretendard',system-ui,sans-serif; -webkit-user-select:none; user-select:none;}
+  .hint{position:fixed; top:16px; left:50%; transform:translateX(-50%); color:rgba(255,255,255,.45); font-size:12.5px; white-space:nowrap;}
+  .stage{transform-origin:center center;}
+
+  /* ---- Apple Watch(46mm 근사) 목업 ---- */
+  .watch{position:relative; display:flex; flex-direction:column; align-items:center;}
+  .band{width:118px; height:150px; background:linear-gradient(90deg,#23261F,#3A4034 30%,#3A4034 70%,#23261F); z-index:0;}
+  .band.top{border-radius:16px 16px 30px 30px; margin-bottom:-24px;}
+  .band.bot{border-radius:30px 30px 16px 16px; margin-top:-24px;}
+  .case{position:relative; z-index:1; width:233px; height:276px; border-radius:64px; background:#0c0c0d; padding:14px; box-sizing:border-box;
+    box-shadow:0 0 0 2px #55565a, 0 0 0 5px #b9b4ac, 0 0 0 6px #83807a,
+      0 30px 70px rgba(0,0,0,.65), 0 10px 24px rgba(0,0,0,.5);}
+  .crown{position:absolute; right:-9px; top:78px; width:11px; height:34px; border-radius:4px 3px 3px 4px;
+    background:repeating-linear-gradient(0deg,#8e8a83 0 2px,#c9c4bb 2px 4px); z-index:0;}
+  .crown::after{content:''; position:absolute; inset:2px auto 2px -3px; width:4px; border-radius:2px; background:#2E5E56;}
+  .sidebtn{position:absolute; right:-7px; top:128px; width:8px; height:52px; border-radius:0 4px 4px 0; background:linear-gradient(180deg,#8e8a83,#c9c4bb 30%,#c9c4bb 70%,#83807a); z-index:0;}
+  .scr{position:relative; width:205px; height:248px; border-radius:52px; overflow:hidden; background:#000; color:#fff;}
+  .scr.pulse{animation:pulse .35s ease;}
+  @keyframes pulse{0%{box-shadow:inset 0 0 0 0 rgba(155,232,176,0);} 35%{box-shadow:inset 0 0 0 5px rgba(155,232,176,.85);} 100%{box-shadow:inset 0 0 0 0 rgba(155,232,176,0);}}
+
+  /* ---- NRC 문법: 검정 + 라이트 그린, 초대형 타이포 ---- */
+  .clock{position:absolute; top:9px; left:0; right:0; text-align:center; font-size:12px; font-weight:600; color:#8fa89b; z-index:6; font-variant-numeric:tabular-nums; pointer-events:none;}
+  .app{position:absolute; inset:0; padding:26px 15px 13px; box-sizing:border-box; display:flex; flex-direction:column;}
+  .app.hidden{display:none;}
+  .k{font-size:10.5px; font-weight:800; color:#8fa89b; letter-spacing:.08em; text-transform:uppercase;}
+  .grow{flex:1;}
+  .center{text-align:center;}
+
+  /* 홈 */
+  #scr-home .date{font-size:11px; color:#8fa89b; font-weight:700;}
+  #scr-home .ttl{font-size:24px; font-weight:850; letter-spacing:-.02em; line-height:1.12; margin-top:3px;}
+  #scr-home .sub{font-size:12px; color:#a7b1aa; margin-top:5px;}
+  #scr-home .strk{font-size:11.5px; color:#F0B95C; font-weight:800; margin-top:5px;}
+  .gobtn{width:88px; height:88px; border-radius:50%; border:none; margin:0 auto; display:flex; align-items:center; justify-content:center;
+    background:#9BE8B0; color:#03170c; font-family:inherit; font-size:17px; font-weight:900; cursor:pointer; letter-spacing:-.01em;}
+  .gobtn:active{transform:scale(.94);}
+
+  /* 3·2·1 카운트다운 */
+  #scr-cd{align-items:center; justify-content:center;}
+  #cd-num{font-size:104px; font-weight:900; color:#9BE8B0; font-variant-numeric:tabular-nums; line-height:1;}
+  #cd-num.go{font-size:44px;}
+
+  /* 세션 뷰: 가로 스크롤 스냅 페이지 */
+  .pages{flex:1; display:flex; overflow-x:auto; scroll-snap-type:x mandatory; scrollbar-width:none; margin:0 -15px;}
+  .pages::-webkit-scrollbar{display:none;}
+  .page{flex:none; width:205px; scroll-snap-align:start; box-sizing:border-box; padding:0 15px; display:flex; flex-direction:column;}
+  .pgdots{display:flex; gap:5px; justify-content:center; padding:7px 0 0;}
+  .pgdots i{width:5px; height:5px; border-radius:50%; background:#2a2c2e;}
+  .pgdots i.on{background:#9BE8B0;}
+  /* P1 지금 할 일 */
+  .p1-set{font-size:12px; font-weight:800; color:#9BE8B0; margin-top:2px;}
+  .p1-name{font-size:23px; font-weight:850; letter-spacing:-.02em; line-height:1.12; margin-top:4px; word-break:keep-all;}
+  .p1-w{display:flex; align-items:center; justify-content:center; gap:10px; margin:10px 0 4px;}
+  .p1-w button{width:36px; height:36px; border-radius:50%; border:none; background:#1c1d1f; color:#fff; font-size:19px; font-weight:800; cursor:pointer; font-family:inherit;}
+  .p1-w button:active{transform:scale(.92);}
+  .p1-w .v{font-size:30px; font-weight:850; min-width:80px; text-align:center; font-variant-numeric:tabular-nums;}
+  .p1-w .v small{font-size:13px; color:#8fa89b; font-weight:800;}
+  .p1-tap{font-size:11px; color:#6f7a72; text-align:center; margin-top:2px;}
+  .setdots{display:flex; gap:6px; justify-content:center; margin-top:8px;}
+  .setdots i{width:9px; height:9px; border-radius:50%; background:#26282a;}
+  .setdots i.on{background:#9BE8B0;}
+  /* P2 경과 */
+  .p2-time{font-size:52px; font-weight:900; font-variant-numeric:tabular-nums; letter-spacing:-.02em; text-align:center; margin-top:14px;}
+  .p2-bar{display:flex; gap:3px; margin:12px 4px 6px;}
+  .p2-bar i{flex:1; height:6px; border-radius:99px; background:#26282a;}
+  .p2-bar i.on{background:#9BE8B0;}
+  .p2-sub{font-size:12px; color:#a7b1aa; text-align:center;}
+  /* P3 심박 */
+  .p3-bpm{font-size:56px; font-weight:900; color:#ff5f6d; font-variant-numeric:tabular-nums; text-align:center; margin-top:8px; line-height:1;}
+  .p3-u{font-size:12px; color:#a7b1aa; text-align:center; font-weight:800; margin-top:2px;}
+  .zone{display:flex; gap:3px; margin:12px 6px 4px;}
+  .zone i{flex:1; height:7px; border-radius:99px; background:#26282a;}
+  .zone i.z2{background:#2E5E56;}
+  .zone i.cur{background:#9BE8B0;}
+  .zlabel{text-align:center; font-size:12.5px; color:#9BE8B0; font-weight:800; margin-top:7px;}
+
+  /* 휴식 풀스크린 */
+  .ring{position:relative; width:126px; height:126px; margin:4px auto;}
+  .ring svg{transform:rotate(-90deg); display:block;}
+  .ring .num{position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:38px; font-weight:900; font-variant-numeric:tabular-nums;}
+  .rest-adj{display:flex; gap:7px; justify-content:center;}
+  .rest-adj button{border:none; border-radius:14px; padding:7px 12px; background:#1c1d1f; color:#cfd6d0; font-family:inherit; font-size:12px; font-weight:800; cursor:pointer;}
+
+  /* 유산소: 길게 눌러 완료 */
+  .hold{position:relative; border:none; border-radius:22px; padding:12px 0; width:100%; font-family:inherit; font-size:13.5px; font-weight:800; cursor:pointer; background:#1c1d1f; color:#cfd6d0; overflow:hidden;}
+  .hold .fill{position:absolute; inset:0; width:0; background:#2E5E56; transition:width .1s linear;}
+  .hold span{position:relative; z-index:1;}
+
+  /* 축하 */
+  .doneck{width:92px; height:92px; margin:8px auto 8px; border-radius:50%; background:#9BE8B0; color:#03170c; display:flex; align-items:center; justify-content:center; font-size:44px; font-weight:900; animation:pop .5s cubic-bezier(.2,1.6,.4,1);}
+  @keyframes pop{from{transform:scale(.3); opacity:0;} to{transform:scale(1); opacity:1;}}
+  .sum{margin-top:8px;}
+  .sum .row{display:flex; justify-content:space-between; font-size:13px; font-weight:700; padding:4px 6px; color:#cfd6d0;}
+  .sum .row b{color:#fff; font-variant-numeric:tabular-nums;}
+  .fineprint{font-size:10.5px; color:#6f7a72; text-align:center; margin-top:6px; line-height:1.5;}
+
+  .wbtn{border:none; border-radius:22px; padding:11px 0; width:100%; font-family:inherit; font-size:13.5px; font-weight:800; cursor:pointer; background:#2E5E56; color:#EAF4EC;}
+  .wbtn.ghost{background:#1c1d1f; color:#cfd6d0;}
+  .wbtn:active{transform:scale(.97);}
+  .wbtn+.wbtn,.wbtn+.hold,.hold+.wbtn{margin-top:6px;}
+</style>
+</head>
+<body>
+<div class="hint">MATE 워치앱 프로토타입(NRC 컨셉) — 눌러서 진행, 세션 화면은 좌우로 넘겨보세요. 기록에는 저장되지 않아요</div>
+<div class="stage" id="stage">
+  <div class="watch">
+    <div class="band top"></div>
+    <div class="case">
+      <div class="crown"></div><div class="sidebtn"></div>
+      <div class="scr" id="scr">
+        <div class="clock" id="wclock">9:41</div>
+
+        <!-- W-A 홈 -->
+        <div class="app" id="scr-home">
+          <div class="date" id="home-date"></div>
+          <div class="ttl" id="home-title">오늘의 운동</div>
+          <div class="sub" id="home-sub">불러오는 중이에요</div>
+          <div class="strk" id="home-strk"></div>
+          <div class="grow"></div>
+          <button class="gobtn" onclick="startCd()">시작</button>
+          <div class="grow"></div>
+        </div>
+
+        <!-- W-B 3·2·1 -->
+        <div class="app hidden" id="scr-cd"><div id="cd-num">3</div></div>
+
+        <!-- W-C 세션 뷰 (P1/P2/P3 스와이프) -->
+        <div class="app hidden" id="scr-run" style="padding-left:0;padding-right:0;">
+          <div class="pages" id="pages">
+            <div class="page" id="page1" onclick="p1Tap(event)">
+              <div class="k" id="p1-k">운동 1/6</div>
+              <div class="p1-set" id="p1-set">세트 1/4</div>
+              <div class="p1-name" id="p1-name">운동명</div>
+              <div class="grow"></div>
+              <div class="p1-w" id="p1-wrow">
+                <button onclick="event.stopPropagation();wAdj(-1)">−</button>
+                <div class="v"><span id="p1-w">20</span><small>kg</small></div>
+                <button onclick="event.stopPropagation();wAdj(1)">+</button>
+              </div>
+              <div class="setdots" id="p1-dots"></div>
+              <div class="p1-tap" id="p1-tap">화면을 탭하면 세트 완료</div>
+            </div>
+            <div class="page">
+              <div class="k">경과</div>
+              <div class="p2-time" id="p2-time">00:00</div>
+              <div class="p2-bar" id="p2-bar"></div>
+              <div class="p2-sub" id="p2-sub">1/8단계</div>
+              <div class="grow"></div>
+              <div class="p2-sub" id="p2-kcal">약 0kcal</div>
+            </div>
+            <div class="page">
+              <div class="k">심박</div>
+              <div class="p3-bpm" id="p3-bpm">128</div>
+              <div class="p3-u">BPM</div>
+              <div class="zone" id="p3-zone"><i></i><i class="z2"></i><i></i><i></i><i></i></div>
+              <div class="zlabel" id="p3-label">존2 유지 중이에요</div>
+              <div class="grow"></div>
+              <div class="fineprint">실기기에서는 워치 심박 센서 실측이에요</div>
+            </div>
+          </div>
+          <div class="pgdots" id="pgdots"><i class="on"></i><i></i><i></i></div>
+        </div>
+
+        <!-- W-D 휴식 풀스크린 -->
+        <div class="app hidden" id="scr-rest" onclick="restSkip()">
+          <div class="k center" style="margin-top:2px">휴식</div>
+          <div class="ring">
+            <svg width="126" height="126" viewBox="0 0 126 126">
+              <circle cx="63" cy="63" r="55" stroke="#1e1f21" stroke-width="10" fill="none"/>
+              <circle id="rest-arc" cx="63" cy="63" r="55" stroke="#9BE8B0" stroke-width="10" fill="none" stroke-linecap="round" stroke-dasharray="345.6" stroke-dashoffset="0"/>
+            </svg>
+            <div class="num" id="rest-num">45</div>
+          </div>
+          <div class="rest-adj">
+            <button onclick="event.stopPropagation();restAdj(-15)">−15초</button>
+            <button onclick="event.stopPropagation();restAdj(15)">+15초</button>
+          </div>
+          <div class="grow"></div>
+          <div class="p1-tap">탭하면 바로 다음 세트, 끝나면 손목 진동</div>
+        </div>
+
+        <!-- W-E 유산소 -->
+        <div class="app hidden" id="scr-cardio">
+          <div class="k" id="ca-k">유산소</div>
+          <div class="p2-time" id="ca-time" style="margin-top:6px">00:00</div>
+          <div class="p3-bpm" id="ca-bpm" style="font-size:34px;margin-top:4px">128</div>
+          <div class="zone" id="ca-zone"><i></i><i class="z2"></i><i></i><i></i><i></i></div>
+          <div class="zlabel" id="ca-label">존2 유지 중이에요</div>
+          <div class="grow"></div>
+          <button class="hold" id="ca-hold"><div class="fill"></div><span>길게 눌러 완료</span></button>
+        </div>
+
+        <!-- W-F 축하 + 요약 -->
+        <div class="app hidden" id="scr-done">
+          <div class="doneck">✓</div>
+          <div class="ttl center" style="font-size:19px;font-weight:850">오늘도 해냈어요!</div>
+          <div class="sum">
+            <div class="row"><span>시간</span><b id="dn-time">00:00</b></div>
+            <div class="row"><span>세트</span><b id="dn-sets">0세트</b></div>
+            <div class="row"><span>칼로리</span><b id="dn-kcal">0kcal</b></div>
+          </div>
+          <div class="fineprint">실기기에서는 활동 링에 기록돼요</div>
+          <div class="grow"></div>
+          <button class="wbtn ghost" onclick="resetProto()">처음으로</button>
+        </div>
+      </div>
+    </div>
+    <div class="band bot"></div>
+  </div>
+</div>
+
+<iframe id="core" src="./index.html" style="display:none" title="core"></iframe>
+<script>
+  function fit(){ const s=Math.min(1.7,(innerHeight-80)/620,(innerWidth-40)/280); document.getElementById('stage').style.transform='scale('+s+')'; }
+  fit(); addEventListener('resize',fit);
+  function clock(){ const d=new Date(), h=d.getHours()%12||12; document.getElementById('wclock').textContent=h+':'+String(d.getMinutes()).padStart(2,'0'); }
+  clock(); setInterval(clock,15000);
+  const $=id=>document.getElementById(id);
+  function haptic(){ const s=$('scr'); s.classList.remove('pulse'); void s.offsetWidth; s.classList.add('pulse'); } /* 햅틱 대체 */
+
+  /* ---- 프로토타입 상태 (실제 앱 데이터는 읽기 전용) ---- */
+  const P={items:[], idx:0, set:0, w:20, restT:null, restLeft:0, restTotal:45,
+           t0:null, elapT:null, hrT:null, caSec:0, setsDone:0, title:'오늘의 운동'};
+
+  function go(name){ ['home','cd','run','rest','cardio','done'].forEach(n=>$('scr-'+n).classList.toggle('hidden', n!==name)); }
+
+  /* 실제 앱에서 오늘 세션 읽기(읽기 전용) — 실패 시 데모 */
+  function loadFromCore(){
+    try{
+      const w=$('core').contentWindow;
+      const t=w.todayStr(); const e=w.sessionFor(t);
+      const d=new Date(); $('home-date').textContent=(d.getMonth()+1)+'월 '+d.getDate()+'일 '+['일','월','화','수','목','금','토'][d.getDay()]+'요일';
+      const st=w.streak?w.streak():0; if(st>0) $('home-strk').textContent='🔥 '+st+'일 연속';
+      if(!e||e.rest){ $('home-title').textContent='오늘은 회복하는 날'; $('home-sub').textContent='가벼운 스트레칭 어때요?'; demoItems(); return; }
+      const s=w.SESSIONS[e.session];
+      const kept=w.sessionExercises(s, e.session);
+      P.items=[];
+      kept.forEach(x=>{
+        let wv=null; try{ const ll=w.lastLog(t, x.key); if(ll&&ll.w){ const nums=ll.w.filter(v=>typeof v==='number'&&v>0); if(nums.length) wv=Math.max(...nums); } }catch(err){}
+        P.items.push({kind:'ex', name:x.r.name, sets:(x.sl.sets||3), w:(wv!=null?wv:20), doneSets:0});
+      });
+      P.items.push({kind:'hr', name:s.cardio?s.cardio.label:'유산소'});
+      P.title=(s.title||'오늘의 운동').split('·')[0].trim();
+      $('home-title').textContent=P.title;
+      $('home-sub').textContent=kept.length+'개 운동, 약 '+(w.state&&w.state.sessionMinutes||60)+'분';
+    }catch(err){ demoItems(); }
+  }
+  function demoItems(){
+    if(P.items.length) return;
+    P.items=[{kind:'ex',name:'레그프레스',sets:4,w:50,doneSets:0},{kind:'ex',name:'체스트 프레스',sets:3,w:30,doneSets:0},{kind:'hr',name:'유산소'}];
+    if($('home-sub').textContent==='불러오는 중이에요'){ $('home-sub').textContent='데모 데이터로 보여드려요'; }
+  }
+  $('core').addEventListener('load', ()=>setTimeout(loadFromCore,900));
+  setTimeout(demoItems, 4000);
+
+  /* W-B 3·2·1 */
+  function startCd(){
+    go('cd'); const el=$('cd-num'); el.classList.remove('go');
+    let n=3; el.textContent=n; haptic();
+    const iv=setInterval(()=>{ n--;
+      if(n>0){ el.textContent=n; haptic(); }
+      else { clearInterval(iv); el.textContent='가자!'; el.classList.add('go'); haptic();
+        setTimeout(()=>{ startSession(); },700); }
+    },800);
+  }
+  function startSession(){ P.t0=Date.now(); P.idx=0; P.set=0; P.setsDone=0;
+    if(P.elapT) clearInterval(P.elapT); P.elapT=setInterval(tickElapsed,500);
+    hrStart(); openItem(0); }
+  function fmtT(ms){ const s=Math.floor(ms/1000); return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0'); }
+  function tickElapsed(){ if(!P.t0) return; const ms=Date.now()-P.t0;
+    $('p2-time').textContent=fmtT(ms); $('ca-time').textContent=fmtT(ms);
+    $('p2-kcal').textContent='약 '+Math.round(4.5*70*(ms/3600000))+'kcal (추정)'; }
+
+  /* W-C 세션 뷰 */
+  function openItem(i){
+    if(i>=P.items.length){ finishAll(); return; }
+    P.idx=i; const it=P.items[i];
+    if(it.kind==='hr'){ go('cardio'); $('ca-k').textContent=it.name; P.caSec=0; return; }
+    P.set=it.doneSets||0; P.w=it.w;
+    $('p1-k').textContent='운동 '+(i+1)+'/'+P.items.length;
+    $('p1-set').textContent='세트 '+(P.set+1)+'/'+it.sets;
+    $('p1-name').textContent=it.name;
+    $('p1-w').textContent=P.w%1?P.w.toFixed(1):P.w;
+    renderDots(it); renderP2(); go('run');
+    $('pages').scrollTo({left:0});
+  }
+  function renderDots(it){ $('p1-dots').innerHTML=Array.from({length:it.sets},(_,k)=>'<i class="'+(k<P.set?'on':'')+'"></i>').join(''); }
+  function renderP2(){ const total=P.items.length;
+    $('p2-bar').innerHTML=P.items.map((x,k)=>'<i class="'+(k<P.idx?'on':'')+'"></i>').join('');
+    $('p2-sub').textContent=(P.idx+1)+'/'+total+'단계'; }
+  function wAdj(dir){ P.w=Math.max(0, Math.round((P.w+dir*2.5)*10)/10); $('p1-w').textContent=P.w%1?P.w.toFixed(1):P.w; }
+  function p1Tap(ev){ setDoneP(); } /* 화면 탭 = 세트 완료 (NRC 큰 타깃) */
+  function setDoneP(){
+    const it=P.items[P.idx]; it.w=P.w; P.set++; it.doneSets=P.set; P.setsDone++;
+    haptic();
+    if(P.set>=it.sets){ openItem(P.idx+1); return; }
+    $('p1-set').textContent='세트 '+(P.set+1)+'/'+it.sets; renderDots(it);
+    restStart(P.restTotal);
+  }
+
+  /* W-D 휴식 */
+  function restStart(sec){
+    go('rest'); P.restLeft=sec; const total=()=>P.restTotal;
+    const arc=$('rest-arc'), C=345.6;
+    const tick=()=>{ $('rest-num').textContent=Math.ceil(P.restLeft);
+      arc.style.strokeDashoffset=String(C*(1-Math.max(0,P.restLeft)/Math.max(P.restTotal,1)));
+      if(P.restLeft<=0){ haptic(); haptic(); restSkip(); return; } P.restLeft-=0.2; };
+    clearInterval(P.restT); tick(); P.restT=setInterval(tick,200);
+  }
+  function restAdj(d){ P.restTotal=Math.max(15, Math.min(180, P.restTotal+d)); P.restLeft=Math.max(1, P.restLeft+d); }
+  function restSkip(){ clearInterval(P.restT); P.restT=null; go('run'); $('pages').scrollTo({left:0}); }
+
+  /* 심박 시뮬레이션 (존2 118~142 부근 랜덤 워크) */
+  let _bpm=124;
+  function hrStart(){ hrStop();
+    P.hrT=setInterval(()=>{ _bpm=Math.max(96,Math.min(158,_bpm+(Math.random()*8-4)));
+      const b=Math.round(_bpm), z=b<109?0:b<118?1:b<143?2:b<156?3:4;
+      const lb= z===2?'존2 유지 중이에요': z<2?'조금만 더 올려볼까요':'살짝 여유를 가져요';
+      $('p3-bpm').textContent=b; $('ca-bpm').textContent=b;
+      [['p3-zone','p3-label'],['ca-zone','ca-label']].forEach(([zi,li])=>{
+        [...$(zi).children].forEach((el,i2)=>el.classList.toggle('cur',i2===z)); $(li).textContent=lb; });
+    },1000); }
+  function hrStop(){ if(P.hrT){ clearInterval(P.hrT); P.hrT=null; } }
+
+  /* W-E 유산소: 길게 눌러 완료 */
+  (function(){ const btn=$('ca-hold'), fill=btn.querySelector('.fill'); let hT=null, p=0;
+    const down=()=>{ p=0; clearInterval(hT); hT=setInterval(()=>{ p+=0.09; fill.style.width=Math.min(100,p*100)+'%';
+      if(p>=1){ clearInterval(hT); fill.style.width='0'; cardioDoneP(); } },60); };
+    const up=()=>{ clearInterval(hT); fill.style.width='0'; };
+    btn.addEventListener('pointerdown',down); btn.addEventListener('pointerup',up); btn.addEventListener('pointerleave',up);
+  })();
+  function cardioDoneP(){ haptic(); openItem(P.idx+1); }
+
+  /* W-F 축하 */
+  function finishAll(){
+    hrStop(); if(P.elapT){ clearInterval(P.elapT); P.elapT=null; }
+    const ms=P.t0?Date.now()-P.t0:0;
+    $('dn-time').textContent=fmtT(ms);
+    $('dn-sets').textContent=P.setsDone+'세트';
+    $('dn-kcal').textContent=Math.round(4.5*70*(ms/3600000))+'kcal (추정)';
+    haptic(); go('done');
+  }
+  function resetProto(){ P.items.forEach(it=>{ it.doneSets=0; delete it.done; }); P.idx=0; P.set=0; P.setsDone=0; P.t0=null;
+    hrStop(); if(P.elapT){clearInterval(P.elapT);P.elapT=null;} go('home'); }
+
+  /* 페이지 dots */
+  $('pages').addEventListener('scroll', ()=>{ const p=Math.round($('pages').scrollLeft/205);
+    [...$('pgdots').children].forEach((el,i)=>el.classList.toggle('on',i===p)); }, {passive:true});
+</script>
+</body>
+</html>

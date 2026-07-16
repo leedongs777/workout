@@ -2087,8 +2087,11 @@ function wuFinish(){
   if(!state.stepMs) state.stepMs={}; if(!state.stepMs[dateStr]) state.stepMs[dateStr]={};
   state.stepMs[dateStr][phase]=Date.now()-beganAt;
   wuP=null; doneStep(dateStr,phase);
-  /* 마치면 다음 단계 카드가 화면 맨 위에 오게(운영자 요청) — 재렌더 후 활성 단계로 스크롤 */
-  if(typeof requestAnimationFrame==='function') requestAnimationFrame(()=>{ const el=document.querySelector('.step.active'); if(el&&el.scrollIntoView) el.scrollIntoView({block:'start'}); });
+  /* 마치면 다음 단계 카드가 화면 맨 위에 오게(운영자 요청). 쿨다운은 다음 운동이 없으니 쿨다운 카드 처음이 위에 */
+  if(typeof requestAnimationFrame==='function') requestAnimationFrame(()=>{
+    const el=(phase==='cool')? document.querySelector('[data-step="cool"]') : document.querySelector('.step.active');
+    if(el&&el.scrollIntoView) el.scrollIntoView({block:'start'});
+  });
 }
 function wuTick(){
   if(!wuP){ if(wuTimer){clearInterval(wuTimer);wuTimer=null;} return; }
@@ -2212,7 +2215,7 @@ function wuStepCard(phase,s,dateStr,active,done,mins){
   let btn;
   if(done) btn=`<div class="step-done-row">✓ 완료${elapsed?` <b>${fmtDur(elapsed)}</b> 걸림`:''} <button class="step-reopen" onclick="resetStep('${dateStr}','${phase}')">다시 열기</button></div>`;
   else btn=`<button class="step-done-btn start" onclick="wuStart('${phase}','${dateStr}')">${isWarm?'WARM-UP':'COOL-DOWN'} 시작 →</button>`;
-  return `<div class="step ${active?'active':''} ${done?'done':''}"><div class="step-head"><div class="step-fig">${fig}</div><div class="step-main"><div class="step-hrow"><div class="step-hmain"><div class="step-title">${role}</div><div class="step-name">${nm}</div></div><div class="step-kicker">${kicker}</div></div></div></div><div class="step-body">${listBody(arr)}</div>${btn}</div>`;
+  return `<div class="step ${active?'active':''} ${done?'done':''}" data-step="${phase}"><div class="step-head"><div class="step-fig">${fig}</div><div class="step-main"><div class="step-hrow"><div class="step-hmain"><div class="step-title">${role}</div><div class="step-name">${nm}</div></div><div class="step-kicker">${kicker}</div></div></div></div><div class="step-body">${listBody(arr)}</div>${btn}</div>`;
 }
 function sessionTimes(s, kept, si){
   const T=Math.max(20, state.sessionMinutes||60);

@@ -3251,7 +3251,7 @@ function anChart(kind, days){
     const cx=cw*ci+cw/2;
     out+=`<text x="${cx}" y="${H-2}" text-anchor="middle" font-size="9" fill="var(--faint)" font-family="inherit">${dy.lb}</text>`;
     if(dy.w==null){ out+=`<circle cx="${cx}" cy="${H-bot-3}" r="1.6" fill="var(--line)"/>`; return; }
-    const wv=dy.w;
+    const wv=dy.w; let topY=H-bot; /* 그린 모양의 최상단 — 무게 라벨을 바로 위에 붙이기 위함 */
     if(kind==='m'||kind==='b'){
       const maxN=Math.round(sc.max/sc.unit);
       const n=Math.max(1, Math.min(maxN, Math.round(wv/sc.unit)));
@@ -3260,6 +3260,7 @@ function anChart(kind, days){
         out+= kind==='m'
           ? `<rect x="${x}" y="${y}" width="${ew}" height="${ph}" rx="1.3" fill="var(--accent)"/><rect x="${cx-1.5}" y="${y+ph*0.3}" width="3" height="${ph*0.36}" rx=".6" fill="var(--surface)"/>`
           : `<rect x="${x}" y="${y}" width="${ew}" height="${ph}" rx="${ph/2}" fill="var(--accent)"/>${i===n-1?`<rect x="${cx-1.9}" y="${y-1}" width="3.8" height="${ph+2}" rx="1.3" fill="var(--accent-ink)"/>`:''}`; }
+      topY=H-bot-n*eh;
     } else {
       /* 덤벨·케틀벨: 무거울수록 커짐(실물처럼 더 큰 것으로 바꿔 듦) — 고정 스케일, 바닥 정렬 */
       const h=10+Math.min(1, wv/sc.max)*(IH-10);
@@ -3267,8 +3268,9 @@ function anChart(kind, days){
         out+=`<path d="M ${cx-hw} ${cy-r*0.55} a ${hw} ${h*0.30} 0 0 1 ${hw*2} 0" stroke="var(--accent)" stroke-width="${Math.max(1.6,h*0.13)}" fill="none" stroke-linecap="round"/><circle cx="${cx}" cy="${cy}" r="${r}" fill="var(--accent)"/>`;
       } else { const bw2=h*0.30, bh=h*0.92, barw=h*0.55, y=H-bot-bh;
         out+=`<rect x="${cx-barw/2-bw2}" y="${y}" width="${bw2}" height="${bh}" rx="${bw2*0.32}" fill="var(--accent)"/><rect x="${cx+barw/2}" y="${y}" width="${bw2}" height="${bh}" rx="${bw2*0.32}" fill="var(--accent)"/><rect x="${cx-barw/2}" y="${H-bot-bh/2-h*0.13}" width="${barw}" height="${h*0.26}" rx="${h*0.13}" fill="var(--accent)"/>`; }
+      topY=H-bot-h;
     }
-    out+=`<text x="${cx}" y="9.5" text-anchor="middle" font-size="9.5" font-weight="700" fill="var(--muted)" font-family="inherit">${wv%1?wv.toFixed(1):wv}kg</text>`;
+    out+=`<text x="${cx}" y="${Math.max(9.5, topY-4)}" text-anchor="middle" font-size="9.5" font-weight="700" fill="var(--muted)" font-family="inherit">${wv%1?wv.toFixed(1):wv}kg</text>`;
   });
   return `<svg width="100%" viewBox="0 0 ${W} ${H}" style="display:block" aria-hidden="true">${out}</svg>`;
 }
@@ -3352,12 +3354,14 @@ function renderAnal(){
     const series=anExSeries();
     const ins=anInsight(series);
     if(ins) html+=`<div class="an-insight">${ins}</div>`;
-    /* 운동 발전 — 최근 7일(열=날짜, 열 위 무게 라벨) */
+    /* 운동 발전 — 최근 7일(열=날짜, 스택 위 무게 라벨). 7일 내 기록이 있는 운동만 */
     html+=`<div class="sec-label">운동 발전</div>`;
-    if(series.length){
-      const td=parse(t);
+    const td=parse(t), from=fmt(addDays(td,-6));
+    const recent=series.filter(o=>o.pts.some(p=>p.d>=from))
+      .sort((a,b)=>b.pts[b.pts.length-1].d.localeCompare(a.pts[a.pts.length-1].d));
+    if(recent.length){
       html+=`<div class="card an-card" style="padding:4px 16px">`;
-      series.slice(0,4).forEach(o=>{
+      recent.slice(0,4).forEach(o=>{
         const days=Array.from({length:7},(_,i)=>{ const d=addDays(td,i-6), k=fmt(d);
           const pt=o.pts.find(p=>p.d===k); return {lb:WD[d.getDay()], w:pt?pt.w:null}; });
         const have=days.filter(dy=>dy.w!=null).map(dy=>dy.w);
@@ -3366,7 +3370,7 @@ function renderAnal(){
         html+=`<div class="an-ex2"><div class="x-hd"><b>${esc(o.name)}</b><span class="x-cat">${AN_CAT_LABEL[o.cat]||'머신'} · ${esc(String(o.reps))}</span>${badge}</div>${anChart(anChartKind(o.cat),days)}</div>`; });
       html+=`</div>`;
     } else {
-      html+=`<div class="card an-empty"><div class="ae-s">운동 중 무게를 기록하면<br>기구가 차곡차곡 쌓이는 발전 그래프가 생겨요</div></div>`;
+      html+=`<div class="card an-empty"><div class="ae-s">${series.length?'최근 7일에 무게 기록이 없어요.<br>다음 세션에서 기록하면 여기 다시 쌓여요':'운동 중 무게를 기록하면<br>기구가 차곡차곡 쌓이는 발전 그래프가 생겨요'}</div></div>`;
     }
     /* 꾸준함 */
     const cur=streak(), best=bestStreak();

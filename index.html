@@ -2174,10 +2174,13 @@ function wuPlayerCard(){
   }
   const dots=wuP.items.map((_,i)=>`<span class="wup-dot ${i<wuP.idx?'done':''}${i===wuP.idx?' cur':''}"></span>`).join('');
   const paused=!!wuP.paused;
+  /* 렌더 시점의 경과 시간 — 일시정지 재렌더에서 시계·진행바가 0으로 초기화되지 않게(운영자 제보). 일시정지 중엔 멈춘 시각 기준 */
+  const el0=Math.min(((paused?wuP.paused:Date.now())-wuP.t0)/1000, it.dur);
+  const rep0=it.mode==='reps'?Math.min(it.reps, Math.floor(el0/(it.dur/it.reps))):0;
   const mid = paused
     ? `<div class="wup-reps">일시정지됨</div>`
     : it.mode==='reps'
-      ? `<div class="wup-reps">진행 <span id="wup-rep">0</span> <span class="wup-sub">/ ${it.reps}회, 일정한 속도로</span></div>`
+      ? `<div class="wup-reps">진행 <span id="wup-rep">${rep0}</span> <span class="wup-sub">/ ${it.reps}회, 일정한 속도로</span></div>`
       : `<div class="wup-reps">${it.cardio?'원하는 기구로 가볍게':'자세를 유지하세요'}</div>`;
   const icPlay='<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8.2 5.6v12.8c0 .9 1 1.5 1.8 1l10-6.4a1.2 1.2 0 0 0 0-2l-10-6.4c-.8-.5-1.8.1-1.8 1z"/></svg>';
   const icPause='<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6.6" y="5" width="3.8" height="14" rx="1.4"/><rect x="13.6" y="5" width="3.8" height="14" rx="1.4"/></svg>';
@@ -2187,9 +2190,9 @@ function wuPlayerCard(){
     <div class="wup-head">${isWarm?'WARM-UP(준비 운동)':'COOL-DOWN(마무리 운동)'}<span class="vdiv"></span><b>${wuP.idx+1}/${total}</b></div>
     <div class="wup-name">${it.n}</div>
     ${it.d?`<div class="wup-desc">${it.d.replace(/\|/g,' ')}</div>`:''}
-    <div class="wup-clock"><span id="wup-count">0:00</span><span class="wup-dur"> / ${fmtClock(it.dur)}</span></div>
+    <div class="wup-clock"><span id="wup-count">${fmtClock(el0)}</span><span class="wup-dur"> / ${fmtClock(it.dur)}</span></div>
     ${mid}
-    <div class="wup-bar"><div id="wup-fill" class="wup-fill"></div></div>
+    <div class="wup-bar"><div id="wup-fill" class="wup-fill" style="width:${Math.min(100,el0/it.dur*100).toFixed(1)}%"></div></div>
     <div class="wup-dots">${dots}</div>
     <div class="wup-btns">
       <button class="wup-ic" onclick="event.stopPropagation();wuPrev()" aria-label="이전 동작">${icPrev}</button>

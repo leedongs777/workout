@@ -505,7 +505,7 @@
   .pb2-wt b{display:block; color:var(--ink); font-weight:750; margin-bottom:3px;}
 
   /* home dashboard */
-  .home-hi{font-size:19px; font-weight:700; letter-spacing:-.01em; line-height:1.4; color:var(--accent-ink); margin:12px 0 15px;} /* 인사말 = 홈의 헤더(H2, 앱바 타이틀은 비움) */
+  .home-hi{font-size:19px; font-weight:700; letter-spacing:-.01em; line-height:1.4; color:var(--accent-ink); margin:12px 0 15px; white-space:nowrap;} /* 인사말 = 홈의 헤더(H2, 앱바 타이틀은 비움). 항상 한 줄(운영자 규칙) — 넘치면 fitOneLine이 폰트를 줄임 */
   /* 프레스 피드백(G1) + 탭 전환 모션(G2) — 네이티브 감각. 모션 축소 설정 존중 */
   button{transition:transform .15s ease;}
   button:active{transform:scale(.96);}
@@ -2340,8 +2340,13 @@ function monthMiniDots(){
 }
 function monthDone(){ const t=parse(todayStr()),y=t.getFullYear(),m=t.getMonth(); return state.doneDays.filter(k=>{const d=parse(k);return d.getFullYear()===y&&d.getMonth()===m;}).length; }
 function monthTotal(){ const t=parse(todayStr()),y=t.getFullYear(),m=t.getMonth(),last=new Date(y,m+1,0).getDate(); let c=0; for(let i=1;i<=last;i++){ const e=sessionFor(fmt(new Date(y,m,i))); if(e&&!e.rest)c++; } return c; }
-const MOTIV=['오늘의 땀은 내일의 자신감이 돼요.','작은 한 걸음이 큰 변화를 만들어요!','어제의 나를 이겨볼까요?','꾸준함이 재능을 이겨요.','이미 시작했으니 절반은 온 거예요!','몸은 오늘의 노력을 기억해요.','포기하지 않는 한 실패는 없어요!','건강은 가장 확실한 투자예요.','미래의 나에게 선물을 줄 시간이에요!','완벽함보다 꾸준함이에요.','움직이는 만큼 강해져요!','오늘도 나를 아껴볼까요?'];
+/* 동기부여 멘트 — 닉네임과 합쳐 한 줄이어야 하므로 14자 이내로 유지(넘치면 fitOneLine이 줄이긴 함) */
+const MOTIV=['땀은 배신하지 않아요!','한 걸음이 변화를 만들어요!','어제의 나를 이겨볼까요?','꾸준함이 재능을 이겨요.','시작했으니 절반은 왔어요!','몸은 오늘을 기억해요.','오늘도 포기는 없어요!','건강은 최고의 투자예요.','미래의 나를 위한 시간이에요!','완벽함보다 꾸준함이에요.','움직이는 만큼 강해져요!','오늘도 나를 아껴볼까요?'];
 let _motiv=null; function homeMotiv(){ if(!_motiv) _motiv=MOTIV[Math.floor(Math.random()*MOTIV.length)]; return _motiv; }
+/* 한 줄 맞춤: 컨테이너를 넘치면 폰트를 0.5px씩 줄인다(최소 min px) */
+function fitOneLine(el,min){ if(!el || typeof getComputedStyle==='undefined') return; el.style.fontSize='';
+  let s=parseFloat(getComputedStyle(el).fontSize)||19;
+  while(el.scrollWidth>el.clientWidth && s>min){ s-=.5; el.style.fontSize=s+'px'; } }
 function longDate(t){ const d=parse(t); return `${d.getMonth()+1}월 ${d.getDate()}일 ${WD[d.getDay()]}요일`; }
 function renderHome(){
   const t=todayStr(); const entry=sessionFor(t);
@@ -2384,6 +2389,7 @@ function renderHome(){
   html+=`</div>`; /* '전체 일정 보기' 큰 버튼 → 섹션 헤더 우측 '전체 보기 ›'로 흡수(2026-07) */
   const pb=profileBanner(); if(pb) html+=pb; /* sec-head가 자체 상단 여백을 가짐 */
   $('view-home').innerHTML=html;
+  fitOneLine(document.querySelector('.home-hi'),13); /* 인사말은 어떤 닉네임·멘트 조합에서도 한 줄 */
   $('hd-title').textContent=''; $('hd-cyc').innerHTML=''; /* 홈은 인사말이 헤더(H2) — 앱바 타이틀 비움 */
 }
 

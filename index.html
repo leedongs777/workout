@@ -351,6 +351,7 @@
   .wup-fin{flex:1; height:46px; border:none; background:var(--accent); color:var(--on-accent); font-family:inherit; font-size:14px; font-weight:800; border-radius:11px; cursor:pointer;}
   /* 카운트다운(시작 전 5초 / 다음 동작 3초) */
   .wu-cd{cursor:pointer;}
+  .wu-player{scroll-margin-top:8px;} /* 시작 시 상단 정렬 스크롤의 여백 */
   .wu-fig{display:flex; align-items:center; justify-content:center; height:150px; margin:8px auto 2px; color:var(--accent);}
   .wu-fig-svg{width:132px; height:150px;}
   .wup-cd-num{font-size:74px; font-weight:800; color:var(--accent-ink); line-height:1; font-variant-numeric:tabular-nums; margin:4px 0 10px; animation:cdpop .5s cubic-bezier(.2,.85,.3,1);}
@@ -2055,6 +2056,8 @@ function wuStart(phase,dateStr){
   wuP={phase,dateStr,items,idx:0,t0:Date.now(),beganAt:Date.now(),cd:{total:5,t0:Date.now()}};
   if(wuTimer) clearInterval(wuTimer); wuTimer=setInterval(wuTick,200);
   renderToday();
+  /* 시작하면 플레이어 상단을 화면 위에 딱 맞춤 — 시간·동작이 바로 보이게(운영자 제보: 시작 시 화면이 아래로 밀려남) */
+  if(typeof requestAnimationFrame==='function') requestAnimationFrame(()=>{ const el=document.querySelector('.wu-player'); if(el&&el.scrollIntoView) el.scrollIntoView({block:'start'}); });
 }
 function wuAdvance(){ if(!wuP) return; wuP.idx++; if(wuP.idx>=wuP.items.length){ wuFinish(); return; } wuP.cd={total:3,t0:Date.now()}; wuP.t0=Date.now(); renderToday(); }
 function wuNext(){ wuAdvance(); }

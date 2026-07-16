@@ -3326,7 +3326,7 @@ function anInsight(series){
   if(best) return `🏋️ ${esc(best.name)}${josaGa(best.name)} 최근 <b>+${best.dw%1?best.dw.toFixed(1):best.dw}kg</b> 무거워졌어요`;
   const cur=streak();
   if(cur>=2) return `🔥 <b>${cur}일 연속</b> 운동 중이에요, 이 흐름 그대로!`;
-  if(state.doneDays.length>0) return `💪 지금까지 <b>${state.doneDays.length}세션</b> 완주!<br>무게를 기록하면 발전 그래프가 생겨요`;
+  if(state.doneDays.length>0) return `💪 지금까지 <b>${state.doneDays.length}세션</b> 완주!<br>무게를 기록하면 발전 그래프가 생겨요!`;
   return '';
 }
 

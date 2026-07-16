@@ -358,7 +358,7 @@
   .wup-fin{flex:1; height:46px; border:1px solid var(--line); background:var(--surface-2); color:var(--ink); font-family:inherit; font-size:14px; font-weight:700; border-radius:11px; cursor:pointer;}
   /* 카운트다운(시작 전 5초 / 다음 동작 3초) */
   .wu-cd{cursor:pointer;}
-  .wu-player{scroll-margin-top:8px;} /* 시작 시 상단 정렬 스크롤의 여백 */
+  .step{scroll-margin-top:8px;} /* 시작/마침 시 상단 정렬 스크롤의 여백(플레이어·단계 카드 공통) */
   .wu-fig{display:flex; align-items:center; justify-content:center; height:150px; margin:8px auto 2px; color:var(--accent);}
   .wu-fig-svg{width:132px; height:150px;}
   .wup-cd-num{font-size:74px; font-weight:800; color:var(--accent-ink); line-height:1; font-variant-numeric:tabular-nums; margin:4px 0 10px; animation:cdpop .5s cubic-bezier(.2,.85,.3,1);}
@@ -2087,6 +2087,8 @@ function wuFinish(){
   if(!state.stepMs) state.stepMs={}; if(!state.stepMs[dateStr]) state.stepMs[dateStr]={};
   state.stepMs[dateStr][phase]=Date.now()-beganAt;
   wuP=null; doneStep(dateStr,phase);
+  /* 마치면 다음 단계 카드가 화면 맨 위에 오게(운영자 요청) — 재렌더 후 활성 단계로 스크롤 */
+  if(typeof requestAnimationFrame==='function') requestAnimationFrame(()=>{ const el=document.querySelector('.step.active'); if(el&&el.scrollIntoView) el.scrollIntoView({block:'start'}); });
 }
 function wuTick(){
   if(!wuP){ if(wuTimer){clearInterval(wuTimer);wuTimer=null;} return; }

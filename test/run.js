@@ -31,7 +31,7 @@ const doc = { getElementById:id=>{ if(!els[id])els[id]=mkEl(id); return els[id];
   querySelector:()=>mkEl('q'), querySelectorAll:()=>[], createElement:()=>mkEl('c'),
   createTreeWalker:()=>({nextNode:()=>null}), body:mkEl('body'), head:mkEl('head'), addEventListener(){} };
 
-const EXPORTS = 'SESSIONS,state,freshState,sessionFor,sessionExercises,sessionTimes,effVol,goalMods,slotCands,slotActive,isPostureSlot,programFor,weekTotal,weekPlanned,cardioGuide,cardioDetail,safetyBox,renderHome,renderToday,renderPlan,renderSetup,renderAnal,anChartKind,anChart,anKcalFor,anWeekKcal,anExSeries,anTotals,showProfile,Auth,wByGender,esc,renderSetLog,todayStr,DEFAULT_EQUIP,isBW';
+const EXPORTS = 'SESSIONS,state,freshState,sessionFor,sessionExercises,sessionTimes,effVol,goalMods,slotCands,slotActive,isPostureSlot,programFor,weekTotal,weekPlanned,cardioGuide,cardioDetail,safetyBox,renderHome,renderToday,renderPlan,renderSetup,renderAnal,anChartKind,anChart,anKcalFor,anWeekKcal,anExSeries,anTotals,showProfile,Auth,wByGender,esc,renderSetLog,volEditor,todayStr,DEFAULT_EQUIP,isBW';
 js += `\n;globalThis.__T={${EXPORTS}};globalThis.__setPlanDate=d=>{planDate=d;};`;
 
 const ctx = { console, Date, Math, JSON, Object, Array, String, Number, Boolean, RegExp, Set, Map, isNaN, parseInt, parseFloat, Promise, Function, encodeURIComponent,
@@ -119,6 +119,14 @@ section('렌더 스캔 (onclick 문법 + XSS 이스케이프)');
   // 맨몸 세트 점 onclick(문자열 키) 문법 — UI-1 회귀 방지
   const dots = T.renderSetLog({role:'코어',sets:3,reps:'20–30초/측',options:[],fb:{name:'사이드 플랭크'}}, {name:'사이드 플랭크',bw:true,eq:['mat']}, '2099-01-01','5b',3);
   [...dots.matchAll(/onclick="([^"]*)"/g)].forEach(mm=>{ try{ new Function(mm[1]); }catch(e){ fails++; console.error('  ✗ 맨몸 세트점 onclick 문법:', e.message); } });
+  // volEditor 맨몸 코어 슬롯(문자열 키 "4b") onclick 문법 + reps 이스케이프 — P0-1/P0-2 회귀 방지
+  // (chgSets/setReps/resetVol에 oi를 따옴표 없이 심으면 chgSets(0,4b,…)로 SyntaxError, reps 미이스케이프면 자기-XSS)
+  T.state.profile={gender:'male',goals:['근육 만들기']};
+  const ve = T.volEditor(0,'4b',{role:'코어',sets:3,reps:'20회',options:[],fb:{name:'데드버그'}},
+                         {sets:3,reps:'<img src=x onerror=alert(1)>"',customized:true},'20회');
+  [...ve.matchAll(/\son\w+="([^"]*)"/g)].forEach(mm=>{ const body=mm[1].replace(/&quot;/g,'"').replace(/&#39;/g,"'").replace(/&amp;/g,'&');
+    try{ new Function(body); }catch(e){ fails++; console.error('  ✗ volEditor onclick 문법(pbw 문자열키):', body.slice(0,60), '→', e.message); } });
+  ok(!ve.includes('<img src=x onerror'), 'volEditor reps 원시 노출(이스케이프 누락)');
 }
 
 /* ---------- 4. 자세교정 판정 동작 보존 (구 regex ≡ isPostureSlot) ---------- */

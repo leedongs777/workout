@@ -270,7 +270,8 @@
   - 컨테이너별 크기: `.eqmodal-ill`(76px)·`.eq-tile .ill`·`.mini-fig`는 100%, `.step-fig`36px, `.eq-ic`16px.
   - 마스크 생성: 투명 PNG → 알파 bbox crop → 정사각 중앙정렬 → 160px 리샘플 → **팔레트+알파 PNG(64색)** → base64. (RGBA로 저장하면 4배 커짐)
   - 원본: `MATE_운동기구_아이콘_34종_투명배경/` (파일명 = `EQ_LABEL` 값과 1:1).
-- **하단 나브 아이콘 4종**도 같은 mask 방식(`.nav-ic.home|plan|schedule|setup`). 원본 `MATE_하단메뉴_아이콘_4종_투명배경/`.
+- **하단 나브 아이콘 5종**도 같은 mask 방식(`.nav-ic.home|plan|schedule|anal|setup`). 원본 `MATE_하단메뉴_아이콘_4종_투명배경/`(분석 포함 5개 파일).
+  - 나브 마스크 규격은 장비 아이콘과 다르다: **96×96 RGBA**(팔레트/160px 아님). 알파 bbox crop → **긴 변을 96에 꽉 채움** → 정사각 중앙정렬. RGB는 검정 단색으로 통일하면 압축이 좋아진다(마스크는 알파만 사용).
 - **동작 아이콘 24종 + 단계 대표 3종(웜업/쿨다운/유산소)도 같은 mask 방식** (2026-07 교체 완료). `.ic-pose-{키}` 24개 + `.ic-step-{warmup|cooldown|cardio}` 3개 클래스. 원본 `MATE_동작_아이콘_27종_투명배경/` (파일명 = `pose_{ROLE_PAT 키}` / `step_{키}`).
   - 구 벡터 `POSE_SVG`/`STEP_SVG`와 이름 잘라내기(`_CROP_POSE`/`cropSvg`)는 **삭제됨**. `PAT_ICON`은 폴백용 `strength` 1종만 남음.
   - 게이트(로그인) 로고 = `stepIcon('warmup')`.
@@ -281,7 +282,7 @@
 
 ### 4.9 탭/네비게이션
 - 하단 탭 [홈][운동][일정][분석][설정] (data-tab home/plan/schedule/anal/setup). `switchTab(tab)`: activeTab 설정, `if(tab==='plan')planDate=null`, 뷰 토글(`.hidden{display:none!important}`), hd-title, updateBackBtn, refresh.
-- **분석 탭(`renderAnal`, 2026-07 MVP)**: 전부 로컬 계산 — 주간 스코어(weekDone/weekPlanned), 규칙 기반 문장 인사이트, 운동 발전 그래프(`anExSeries`→`anChart`: 머신=무게판 스택·바벨/스미스=눕힌 원판 스택·덤벨/케틀벨=크기 성장, `exCat` 기준), 12주 히트맵, 스트릭/준수율, MET 추정 칼로리(`anKcalFor`, "추정" 명시 필수), 마일스톤(볼륨·코끼리/치킨 환산). 기획: 프로젝트 루트 `MATE_분석탭_기획.md`. 나브 분석 아이콘은 임시 인라인 SVG — 코덱스 PNG로 교체 예정. 지표는 워치 연동 시 추정→실측 스왑 가능 구조 유지.
+- **분석 탭(`renderAnal`, 2026-07 MVP)**: 전부 로컬 계산 — 주간 스코어(weekDone/weekPlanned), 규칙 기반 문장 인사이트, 운동 발전 그래프(`anExSeries`→`anChart`: 머신=무게판 스택·바벨/스미스=눕힌 원판 스택·덤벨/케틀벨=크기 성장, `exCat` 기준), 12주 히트맵, 스트릭/준수율, MET 추정 칼로리(`anKcalFor`, "추정" 명시 필수), 마일스톤(볼륨·코끼리/치킨 환산). 기획: 프로젝트 루트 `MATE_분석탭_기획.md`. 나브 분석 아이콘은 **PNG 마스크로 교체 완료**(2026-07, `.nav-ic.anal` — 나브 5종 동일 방식, §4.8). 지표는 워치 연동 시 추정→실측 스왑 가능 구조 유지.
 - **레이아웃**: `.wrap`에 `min-height:100vh` 쓰지 말 것(모바일에서 주소창 영역까지 잡혀 빈 스크롤 발생) → 제거하고 `body{min-height:100dvh}`.
 
 ### 4.10 화면별 핵심

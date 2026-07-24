@@ -89,8 +89,13 @@ jobs:
           cp index.html _site/
           cp preview.html _site/   # 개발용 디바이스 미리보기(아이폰/갤럭시 목업)
           cp watch.html _site/     # 워치 컴패니언 앱 프로토타입(애플워치 목업)
+          # PWA(홈 화면 설치 + 오프라인) — 이 3가지가 빠지면 설치 배너가 안 뜬다
+          cp manifest.webmanifest _site/
+          cp sw.js _site/
+          cp -r icons _site/
           echo "--- _site 내용"
           ls -la _site
+          ls -la _site/icons
 
       - name: 사이트 파일 업로드(_site 만)
         uses: actions/upload-pages-artifact@v3

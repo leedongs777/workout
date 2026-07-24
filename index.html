@@ -3,15 +3,17 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<meta name="theme-color" content="#2E5E56">
+<!-- 팬톤 626 C(--accent)와 일치. 안드로이드 상단바·설치앱 색 -->
+<meta name="theme-color" content="#285C4D">
 <!-- 홈 화면에 추가하면 앱처럼 전체화면으로 열리도록 -->
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="운동 플랜">
-<meta name="application-name" content="운동 플랜">
+<meta name="apple-mobile-web-app-title" content="MATE">
+<meta name="application-name" content="MATE">
+<link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%232E5E56'/%3E%3Cpath d='M28 50h44M34 40v20M66 40v20M24 45v10M76 45v10' stroke='white' stroke-width='7' stroke-linecap='round'/%3E%3C/svg%3E">
-<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%232E5E56'/%3E%3Cpath d='M28 50h44M34 40v20M66 40v20M24 45v10M76 45v10' stroke='white' stroke-width='7' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png"><!-- iOS는 SVG 터치아이콘 미지원 → PNG 필수 -->
 <title>운동 플랜</title>
 <!-- Pretendard — 토스·애플 계열의 깔끔한 한글 UI 서체 (SIL OFL, 상업용 무료).
      @import는 CSS 파싱 중 직렬 로드라 first paint를 지연 → preconnect로 왕복 단축 + <link>로 병렬화. -->
@@ -3963,7 +3965,21 @@ document.addEventListener('visibilitychange',()=>{ if(document.hidden){ if(_live
   // re-init sync if configured before; Google login session restores automatically
   const cfg=await Store.get(CFG_KEY);
   if(cfg){ Sync.init(cfg).then(()=>{ if(activeTab==='setup')renderSetup(); }).catch(()=>{}); }
+
+  // 홈 화면 바로가기(manifest shortcuts)로 특정 탭 열기 — 예: index.html?tab=plan
+  try{
+    const t=new URLSearchParams(location.search).get('tab');
+    if(t && ['home','plan','schedule','anal','setup'].includes(t) && state.authPassed) switchTab(t);
+  }catch(e){}
 })();
+
+/* 서비스워커 등록 — 홈 화면 설치(PWA) + 오프라인.
+   file:// 로 열면 등록이 안 되므로(보안 제약) 실패해도 앱은 그대로 동작해야 한다. */
+if('serviceWorker' in navigator && location.protocol.startsWith('http')){
+  window.addEventListener('load',()=>{
+    navigator.serviceWorker.register('sw.js').catch(()=>{});
+  });
+}
 </script>
 </body>
 </html>

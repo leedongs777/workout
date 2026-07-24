@@ -3668,7 +3668,9 @@ const Auth=(()=>{
       if(!u) return;
       if(_interactive) return; // 인터랙티브 로그인(google/email)은 자체 라우팅
       if(state.consent){ // 이미 동의(복귀 유저는 attach가 원격 consent를 동기화) → 통과
-        if(!state.authPassed){ state.authProvider=state.authProvider||'google'; state.authPassed=true; persist(); }
+        // 실제 계정 세션이 복원된 것이므로 이전에 남아 있던 'guest' 표식을 물려받지 않는다
+        // (물려받으면 프로필이 "둘러보기 모드"로 뜨고, 재실행마다 게이트가 다시 뜬다)
+        if(!state.authPassed){ state.authProvider=(state.authProvider&&state.authProvider!=='guest')?state.authProvider:'google'; state.authPassed=true; persist(); }
         hide(); return;
       }
       // 계정 로그인했으나 동의 이력 없음(신규·게스트 전환·리다이렉트 복귀) → 약관 동의 필수(우회 금지)
@@ -3981,6 +3983,9 @@ document.addEventListener('visibilitychange',()=>{ if(document.hidden){ if(_live
 (async function(){
   await load();
   // state._ts는 여기서 찍지 않는다 — 실데이터 없는 새 기기는 _ts=0이어야 첫 동기화에서 원격을 다운로드(빈 state로 덮어쓰기 방지). 실제 편집 시 touch()가 stamp함.
+  // 둘러보기(게스트)는 이번 실행에만 유효하다 — 앱을 다시 열면 로그인 화면을 다시 보여준다.
+  // 기록은 그대로 남으므로 둘러보기를 다시 누르면 이어서 볼 수 있다. 로그인 계정은 이 규칙에서 제외.
+  if(state.authProvider==='guest' && state.authPassed) state.authPassed=false;
   clampStartDate();
   renderHome();
   Sync.setOnAuth(u=>{ Auth.onSignedIn(u); });

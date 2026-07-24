@@ -3459,6 +3459,7 @@ document.querySelectorAll('.nav-btn').forEach(b=>{ b.addEventListener('click',()
 
 /* ---------------- Cloud sync (Firebase + Google 로그인) ---------------- */
 const CFG_KEY='workoutPlanner:fbcfg';
+const RDR_KEY='workoutPlanner:authRedirect'; /* 리다이렉트 로그인 시도 흔적(설치형 앱 실패 안내용) */
 function parseFirebaseConfig(str){
   let s=(str||'').trim();
   const idx=s.indexOf('firebaseConfig');
@@ -3533,16 +3534,38 @@ const Sync=(()=>{
     try{ await auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL); }catch(e){}
     await Store.set(CFG_KEY,cfgStr);
     auth.onAuthStateChanged(async u=>{ user=u; ready=true; await attach(); if(onAuth) onAuth(u); if(activeTab==='setup')renderSetup(); });
-    try{ await auth.getRedirectResult(); }catch(e){ if(e&&e.message) toast(e.message); }
+    // 리다이렉트 로그인 복귀 처리.
+    // ⚠️ 설치형 앱(특히 iOS)은 authDomain이 앱 도메인과 다르면 브라우저 저장소 분리로
+    //    리다이렉트가 조용히 실패할 수 있다. 시도 흔적이 있는데 로그인이 안 됐으면 대안을 안내한다.
+    let _rdrUser=null;
+    try{ const rr=await auth.getRedirectResult(); _rdrUser=rr&&rr.user; }
+    catch(e){ if(e&&e.message) toast(e.message); }
+    try{
+      const t=+(localStorage.getItem(RDR_KEY)||0);
+      if(t){
+        localStorage.removeItem(RDR_KEY);
+        if(!_rdrUser && !auth.currentUser && Date.now()-t < 900000)
+          toast('구글 로그인이 완료되지 않았어요. 설치한 앱에서는 이메일 로그인을 써 주세요.');
+      }
+    }catch(e){}
     return true;
   }
+  /* 홈 화면에 설치된 앱(standalone)으로 실행 중인가 — iOS는 navigator.standalone */
+  function isStandalone(){
+    try{ return (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) || navigator.standalone===true; }
+    catch(e){ return false; }
+  }
+  function markRedirect(){ try{ localStorage.setItem(RDR_KEY, String(Date.now())); }catch(e){} }
   async function signIn(){
     if(!auth)throw new Error('먼저 Firebase 설정을 저장해 주세요.');
     const provider=new firebase.auth.GoogleAuthProvider();
+    // ⚠️ 설치형(홈 화면) 앱에서는 팝업이 열리지 않거나 결과를 부모 창에 돌려주지 못해
+    //    signInWithPopup이 에러도 없이 영영 멈춘다(iOS 특히). 그래서 처음부터 리다이렉트.
+    if(isStandalone()){ markRedirect(); await auth.signInWithRedirect(provider); return {isNewUser:false, redirect:true}; }
     try{ const cred=await auth.signInWithPopup(provider); return {isNewUser: !!(cred.additionalUserInfo&&cred.additionalUserInfo.isNewUser)}; }
     catch(e){
-      if(e && (e.code==='auth/popup-blocked'||e.code==='auth/cancelled-popup-request'||e.code==='auth/operation-not-supported-in-this-environment'||e.code==='auth/popup-closed-by-user')){
-        await auth.signInWithRedirect(provider); return {isNewUser:false, redirect:true};
+      if(e && (e.code==='auth/popup-blocked'||e.code==='auth/cancelled-popup-request'||e.code==='auth/operation-not-supported-in-this-environment'||e.code==='auth/popup-closed-by-user'||e.code==='auth/web-storage-unsupported')){
+        markRedirect(); await auth.signInWithRedirect(provider); return {isNewUser:false, redirect:true};
       } else { throw e; }
     }
   }

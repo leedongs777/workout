@@ -3466,7 +3466,10 @@ const RDR_KEY='workoutPlanner:authRedirect'; /* 리다이렉트 로그인 시도
    사용자가 설정에서 자기 config를 붙여넣으면 CFG_KEY가 이 값을 덮어쓴다(개인 프로젝트 우선). */
 const DEFAULT_FB={
   apiKey:"AIzaSyCFikX0a0t4FftFl2rXPynVzYNfLNaJinw",
-  authDomain:"mate-app-c156c.firebaseapp.com",
+  // ⚠️ authDomain은 앱이 서빙되는 도메인(web.app)과 같게 둔다.
+  // firebaseapp.com으로 두면 iOS 설치앱에서 로그인 리다이렉트가 교차도메인이라 조용히 실패한다.
+  // web.app이 /__/auth/handler를 제공하므로 같은 도메인 안에서 로그인이 완결된다.
+  authDomain:"mate-app-c156c.web.app",
   databaseURL:"https://mate-app-c156c-default-rtdb.asia-southeast1.firebasedatabase.app",
   projectId:"mate-app-c156c",
   storageBucket:"mate-app-c156c.firebasestorage.app",

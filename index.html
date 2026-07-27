@@ -3460,6 +3460,20 @@ document.querySelectorAll('.nav-btn').forEach(b=>{ b.addEventListener('click',()
 /* ---------------- Cloud sync (Firebase + Google 로그인) ---------------- */
 const CFG_KEY='workoutPlanner:fbcfg';
 const RDR_KEY='workoutPlanner:authRedirect'; /* 리다이렉트 로그인 시도 흔적(설치형 앱 실패 안내용) */
+/* 기본 내장 Firebase 프로젝트(1st-party) — 사용자가 따로 설정하지 않아도 "구글로 로그인"이 바로 되게 한다.
+   ⚠️ 이 값들은 공개돼도 안전(웹 앱은 원래 클라이언트에 노출됨). 실제 보안은 RTDB 규칙 + 승인 도메인이 담당한다.
+   ⚠️ 서비스 계정 키(비공개)는 여기에 절대 넣지 말 것.
+   사용자가 설정에서 자기 config를 붙여넣으면 CFG_KEY가 이 값을 덮어쓴다(개인 프로젝트 우선). */
+const DEFAULT_FB={
+  apiKey:"AIzaSyCFikX0a0t4FftFl2rXPynVzYNfLNaJinw",
+  authDomain:"mate-app-c156c.firebaseapp.com",
+  databaseURL:"https://mate-app-c156c-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId:"mate-app-c156c",
+  storageBucket:"mate-app-c156c.firebasestorage.app",
+  messagingSenderId:"330723978029",
+  appId:"1:330723978029:web:0c9199c915973f18ba01a4",
+  measurementId:"G-FB61GFM64B"
+};
 function parseFirebaseConfig(str){
   let s=(str||'').trim();
   const idx=s.indexOf('firebaseConfig');
@@ -3523,7 +3537,7 @@ const Sync=(()=>{
     const ts=state._ts||nowTs(); lastPushed=ts;
     try{await ref.set({data:JSON.stringify(state),updatedAt:ts});}catch(e){console.warn('sync push failed',e);}
   }
-  async function init(cfgStr){
+  async function init(cfgStr, persist){
     let cfg;try{cfg=parseFirebaseConfig(cfgStr);}catch(e){throw new Error('Firebase 설정을 읽지 못했어요. firebaseConfig의 { … } 부분을 통째로 붙여넣어 주세요.');}
     if(!cfg.apiKey||!cfg.authDomain)throw new Error('설정에 apiKey / authDomain 이 필요해요. 웹 앱 설정을 통째로 붙여넣어 주세요.');
     if(!cfg.databaseURL)throw new Error('설정에 databaseURL이 없어요. Realtime Database를 먼저 만들어야 합니다.');
@@ -3532,7 +3546,9 @@ const Sync=(()=>{
     auth=firebase.auth(app); db=firebase.database(app);
     try{ db.ref('.info/serverTimeOffset').on('value',s=>{ _clockSkew=s.val()||0; }); }catch(e){} // 서버 시각 오프셋으로 _ts 보정(S5)
     try{ await auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL); }catch(e){}
-    await Store.set(CFG_KEY,cfgStr);
+    // 기본 내장 config(persist=false)는 저장하지 않는다 — 저장하면 나중에 DEFAULT_FB를 바꿔도 옛 값에 갇힌다.
+    // 사용자가 붙여넣은 개인 config만 저장(persist!==false).
+    if(persist!==false) await Store.set(CFG_KEY,cfgStr);
     auth.onAuthStateChanged(async u=>{ user=u; ready=true; await attach(); if(onAuth) onAuth(u); if(activeTab==='setup')renderSetup(); });
     // 리다이렉트 로그인 복귀 처리.
     // ⚠️ 설치형 앱(특히 iOS)은 authDomain이 앱 도메인과 다르면 브라우저 저장소 분리로
@@ -3990,9 +4006,11 @@ document.addEventListener('visibilitychange',()=>{ if(document.hidden){ if(_live
   renderHome();
   Sync.setOnAuth(u=>{ Auth.onSignedIn(u); });
   if(!state.authPassed) Auth.show(); else Auth.hide();
-  // re-init sync if configured before; Google login session restores automatically
-  const cfg=await Store.get(CFG_KEY);
-  if(cfg){ Sync.init(cfg).then(()=>{ if(activeTab==='setup')renderSetup(); }).catch(()=>{}); }
+  // 동기화 초기화 — 사용자가 저장한 config가 있으면 그것, 없으면 기본 내장 프로젝트(DEFAULT_FB) 사용.
+  // 이걸로 아무 설정 없이도 "구글로 로그인"이 동작한다(1st-party). 구글 로그인 세션은 자동 복원.
+  const storedCfg=await Store.get(CFG_KEY);
+  const cfg=storedCfg || (DEFAULT_FB?JSON.stringify(DEFAULT_FB):null);
+  if(cfg){ Sync.init(cfg, !!storedCfg).then(()=>{ if(activeTab==='setup')renderSetup(); }).catch(()=>{}); }
 
   // 홈 화면 바로가기(manifest shortcuts)로 특정 탭 열기 — 예: index.html?tab=plan
   try{

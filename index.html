@@ -715,7 +715,8 @@
   .obgrid .obchip{text-align:center; padding:11px 6px;}
   .ob-textin{width:100%; height:46px; margin-top:8px; padding:0 13px; border:1px solid var(--line); border-radius:11px; background:var(--surface); color:var(--ink); font-family:inherit; font-size:16px; box-sizing:border-box; outline:none;}
   .ob-textin:focus{border-color:var(--accent);}
-  .bcal-head{display:flex; align-items:center; justify-content:space-between; margin-bottom:12px;}
+  /* 좌우 여백으로 '‹ 제목 ›'을 안쪽에 대칭 배치 — 오른쪽 '›'가 닫기(✕ right:12px)와 겹치지 않게 */
+  .bcal-head{display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; padding:0 26px;}
   .bcal-title{border:none; background:none; font-family:inherit; font-size:15px; font-weight:800; color:var(--ink); cursor:pointer; padding:6px 8px; border-radius:8px;}
   .bcal-title:active{background:var(--surface-2);}
   .bcal-wd{display:grid; grid-template-columns:repeat(7,1fr); margin-bottom:6px;}

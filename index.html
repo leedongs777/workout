@@ -94,7 +94,8 @@
   .hero-date{color:var(--muted); font-size:13px; letter-spacing:.02em;}
   .vdiv{display:inline-block; width:1px; height:0.82em; background:var(--line); margin:0 9px; vertical-align:middle;}
   .hero-date b{color:var(--ink); font-weight:650;}
-  .hero-title{font-size:26px; font-weight:760; letter-spacing:-.02em; margin:8px 0 2px;}
+  /* §15 타이포: 큰 제목일수록 트래킹을 좁히고 리딩을 타이트하게 */
+  .hero-title{font-size:26px; font-weight:760; letter-spacing:-.028em; line-height:1.1; margin:8px 0 2px;}
   .hero-est{font-size:13px; color:var(--muted);}
   .tags{display:flex; flex-wrap:wrap; gap:6px; margin-top:11px;}
   .tag{font-size:11.5px; font-weight:650; padding:4px 9px; border-radius:999px; background:var(--accent-soft); color:var(--accent-ink); letter-spacing:.01em;}
@@ -338,7 +339,7 @@
   .wu-player{text-align:center; padding:20px 16px;}
   .wup-head{font-size:12.5px; font-weight:700; color:var(--muted); margin-bottom:8px;}
   .wup-head b{color:var(--accent-ink);}
-  .wup-name{font-size:21px; font-weight:800; color:var(--ink); letter-spacing:-.02em; margin-bottom:6px;}
+  .wup-name{font-size:21px; font-weight:800; color:var(--ink); letter-spacing:-.026em; margin-bottom:6px;}
   .wup-desc{font-size:13px; color:var(--muted); line-height:1.5; margin-bottom:14px;}
   .wup-clock{font-size:40px; font-weight:800; color:var(--accent-ink); font-variant-numeric:tabular-nums; line-height:1;}
   .wup-dur{font-size:18px; font-weight:700; color:var(--faint);}
@@ -464,7 +465,7 @@
   .gate-logo{width:66px; height:66px; border-radius:20px; background:var(--accent); color:var(--on-accent); display:flex; align-items:center; justify-content:center; margin:0 auto 16px;}
   .gate-logo svg{width:38px; height:38px;}
   .gate-logo .ic-msk{width:38px; height:38px;}
-  .gate-brand h1{font-size:24px; font-weight:800; letter-spacing:-.02em; margin-bottom:6px;}
+  .gate-brand h1{font-size:24px; font-weight:800; letter-spacing:-.03em; margin-bottom:6px;}
   .gate-brand p{font-size:14px; color:var(--muted);}
   .lbtn{display:flex; align-items:center; justify-content:center; gap:10px; width:100%; height:52px; border-radius:14px; font-family:inherit; font-size:15px; font-weight:700; cursor:pointer; border:1px solid transparent; margin-bottom:11px; transition:.14s;}
   .lbtn svg,.lbtn .em{width:20px; height:20px; flex:none;}
@@ -485,7 +486,7 @@
   .seg button.on{background:var(--accent); border-color:var(--accent); color:var(--on-accent);}
 
   /* consent */
-  .cons-h{font-size:20px; font-weight:800; letter-spacing:-.02em; margin:6px 0 4px;}
+  .cons-h{font-size:20px; font-weight:800; letter-spacing:-.026em; margin:6px 0 4px;}
   .cons-sub{font-size:13.5px; color:var(--muted); margin-bottom:20px;}
   .cons-all{display:flex; align-items:center; gap:12px; padding:16px; border:1.5px solid var(--accent); border-radius:14px; background:var(--accent-soft); cursor:pointer; user-select:none; margin-bottom:8px;}
   .cons-all .cbx{border-color:var(--accent);}
@@ -525,7 +526,7 @@
   .view-anim{animation:viewIn .22s ease both;}
   @media (prefers-reduced-motion:reduce){ button{transition:none;} button:active{transform:none;} .view-anim{animation:none;} }
   /* 홈 = 콤보2(2026-07): 히어로 타이포 확대, 일정은 카드 대신 헤어라인 리스트 (라운드는 --radius 전역 22px) */
-  .home-hero .hero-title{font-size:28px; letter-spacing:-.025em;}
+  .home-hero .hero-title{font-size:28px; letter-spacing:-.032em; line-height:1.08;}
   /* 주간 도트 트래커 — 위 요일, 아래 도트: 완료=액센트 필+체크, 오늘=링, 예정=아웃라인, 지난 미완료=점선, 휴식=작은 점 */
   .wk-strip{display:flex; justify-content:space-between; background:var(--accent-soft); border-radius:18px; padding:12px 16px 14px; margin-bottom:10px;}
   .wk-d{display:flex; flex-direction:column; align-items:center; gap:7px;}
@@ -666,7 +667,7 @@
   .ob-seg{display:flex; gap:5px; margin-bottom:9px;}
   .ob-seg i{flex:1; height:4px; border-radius:99px; background:var(--line-2);}
   .ob-seg i.on{background:var(--accent);}
-  .ob-title{font-size:21px; font-weight:800; letter-spacing:-.02em; margin-bottom:4px;}
+  .ob-title{font-size:21px; font-weight:800; letter-spacing:-.026em; line-height:1.15; margin-bottom:4px;}
   .ob-sub{font-size:13px; color:var(--muted); margin-bottom:6px;}
   .ob-sec{font-size:13px; font-weight:800; color:var(--ink); margin:20px 0 9px;}
   .ob-sub2{font-size:12.5px; font-weight:700; color:var(--muted); margin:12px 0 8px;}
@@ -735,9 +736,15 @@
   .toggle-row.sub{margin-top:8px; margin-left:16px; border-style:dashed;}
   .eq-help{position:absolute; top:6px; left:6px; width:19px; height:19px; border-radius:50%; border:1.5px solid var(--line); background:var(--surface); color:var(--muted); font-size:11px; font-weight:800; line-height:1; cursor:pointer; display:flex; align-items:center; justify-content:center; padding:0; font-family:inherit; z-index:2;}
   .eq-help:hover{border-color:var(--accent); color:var(--accent-ink);}
-  .eqmodal{position:fixed; inset:0; z-index:300; background:rgba(20,20,18,.45); display:flex; align-items:center; justify-content:center; padding:24px;}
+  /* §12 dim to focus: 배경을 흐려 뒤로 밀고 대상에 집중. §4 등장은 materialize(스케일+페이드). */
+  .eqmodal{position:fixed; inset:0; z-index:300; background:rgba(20,20,18,.45); -webkit-backdrop-filter:blur(3px); backdrop-filter:blur(3px); display:flex; align-items:center; justify-content:center; padding:24px; animation:scrimIn .2s ease both;}
+  @keyframes scrimIn{from{opacity:0;} to{opacity:1;}}
+  @keyframes modalIn{from{opacity:0; transform:translateY(10px) scale(.975);} to{opacity:1; transform:none;}}
   .eqmodal.hidden{display:none;}
-  .eqmodal-card{background:var(--surface); border-radius:18px; max-width:360px; width:100%; padding:22px 20px 20px; position:relative; box-shadow:0 20px 60px rgba(0,0,0,.3);}
+  .eqmodal-card{background:var(--surface); border-radius:18px; max-width:360px; width:100%; padding:22px 20px 20px; position:relative; box-shadow:0 20px 60px rgba(0,0,0,.3); animation:modalIn .3s cubic-bezier(.2,.9,.3,1.05) both;}
+  /* 생년월일 달력은 월 이동 시 카드를 다시 그리므로(replay 방지) 등장 팝을 끔 — 배경 스크림 페이드로 충분 */
+  .eqmodal-card.bcard{animation:none;}
+  @media (prefers-reduced-motion:reduce){ .eqmodal,.eqmodal-card{animation:none;} }
   .eqmodal-x{position:absolute; top:12px; right:12px; width:30px; height:30px; border-radius:50%; border:none; background:var(--surface-2); color:var(--muted); font-size:15px; cursor:pointer; font-family:inherit;}
   .eqmodal-ill{width:76px; height:76px; margin:2px auto 12px; color:var(--accent);}
   .eqmodal-ill svg{width:100%; height:100%;}
@@ -894,7 +901,9 @@
   .an-empty{text-align:center; padding:34px 20px;}
   .an-empty .ae-t{font-size:16px; font-weight:750;}
   .an-empty .ae-s{font-size:13px; color:var(--muted); margin-top:6px; line-height:1.6;}
-  nav{position:fixed; left:0; right:0; bottom:0; height:calc(var(--nav-h) + env(safe-area-inset-bottom)); padding-bottom:env(safe-area-inset-bottom); background:color-mix(in srgb, var(--surface) 88%, transparent); backdrop-filter:saturate(1.4) blur(14px); border-top:1px solid var(--line); z-index:40;}
+  /* §12 재질·깊이: 콘텐츠가 밑으로 흐르는 반투명 유리 레이어. 하드 구분선 대신 부드러운 리프트 섀도우 + 밝은 상단 헤어라인. */
+  nav{position:fixed; left:0; right:0; bottom:0; height:calc(var(--nav-h) + env(safe-area-inset-bottom)); padding-bottom:env(safe-area-inset-bottom); background:color-mix(in srgb, var(--surface) 72%, transparent); -webkit-backdrop-filter:saturate(1.8) blur(20px); backdrop-filter:saturate(1.8) blur(20px); border-top:1px solid color-mix(in srgb, var(--ink) 7%, transparent); box-shadow:0 -10px 24px -14px rgba(0,0,0,.28); z-index:40;}
+  @media (prefers-reduced-transparency: reduce){ nav{background:var(--surface); -webkit-backdrop-filter:none; backdrop-filter:none;} }
   .nav-inner{max-width:430px; margin:0 auto; height:var(--nav-h); display:flex;}
   .nav-btn{flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; background:none; border:none; color:var(--muted); font-family:inherit; font-size:11px; font-weight:650; cursor:pointer; letter-spacing:.02em;}
   .nav-ic{width:23px; height:23px; flex:none; background-color:currentColor;
@@ -927,17 +936,30 @@
   .cel-ring svg{width:42px; height:42px; stroke:var(--accent); stroke-width:3.2; fill:none; stroke-linecap:round; stroke-linejoin:round;}
   .cel-ring svg path{stroke-dasharray:34; stroke-dashoffset:34; animation:celCheck .4s ease .34s forwards;}
   @keyframes celCheck{to{stroke-dashoffset:0;}}
-  .cel-h{font-size:23px; font-weight:800; letter-spacing:-.02em; margin:0 0 4px; color:var(--ink);}
+  .cel-h{font-size:23px; font-weight:800; letter-spacing:-.03em; line-height:1.12; margin:0 0 4px; color:var(--ink);}
   .cel-sub{font-size:14px; color:var(--muted); margin-bottom:20px;}
   .cel-stats{display:flex; justify-content:center; gap:8px; margin-bottom:14px;}
   .cel-stat{flex:1; background:var(--surface-2); border-radius:14px; padding:12px 4px;}
-  .cel-stat b{display:block; font-size:21px; font-weight:800; letter-spacing:-.02em; line-height:1.1; color:var(--ink);}
+  .cel-stat b{display:block; font-size:21px; font-weight:800; letter-spacing:-.025em; line-height:1.1; color:var(--ink); font-variant-numeric:tabular-nums;}
   .cel-stat span{display:block; font-size:11.5px; color:var(--muted); margin-top:3px;}
   .cel-pr{background:var(--sand-soft); color:var(--sand-ink); border-radius:14px; padding:11px 14px; font-size:14px; font-weight:700; margin-bottom:8px;}
   .cel-note{font-size:11px; color:var(--faint); margin:6px 0 16px;}
   .cel-btn{width:100%; padding:15px; border:none; border-radius:14px; background:var(--accent); color:var(--on-accent); font-family:inherit; font-size:16px; font-weight:800; cursor:pointer;}
   .cel-btn:active{opacity:.9;}
   @media (prefers-reduced-motion:reduce){ .cel-card,.cel-ring,.cel-ring svg path{animation:none;} .cel-ring svg path{stroke-dashoffset:0;} }
+  /* §1 반응: 누르는 즉시 살짝 눌리는 피드백(:active = 포인터 다운). 압축감으로 '살아있는' 느낌. */
+  .btn:active{transform:scale(.97);}
+  .lbtn:active{transform:scale(.98);}
+  .chip{transition:transform .12s ease, background-color .12s ease, border-color .12s ease, color .12s ease;}
+  .chip:active{transform:scale(.95);}
+  .eq-tile{transition:transform .12s ease, border-color .14s ease, background-color .14s ease;}
+  .eq-tile:active{transform:scale(.97);}
+  .nav-btn{transition:transform .12s ease, color .12s ease;}
+  .nav-btn:active{transform:scale(.92);}
+  .voledit .stp{transition:transform .1s ease, background-color .12s ease;}
+  .voledit .stp:active{transform:scale(.9);}
+  .cel-btn:active{transform:scale(.98); opacity:.92;}
+  @media (prefers-reduced-motion:reduce){ .chip,.eq-tile,.nav-btn,.voledit .stp{transition:none;} .btn:active,.lbtn:active,.chip:active,.eq-tile:active,.nav-btn:active,.voledit .stp:active,.cel-btn:active{transform:none;} }
   a{color:var(--accent-ink);}
 </style>
 </head>
@@ -3869,7 +3891,7 @@ const Onboard=(()=>{
         <div class="bcal-grid">${cells}</div>
         <div class="bcal-foot"><button onclick="Onboard.bdClear()">지우기</button><button onclick="Onboard.bdToday()">오늘</button></div>`;
     }
-    m.innerHTML=`<div class="eqmodal-card" style="max-width:340px"><button class="eqmodal-x" onclick="closeYM()">✕</button>${inner}</div>`;
+    m.innerHTML=`<div class="eqmodal-card bcard" style="max-width:340px"><button class="eqmodal-x" onclick="closeYM()">✕</button>${inner}</div>`;
     if(bdStep==='year'){ const on=m.querySelector('.ym-cell.on'); if(on) on.scrollIntoView({block:'center'}); }
   }
   const box=()=>document.getElementById('onboard');

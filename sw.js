@@ -7,7 +7,7 @@
  * 3) Firebase/구글 인증·동기화 요청은 절대 캐시하지 않는다(오래된 인증·데이터 응답 위험).
  * 4) CACHE_VERSION을 올리면 이전 캐시는 activate에서 전부 삭제된다.
  */
-const CACHE_VERSION = 'v1';
+const CACHE_VERSION = 'v2';  /* v2: /__/ 인증 경로 가로채기 제외 */
 const CACHE = 'mate-' + CACHE_VERSION;
 
 /* 앱 셸 — 오프라인 첫 실행에 필요한 최소 집합 */
@@ -51,6 +51,10 @@ self.addEventListener('fetch', e => {
   const req = e.request;
   if (req.method !== 'GET') return;                    // POST 등은 건드리지 않음
   const url = new URL(req.url);
+  // ⚠️ Firebase 예약 경로(/__/auth/*, /__/firebase/*)는 절대 가로채지 않는다.
+  //    로그인은 이 경로의 handler/iframe으로 통신하는데, 캐시하거나 스테일 응답을 주면
+  //    getRedirectResult가 결과를 못 받아 "구글 창 떴다 닫히고 로그인 실패"가 된다.
+  if (url.pathname.startsWith('/__/')) return;
   if (NEVER_CACHE.test(url.host)) return;              // 인증·동기화는 항상 네트워크 그대로
 
   const isHTML = req.mode === 'navigate' ||

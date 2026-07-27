@@ -913,6 +913,31 @@
   .toast{position:fixed; left:50%; bottom:calc(var(--nav-h) + 22px); transform:translateX(-50%) translateY(20px); background:var(--ink); color:var(--bg); font-size:13.5px; font-weight:600; padding:11px 18px; border-radius:999px; opacity:0; transition:.25s; z-index:400; pointer-events:none; box-shadow:var(--shadow); max-width:88%; text-align:center;}
   .toast.show{opacity:1; transform:translateX(-50%) translateY(0);}
   @media (prefers-reduced-motion:reduce){*{transition:none !important;}}
+  /* 운동 완료 축하(풀스크린) */
+  .celebrate{position:fixed; inset:0; z-index:460; display:flex; align-items:center; justify-content:center;
+    padding:24px calc(20px + env(safe-area-inset-right)) calc(24px + env(safe-area-inset-bottom)) calc(20px + env(safe-area-inset-left));
+    background:rgba(20,20,18,.5); -webkit-backdrop-filter:blur(2px); backdrop-filter:blur(2px);}
+  .celebrate.hidden{display:none !important;}
+  .cel-card{background:var(--surface); border-radius:24px; width:100%; max-width:360px; padding:30px 24px 22px; text-align:center;
+    box-shadow:0 24px 70px -20px rgba(0,0,0,.5); animation:celPop .42s cubic-bezier(.2,.9,.3,1.15);}
+  @keyframes celPop{from{opacity:0; transform:translateY(16px) scale(.94);} to{opacity:1; transform:none;}}
+  .cel-ring{width:84px; height:84px; margin:0 auto 16px; border-radius:50%; background:var(--accent-soft);
+    display:flex; align-items:center; justify-content:center; animation:celRing .5s ease .08s both;}
+  @keyframes celRing{from{transform:scale(.5); opacity:0;} to{transform:scale(1); opacity:1;}}
+  .cel-ring svg{width:42px; height:42px; stroke:var(--accent); stroke-width:3.2; fill:none; stroke-linecap:round; stroke-linejoin:round;}
+  .cel-ring svg path{stroke-dasharray:34; stroke-dashoffset:34; animation:celCheck .4s ease .34s forwards;}
+  @keyframes celCheck{to{stroke-dashoffset:0;}}
+  .cel-h{font-size:23px; font-weight:800; letter-spacing:-.02em; margin:0 0 4px; color:var(--ink);}
+  .cel-sub{font-size:14px; color:var(--muted); margin-bottom:20px;}
+  .cel-stats{display:flex; justify-content:center; gap:8px; margin-bottom:14px;}
+  .cel-stat{flex:1; background:var(--surface-2); border-radius:14px; padding:12px 4px;}
+  .cel-stat b{display:block; font-size:21px; font-weight:800; letter-spacing:-.02em; line-height:1.1; color:var(--ink);}
+  .cel-stat span{display:block; font-size:11.5px; color:var(--muted); margin-top:3px;}
+  .cel-pr{background:var(--sand-soft); color:var(--sand-ink); border-radius:14px; padding:11px 14px; font-size:14px; font-weight:700; margin-bottom:8px;}
+  .cel-note{font-size:11px; color:var(--faint); margin:6px 0 16px;}
+  .cel-btn{width:100%; padding:15px; border:none; border-radius:14px; background:var(--accent); color:var(--on-accent); font-family:inherit; font-size:16px; font-weight:800; cursor:pointer;}
+  .cel-btn:active{opacity:.9;}
+  @media (prefers-reduced-motion:reduce){ .cel-card,.cel-ring,.cel-ring svg path{animation:none;} .cel-ring svg path{stroke-dashoffset:0;} }
   a{color:var(--accent-ink);}
 </style>
 </head>
@@ -970,6 +995,7 @@
 </nav>
 
 <div class="toast" id="toast" role="status" aria-live="polite" aria-atomic="true"></div>
+<div class="celebrate hidden" id="celebrate" role="dialog" aria-modal="true" aria-label="운동 완료" onclick="if(event.target===this)closeCelebrate()"></div>
 
 <script>
 /* ---------------- Storage (window.storage → localStorage → memory) ---------------- */
@@ -2317,14 +2343,63 @@ function cardioMinCtrl(si,mins){
 }
 function fmtDur(ms){ const s=Math.round(ms/1000); const m=Math.floor(s/60); const r=s%60; return m>0?`${m}분 ${r}초`:`${r}초`; }
 function startStep(date,id){ if(!state.stepStart)state.stepStart={}; if(!state.stepStart[date])state.stepStart[date]={}; state.stepStart[date][id]=Date.now(); touch(); renderToday(); }
+/* 그날 무게형 종목 중 과거(그날 이전) 최고 무게를 넘긴 것 = 개인 신기록(PR).
+   종목명 기준으로 비교(세션/슬롯 위치가 아니라 이름) — 같은 종목이 다른 세션에 있어도 일관. 맨몸/시간형 제외. */
+function prsForDay(dt){
+  const rec=state.log&&state.log[dt]; if(!rec) return [];
+  const e=sessionFor(dt); if(!e||e.rest) return [];
+  const s=SESSIONS[e.session]; if(!s) return [];
+  const maxOf=(r,keys)=>{ let mx=0; keys.forEach(k=>{ (r[k]||[]).forEach(v=>{ if(typeof v==='number'&&v>mx)mx=v; }); }); return mx; };
+  const prev={}; // 과거 종목별 최고 무게(이름 기준)
+  Object.keys(state.log||{}).forEach(d2=>{
+    if(d2>=dt) return;
+    const e2=sessionFor(d2); if(!e2||e2.rest) return;
+    const s2=SESSIONS[e2.session]; if(!s2) return;
+    sessionExercises(s2,e2.session).forEach(y=>{ if(!y.r||y.r.bw) return;
+      const mx=maxOf(state.log[d2],[y.key,y.key+'L',y.key+'R']);
+      if(mx>(prev[y.r.name]||0)) prev[y.r.name]=mx; });
+  });
+  const prs=[];
+  sessionExercises(s,e.session).forEach(x=>{ if(!x.r||x.r.bw) return;
+    const mx=maxOf(rec,[x.key,x.key+'L',x.key+'R']);
+    // 과거 기록이 있어야 "경신"으로 인정(첫 수행은 신기록 아님)
+    if(mx>0 && (prev[x.r.name]||0)>0 && mx>prev[x.r.name]) prs.push({name:x.r.name,w:mx}); });
+  return prs;
+}
+/* 운동 완료 축하 화면(풀스크린). doneStep이 그날 전체 완료 시 1회 노출. */
+function celebrate(dt){
+  const el=document.getElementById('celebrate'); if(!el) return;
+  const e=sessionFor(dt); const s=(e&&!e.rest)?SESSIONS[e.session]:null;
+  const isToday=dt===todayStr();
+  const kcal=anKcalFor(dt);
+  const stk=streak();
+  const ms=Object.values((state.stepMs&&state.stepMs[dt])||{}).reduce((a,b)=>a+(+b||0),0);
+  const mins=Math.max(1,Math.round(ms/60000));
+  const prs=prsForDay(dt);
+  const stat=(v,l)=>`<div class="cel-stat"><b>${v}</b><span>${l}</span></div>`;
+  const prHTML=prs.slice(0,2).map(p=>`<div class="cel-pr">🏆 ${esc(p.name)} 신기록 ${p.w}kg</div>`).join('');
+  el.innerHTML=`<div class="cel-card">
+    <div class="cel-ring"><svg viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg></div>
+    <div class="cel-h">${isToday?'오늘 운동 완료!':'운동 완료!'}</div>
+    <div class="cel-sub">${s?sessTitle(s.title):'수고하셨어요'}</div>
+    <div class="cel-stats">${stat('🔥'+kcal,'kcal')}${stat(stk+'일','연속')}${stat(mins+'분','시간')}</div>
+    ${prHTML}
+    <div class="cel-note">칼로리는 운동 시간과 체중으로 계산한 추정치예요.</div>
+    <button class="cel-btn" onclick="closeCelebrate()">확인</button>
+  </div>`;
+  el.classList.remove('hidden');
+}
+function closeCelebrate(){ const el=document.getElementById('celebrate'); if(el){ el.classList.add('hidden'); el.innerHTML=''; } }
 function doneStep(date,id){
   if(!state.steps)state.steps={}; if(!state.steps[date])state.steps[date]={};
   const st=state.stepStart&&state.stepStart[date]&&state.stepStart[date][id];
   if(st){ if(!state.stepMs)state.stepMs={}; if(!state.stepMs[date])state.stepMs[date]={}; state.stepMs[date][id]=Date.now()-st; }
   state.steps[date][id]=true;
   const ids=stepIdsFor(date);
-  if(ids.length && ids.every(x=>state.steps[date][x]) && !state.doneDays.includes(date)){ state.doneDays.push(date); toast('오늘 운동 전체 완료! 잘하셨어요 💪'); }
+  const nowDone = ids.length && ids.every(x=>state.steps[date][x]) && !state.doneDays.includes(date);
+  if(nowDone){ state.doneDays.push(date); }
   touch(); renderToday();
+  if(nowDone){ try{ celebrate(date); }catch(e){} }  // 축하 실패해도 완료 처리엔 영향 없게
 }
 function resetStep(date,id){
   if(state.steps&&state.steps[date]) state.steps[date][id]=false;

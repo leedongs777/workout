@@ -31,7 +31,7 @@ const doc = { getElementById:id=>{ if(!els[id])els[id]=mkEl(id); return els[id];
   querySelector:()=>mkEl('q'), querySelectorAll:()=>[], createElement:()=>mkEl('c'),
   createTreeWalker:()=>({nextNode:()=>null}), body:mkEl('body'), head:mkEl('head'), addEventListener(){} };
 
-const EXPORTS = 'SESSIONS,state,freshState,sessionFor,sessionExercises,sessionTimes,effVol,goalMods,slotCands,slotActive,isPostureSlot,programFor,weekTotal,weekPlanned,cardioGuide,cardioDetail,safetyBox,renderHome,renderToday,renderPlan,renderSetup,renderAnal,anChartKind,anChart,anKcalFor,anWeekKcal,anExSeries,anTotals,showProfile,Auth,wByGender,esc,renderSetLog,volEditor,todayStr,DEFAULT_EQUIP,isBW';
+const EXPORTS = 'SESSIONS,state,freshState,sessionFor,sessionExercises,sessionTimes,effVol,goalMods,slotCands,slotActive,isPostureSlot,programFor,weekTotal,weekPlanned,cardioGuide,cardioDetail,safetyBox,renderHome,renderToday,renderPlan,renderSetup,renderAnal,anChartKind,anChart,anKcalFor,anWeekKcal,anExSeries,anTotals,showProfile,Auth,wByGender,esc,renderSetLog,volEditor,prsForDay,celebrate,todayStr,DEFAULT_EQUIP,isBW';
 js += `\n;globalThis.__T={${EXPORTS}};globalThis.__setPlanDate=d=>{planDate=d;};`;
 
 const ctx = { console, Date, Math, JSON, Object, Array, String, Number, Boolean, RegExp, Set, Map, isNaN, parseInt, parseFloat, Promise, Function, encodeURIComponent,
@@ -162,6 +162,44 @@ section('유닛');
   ok((chart2.match(/rx="1.3"/g)||[]).length===3, 'anChart 머신 10kg/판');
   const chart3=T.anChart('m',[{lb:'월',w:990}]); // 상한 120kg=12판 캡
   ok((chart3.match(/rx="1.3"/g)||[]).length===12 && chart3.includes('990kg'), 'anChart 상한 캡 + 실값 라벨');
+}
+
+/* ---------- 6. 완료 축하 + PR(신기록) 감지 ---------- */
+section('완료 축하 / PR');
+{
+  const start = T.todayStr();
+  T.state.equipment = ['barbell','dumbbell','bench','cable','band','mat','smith'];
+  T.state.includeBodyweight=true; T.state.includeFloor=true;
+  T.state.workoutDays=[0,1,2,3,4,5,6]; T.state.sessionMinutes=60; T.state.startDate=start;
+  T.state.restDays=[]; T.state.doneDays=[]; T.state.slotCustom={}; T.state.slotPick={}; T.state.stepMs={}; T.state.cardioMin={};
+  T.state.profile={gender:'male',goals:['근육 만들기'],weightKg:70,liftingExp:true,injuries:{has:false},conditions:{has:false}};
+  const d0=start;
+  const d6=new Date(Date.parse(start)+6*86400000).toISOString().slice(0,10); // 6일 순환이면 같은 세션 반복
+  const e0=T.sessionFor(d0), e6=T.sessionFor(d6);
+  if(e0 && e6 && !e0.rest && !e6.rest && e0.session===e6.session){
+    const s=T.SESSIONS[e0.session];
+    const wx=T.sessionExercises(s,e0.session).find(x=>x.r && !x.r.bw); // 무게형 종목
+    ok(!!wx, 'PR 전제: 무게형 종목 존재');
+    if(wx){
+      T.state.log={}; T.state.log[d0]={[wx.key]:[50]}; T.state.log[d6]={[wx.key]:[55]};
+      ok(T.prsForDay(d6).some(p=>p.w===55 && p.name===wx.r.name), `PR 감지 55>50 [${wx.r.name}]`);
+      T.state.log[d6]={[wx.key]:[45]};
+      ok(T.prsForDay(d6).length===0, 'PR 아님 45<50');
+      T.state.log={}; T.state.log[d6]={[wx.key]:[60]}; // 과거 기록 없음
+      ok(T.prsForDay(d6).length===0, '첫 수행은 PR 아님');
+    }
+  } else { ok(false, `PR 전제 실패: 같은 세션 반복 안 됨 (${e0&&e0.session}/${e6&&e6.session})`); }
+  // celebrate 렌더: onclick 문법 + 원시 가운뎃점 0 (§5)
+  captured.length=0;
+  T.state.log={}; T.state.doneDays=[d0]; T.state.stepMs={[d0]:{warm:600000,ex0:1200000}};
+  try{ T.celebrate(d0); }catch(e){ fails++; console.error('  ✗ celebrate 예외:', e.message); }
+  const cel = captured.filter(c=>c.id==='celebrate').pop();
+  ok(!!cel, 'celebrate 렌더됨');
+  if(cel){
+    ok(cel.html.indexOf('·')<0, 'celebrate 원시 가운뎃점 0');
+    ok(/확인/.test(cel.html), 'celebrate 확인 버튼 존재');
+    [...cel.html.matchAll(/onclick="([^"]*)"/g)].forEach(mm=>{ try{ new Function(mm[1]); }catch(e){ fails++; console.error('  ✗ celebrate onclick 문법:', e.message); } });
+  }
 }
 
 console.log('');

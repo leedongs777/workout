@@ -36,6 +36,11 @@
     --radius:22px; --radius-sm:11px; /* 카드 라운드 22px 전역 통일(2026-07 1차 디자인 배치) */
     --shadow:0 1px 2px rgba(29,33,30,.04), 0 8px 24px -18px rgba(29,33,30,.35);
     --nav-h:64px;
+    /* 모션 이징 토큰 (apple-design §2) — 맨 ease는 약하다. 등장/이동엔 강한 커브를 쓴다. */
+    --ease-out: cubic-bezier(.23, 1, .32, 1);      /* 등장·퇴장(빠르게 시작해 반응감) */
+    --ease-in-out: cubic-bezier(.77, 0, .175, 1);  /* 화면 내 이동·모핑 */
+    --ease-drawer: cubic-bezier(.32, .72, 0, 1);   /* iOS풍 드로어/시트 */
+    --ease-spring: cubic-bezier(.2, .9, .3, 1.1);  /* 살짝 오버슈트(모달·축하 등장) */
   }
   @media (prefers-color-scheme: dark){
     :root{
@@ -366,7 +371,7 @@
   .step{scroll-margin-top:8px;} /* 시작/마침 시 상단 정렬 스크롤의 여백(플레이어·단계 카드 공통) */
   .wu-fig{display:flex; align-items:center; justify-content:center; height:150px; margin:8px auto 2px; color:var(--accent);}
   .wu-fig-svg{width:132px; height:150px;}
-  .wup-cd-num{font-size:74px; font-weight:800; color:var(--accent-ink); line-height:1; font-variant-numeric:tabular-nums; margin:4px 0 10px; animation:cdpop .5s cubic-bezier(.2,.85,.3,1);}
+  .wup-cd-num{font-size:74px; font-weight:800; color:var(--accent-ink); line-height:1; font-variant-numeric:tabular-nums; margin:4px 0 10px; animation:cdpop .5s var(--ease-out);}
   .wup-cd-say{font-size:16px; font-weight:600; color:var(--muted); line-height:1.55;}
   .wup-cd-say b{color:var(--ink); font-weight:800;}
   .wu-cd-skip{margin-top:14px; font-size:12px; color:var(--faint); font-weight:600;}
@@ -523,7 +528,7 @@
   button{transition:transform .15s ease;}
   button:active{transform:scale(.96);}
   @keyframes viewIn{from{opacity:0; transform:translateY(8px);} to{opacity:1; transform:none;}}
-  .view-anim{animation:viewIn .22s ease both;}
+  .view-anim{animation:viewIn .26s var(--ease-out) both;}
   @media (prefers-reduced-motion:reduce){ button{transition:none;} button:active{transform:none;} .view-anim{animation:none;} }
   /* 홈 = 콤보2(2026-07): 히어로 타이포 확대, 일정은 카드 대신 헤어라인 리스트 (라운드는 --radius 전역 22px) */
   .home-hero .hero-title{font-size:28px; letter-spacing:-.032em; line-height:1.08;}
@@ -608,12 +613,12 @@
   .modeseg button.on{color:var(--on-accent);}
   @keyframes thumbR{from{transform:translateX(-100%);} to{transform:none;}}
   @keyframes thumbL{from{transform:translateX(100%);} to{transform:none;}}
-  .modeseg.anim-r .seg-thumb{animation:thumbR .2s ease;}
-  .modeseg.anim-l .seg-thumb{animation:thumbL .2s ease;}
+  .modeseg.anim-r .seg-thumb{animation:thumbR .24s var(--ease-out);}
+  .modeseg.anim-l .seg-thumb{animation:thumbL .24s var(--ease-out);}
   @keyframes planInR{from{opacity:0; transform:translateX(26px);} to{opacity:1; transform:none;}}
   @keyframes planInL{from{opacity:0; transform:translateX(-26px);} to{opacity:1; transform:none;}}
-  .plan-body.anim-r{animation:planInR .22s ease;}
-  .plan-body.anim-l{animation:planInL .22s ease;}
+  .plan-body.anim-r{animation:planInR .26s var(--ease-out);}
+  .plan-body.anim-l{animation:planInL .26s var(--ease-out);}
   @media (prefers-reduced-motion:reduce){ .modeseg .seg-thumb, .plan-body{animation:none !important;} }
   .ymp-title{font-size:15px; font-weight:800; margin-bottom:14px; display:flex; align-items:center; gap:8px;}
   .ymp-back{border:none; background:var(--surface-2); border-radius:8px; width:28px; height:28px; font-size:16px; cursor:pointer; font-family:inherit; color:var(--ink);}
@@ -741,7 +746,7 @@
   @keyframes scrimIn{from{opacity:0;} to{opacity:1;}}
   @keyframes modalIn{from{opacity:0; transform:translateY(10px) scale(.975);} to{opacity:1; transform:none;}}
   .eqmodal.hidden{display:none;}
-  .eqmodal-card{background:var(--surface); border-radius:18px; max-width:360px; width:100%; padding:22px 20px 20px; position:relative; box-shadow:0 20px 60px rgba(0,0,0,.3); animation:modalIn .3s cubic-bezier(.2,.9,.3,1.05) both;}
+  .eqmodal-card{background:var(--surface); border-radius:18px; max-width:360px; width:100%; padding:22px 20px 20px; position:relative; box-shadow:0 20px 60px rgba(0,0,0,.3); animation:modalIn .32s var(--ease-spring) both;}
   /* 생년월일 달력은 월 이동 시 카드를 다시 그리므로(replay 방지) 등장 팝을 끔 — 배경 스크림 페이드로 충분 */
   .eqmodal-card.bcard{animation:none;}
   @media (prefers-reduced-motion:reduce){ .eqmodal,.eqmodal-card{animation:none;} }
@@ -829,7 +834,7 @@
   .drawer-backdrop{position:absolute; inset:0; background:rgba(20,20,18,.4); opacity:0; transition:opacity .34s ease;}
   .drawer.open .drawer-backdrop{opacity:1;}
   .drawer-backdrop.dragging{transition:none;}
-  .drawer-panel{position:absolute; top:0; right:0; bottom:0; width:80%; max-width:320px; background:var(--surface); box-shadow:-10px 0 40px rgba(0,0,0,.25); padding:12px 16px calc(20px + env(safe-area-inset-bottom)); overflow-y:auto; display:flex; flex-direction:column; transform:translateX(100%); transition:transform .34s cubic-bezier(.32,.72,0,1); touch-action:pan-y; overscroll-behavior:contain; will-change:transform;}
+  .drawer-panel{position:absolute; top:0; right:0; bottom:0; width:80%; max-width:320px; background:var(--surface); box-shadow:-10px 0 40px rgba(0,0,0,.25); padding:12px 16px calc(20px + env(safe-area-inset-bottom)); overflow-y:auto; display:flex; flex-direction:column; transform:translateX(100%); transition:transform .34s var(--ease-drawer); touch-action:pan-y; overscroll-behavior:contain; will-change:transform;}
   .drawer.open .drawer-panel{transform:translateX(0);}
   .drawer-panel.dragging{transition:none;}
   @media (prefers-reduced-motion:reduce){ .drawer-panel{transform:none!important; transition:none;} .drawer-backdrop{transition:opacity .18s ease;} }
@@ -934,10 +939,10 @@
     background:rgba(20,20,18,.5); -webkit-backdrop-filter:blur(2px); backdrop-filter:blur(2px);}
   .celebrate.hidden{display:none !important;}
   .cel-card{background:var(--surface); border-radius:24px; width:100%; max-width:360px; padding:30px 24px 22px; text-align:center;
-    box-shadow:0 24px 70px -20px rgba(0,0,0,.5); animation:celPop .42s cubic-bezier(.2,.9,.3,1.15);}
+    box-shadow:0 24px 70px -20px rgba(0,0,0,.5); animation:celPop .42s var(--ease-spring);}
   @keyframes celPop{from{opacity:0; transform:translateY(16px) scale(.94);} to{opacity:1; transform:none;}}
   .cel-ring{width:84px; height:84px; margin:0 auto 16px; border-radius:50%; background:var(--accent-soft);
-    display:flex; align-items:center; justify-content:center; animation:celRing .5s ease .08s both;}
+    display:flex; align-items:center; justify-content:center; animation:celRing .5s var(--ease-out) .08s both;}
   @keyframes celRing{from{transform:scale(.5); opacity:0;} to{transform:scale(1); opacity:1;}}
   .cel-ring svg{width:42px; height:42px; stroke:var(--accent); stroke-width:3.2; fill:none; stroke-linecap:round; stroke-linejoin:round;}
   .cel-ring svg path{stroke-dasharray:34; stroke-dashoffset:34; animation:celCheck .4s ease .34s forwards;}
@@ -2766,7 +2771,7 @@ function renderToday(){
 
 /* ----- PLAN view ----- */
 let planYear=null, planMonth=null, planMode='list';
-function planShift(d){ planMonth+=d; if(planMonth<0){planMonth=11;planYear--;}else if(planMonth>11){planMonth=0;planYear++;} renderPlan(); }
+function planShift(d){ _planSlide = d>0?'r':'l'; /* 월 내비게이션 = 방향 슬라이드(다음 달=오른쪽에서). 부수적 재렌더는 여전히 슬라이드 없음 */ planMonth+=d; if(planMonth<0){planMonth=11;planYear--;}else if(planMonth>11){planMonth=0;planYear++;} renderPlan(); }
 let _planSlide=null; /* 모드 전환 직후 1회 슬라이드 방향('r'|'l') — 달력은 오른쪽 칸이라 cal 진입=r */
 let _planScrollTo=null; /* {k:날짜키, smooth:bool} — 리스트 렌더 후 해당 행으로 1회 스크롤(오늘 또는 달력에서 탭한 날) */
 function planSetMode(m){ if(m!==planMode){ _planSlide = (m==='cal'?'r':'l'); if(m==='list') _planScrollTo={k:todayStr(), smooth:true}; } planMode=m; renderPlan(); }
@@ -2788,7 +2793,7 @@ function dialogAct(i){ const f=_dlgActs&&_dlgActs[i]; closeConfirm(); if(f)f(); 
 function closeConfirm(){ _dlgActs=null; const m=document.getElementById('confirmm'); m.classList.add('hidden'); m.innerHTML=''; }
 function ymPickYear(y){ pickYear=y; pickStep='month'; renderYM(); }
 function ymBackYear(){ pickStep='year'; renderYM(); }
-function ymPickMonth(mo){ planYear=pickYear; planMonth=mo; closeYM(); renderPlan(); }
+function ymPickMonth(mo){ _planSlide = ((pickYear*12+mo) >= (planYear*12+planMonth))?'r':'l'; planYear=pickYear; planMonth=mo; closeYM(); renderPlan(); }
 function renderYM(){
   const m=document.getElementById('ympick'); let inner;
   if(pickStep==='year'){

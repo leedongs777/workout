@@ -825,8 +825,14 @@
   /* side drawer menu */
   .drawer{position:fixed; inset:0; z-index:150;}
   .drawer.hidden{display:none;}
-  .drawer-backdrop{position:absolute; inset:0; background:rgba(20,20,18,.4);}
-  .drawer-panel{position:absolute; top:0; right:0; bottom:0; width:80%; max-width:320px; background:var(--surface); box-shadow:-10px 0 40px rgba(0,0,0,.25); padding:12px 16px calc(20px + env(safe-area-inset-bottom)); overflow-y:auto; display:flex; flex-direction:column;}
+  /* §7 나온 방향(오른쪽)으로 슬라이드 등장/퇴장 + 밀어서 닫기(드래그 중 transition 끔) */
+  .drawer-backdrop{position:absolute; inset:0; background:rgba(20,20,18,.4); opacity:0; transition:opacity .34s ease;}
+  .drawer.open .drawer-backdrop{opacity:1;}
+  .drawer-backdrop.dragging{transition:none;}
+  .drawer-panel{position:absolute; top:0; right:0; bottom:0; width:80%; max-width:320px; background:var(--surface); box-shadow:-10px 0 40px rgba(0,0,0,.25); padding:12px 16px calc(20px + env(safe-area-inset-bottom)); overflow-y:auto; display:flex; flex-direction:column; transform:translateX(100%); transition:transform .34s cubic-bezier(.32,.72,0,1); touch-action:pan-y; overscroll-behavior:contain; will-change:transform;}
+  .drawer.open .drawer-panel{transform:translateX(0);}
+  .drawer-panel.dragging{transition:none;}
+  @media (prefers-reduced-motion:reduce){ .drawer-panel{transform:none!important; transition:none;} .drawer-backdrop{transition:opacity .18s ease;} }
   .drawer-head{display:flex; margin-bottom:2px;}
   .drawer-profile{display:flex; align-items:center; gap:12px; width:100%; text-align:left; background:var(--accent-soft); border:none; border-radius:14px; padding:14px; cursor:pointer; font-family:inherit; margin-bottom:14px;}
   .dp-av{width:44px; height:44px; border-radius:50%; background:var(--accent); color:var(--on-accent); font-size:19px; font-weight:800; display:flex; align-items:center; justify-content:center; flex:none;}
@@ -3074,9 +3080,67 @@ const Drawer=(()=>{
       ${loggedIn?`<button class="drawer-item danger" onclick="Drawer.logout()"><span class="di-ic">↩</span>로그아웃</button>`:`<button class="drawer-item" onclick="Drawer.login()"><span class="di-ic">→</span>로그인 / 회원가입</button>`}
       <div class="drawer-ver">MATE — My AI Training Expert<br>v0.9 (beta)</div>`;
   }
+  const panel=()=>el().querySelector('.drawer-panel');
+  const backdrop=()=>el().querySelector('.drawer-backdrop');
+  const reduce=()=> !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+  let _hideT=null;
+  function doOpen(){
+    render(); const d=el(); clearTimeout(_hideT);
+    d.classList.remove('hidden');
+    void panel().offsetWidth;              // reflow → translateX(100%) 시작상태 확정 후 transition 발동
+    d.classList.add('open');
+    document.body.style.overflow='hidden';
+    bindDrag();
+  }
+  function doClose(){
+    const d=el(); d.classList.remove('open'); document.body.style.overflow='';
+    const p=panel(), bd=backdrop();
+    p.classList.remove('dragging'); bd.classList.remove('dragging');
+    p.style.transform=''; bd.style.opacity='';   // .open 제거 → CSS가 translateX(100%)로 슬라이드아웃
+    clearTimeout(_hideT); _hideT=setTimeout(()=>{ d.classList.add('hidden'); }, reduce()?0:340);
+  }
+  /* §2 1:1 추적 · §9 러버밴딩(왼쪽=더 열기 방향은 저항) · §6 관성 투영으로 닫기 판정 */
+  function bindDrag(){
+    const p=panel(), bd=backdrop();
+    let startX=0, startY=0, cur=0, w=0, hist=[], active=false, decided=false;
+    p.onpointerdown=(e)=>{
+      if(reduce()||e.pointerType==='mouse'&&e.button!==0) return;
+      startX=e.clientX; startY=e.clientY; w=p.getBoundingClientRect().width; cur=0;
+      hist=[{x:e.clientX,t:e.timeStamp}]; active=true; decided=false;
+    };
+    p.onpointermove=(e)=>{
+      if(!active) return;
+      const dx=e.clientX-startX, dy=e.clientY-startY;
+      if(!decided){
+        if(Math.abs(dx)<8 && Math.abs(dy)<8) return;                 // §10 히스테리시스
+        if(Math.abs(dy)>Math.abs(dx)){ active=false; return; }       // 세로 스크롤 의도 → 드래그 포기
+        decided=true; try{p.setPointerCapture(e.pointerId);}catch(_){}
+        p.classList.add('dragging'); bd.classList.add('dragging');
+      }
+      cur = dx>=0 ? dx : dx*0.35;                                     // 오른쪽=1:1, 왼쪽=러버밴딩
+      p.style.transform='translateX('+cur+'px)';
+      bd.style.opacity=String(Math.max(0, 1 - Math.max(0,cur)/w));
+      hist.push({x:e.clientX,t:e.timeStamp}); if(hist.length>6) hist.shift();
+    };
+    const end=()=>{
+      if(!active){ return; } active=false;
+      if(!decided){ return; }                                        // 단순 탭 → 클릭 진행
+      decided=false; p.classList.remove('dragging'); bd.classList.remove('dragging');
+      let v=0; if(hist.length>=2){ const a=hist[0], b=hist[hist.length-1], dt=b.t-a.t; if(dt>0) v=(b.x-a.x)/dt; } // px/ms
+      const projected = cur + v*120;                                 // §6 관성 투영(120ms 앞)
+      if(projected > w*0.4 || v > 0.55){                             // 닫기
+        p.style.transform='translateX(100%)'; bd.style.opacity='0'; el().classList.remove('open'); document.body.style.overflow='';
+        clearTimeout(_hideT); _hideT=setTimeout(()=>{ el().classList.add('hidden'); p.style.transform=''; bd.style.opacity=''; }, 300);
+      } else {                                                       // 스냅백
+        p.style.transform='translateX(0)'; bd.style.opacity='1';
+        setTimeout(()=>{ p.style.transform=''; bd.style.opacity=''; }, 300);
+      }
+    };
+    p.onpointerup=end; p.onpointercancel=end;
+  }
   return {
-    open:()=>{ render(); el().classList.remove('hidden'); document.body.style.overflow='hidden'; },
-    close:()=>{ el().classList.add('hidden'); document.body.style.overflow=''; },
+    open:doOpen,
+    close:doClose,
     go:(tab)=>{ Drawer.close(); goTab(tab); },
     profile:()=>{ Drawer.close(); showProfile(); },
     help:()=>{ Drawer.close(); toast('도움말/문의는 준비 중이에요.'); },

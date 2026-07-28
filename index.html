@@ -272,8 +272,8 @@
   .setdot:active{transform:scale(.9);}                     /* §1 누르는 즉시 반응 */
   .setdot.on{background:var(--accent); border-color:var(--accent); color:var(--on-accent);}
   /* 세트 완료 순간 팝(§8 delight) — 완료된 그 점에만 1회. 자주 눌러서 미세하게. */
-  @keyframes setPop{0%{transform:scale(.72);} 55%{transform:scale(1.16);} 100%{transform:scale(1);}}
-  .setdot.pop{animation:setPop .34s var(--ease-out);}
+  @keyframes setPop{0%{transform:scale(.78);} 55%{transform:scale(1.12);} 100%{transform:scale(1);}}
+  .setdot.pop{animation:setPop .24s var(--ease-out);}  /* 수십 회/일 feedback이라 짧게(review-animations §2·§4) */
   @media (prefers-reduced-motion:reduce){ .setdot{transition:background-color .16s ease, color .16s ease;} .setdot:active,.setdot.pop{transform:none; animation:none;} }
 
   /* guided step flow */

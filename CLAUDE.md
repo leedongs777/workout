@@ -243,7 +243,7 @@
 - `wuTiming(it)`: `a` 문자열 파싱 → `{mode:'hold'|'reps', reps, dur}`. 초/분→hold(초); 회/걸음→reps(회, 템포 ~2초/회, 걸음 ~0.7초); 좌/우 각각·앞·뒤·각각→2배; ×N 세트 곱; hold clamp 15~150초, reps clamp 12~90초; cardio→300초.
 - `wuBuildItems(arr)` = wuResolve 후 wuTiming 매핑. `fmtClock(sec)`→"m:ss".
 - 모듈 변수 `let wuP=null, wuTimer=null;`.
-- `wuStart(phase,dateStr)`: 아이템 생성, `wuP={phase,dateStr,items,idx,t0,beganAt}`, `setInterval(wuTick,200)`, renderToday.
+- `wuStart(phase,dateStr)`: 아이템 생성, `wuP={phase,dateStr,items,idx,t0,beganAt}`, `setInterval(wuTick,200)`, renderToday. **2026-07: 가이드 플레이어는 선택 기능으로 강등** — 웜업/쿨다운 카드 기본은 [완료 ✓](`doneStep`, 완료→접힘)이고, "▶ 가이드 따라하기(타이머)" 버튼을 눌러야 `wuStart`로 진입. 완료된 웜업/쿨다운도 운동 단계처럼 접힘.
 - `wuTick()`: `#wup-fill` 너비 / `#wup-count` / `#wup-rep`(횟수는 전체 시간 동안 **균일 증가**) 갱신, 경과≥dur이면 자동 다음.
 - `wuNext()`=건너뛰기. `wuFinish()`=stepMs 기록 후 wuP 해제, `doneStep(dateStr,phase)`.
 - `wuPlayerCard()`: 큰 타이머 + 횟수 라인 + 진행바 + 점(dots) + [다음 →]/[웜업|쿨다운 마침].
@@ -252,7 +252,7 @@
 - **쿨다운 마침 → 운동 완료로 이어짐**(doneStep이 모든 단계 완료 시 그날 완료 처리).
 
 ### 4.7 본운동 단계별 타이머
-- `stepShell`: 시작/완료 타이머. 미시작→[시작 →](`startStep`) → 진행중→[완료 · live-timer](doneStep이 stepMs 기록) → 완료→"✓ 완료 · N분 M초" + 다시 열기(`resetStep`).
+- `stepShell`: 각 단계 카드. **시작 버튼·시간측정 폐기(2026-07, 운영자 요청 — 시작 누르는 걸 자주 잊고 시간측정이 무의미)**. 미완료→[완료 ✓](`doneStep`), 완료→**접힘 카드**(요약 한 줄, 탭하면 펼침 `toggleDoneOpen`) + 다시 열기(`resetStep`). `startStep`/`stepMs`/`live-timer`는 더 이상 렌더에 쓰지 않음(되돌리지 말 것). 완료 축하 "시간" 스탯과 `anKcalFor`는 측정값이 없으면 계획 운동시간(`sessionMinutes`)으로 추정.
 - 전역 `setInterval(1s)`가 `.live-timer`(data-start) 갱신. `fmtDur(ms)`→"N분 M초".
 - **세트 무게 입력 = −/+ 스텝퍼**(`wtCell`/`adjWeight`). 직접 타이핑도 되지만 폰트는 **반드시 16px 이상**이어야 iOS가 입력 포커스 시 화면을 자동 확대하지 않는다(과거 14px이라 확대 불편 있었음). 무게 승계는 프리필이 담당(아래 참조).
 - **세트 수 ± 스텝퍼(`volEditor`→`chgSets`)**: `chgSets`에 넘기는 기준값은 **화면 표시값 `effVol().sets`(=`v.sets`)**여야 한다. `slot.sets`(raw)를 넘기면 목표(+1)·초보자(−1) 보정이 반영된 표시값과 어긋나 첫 탭이 값을 건너뛴다(2026-07 수정). 되돌리지 말 것.

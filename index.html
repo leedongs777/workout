@@ -286,6 +286,7 @@
   .step.collapsed .step-fig{width:34px; height:34px;}
   .step.collapsed .step-fig .ic-msk, .step.collapsed .step-fig svg{width:26px; height:26px;}
   .step.collapsed .step-name{font-size:14.5px;}
+  .wu-guide-row{margin-top:8px; text-align:center;} /* 웜업/쿨다운 가이드(타이머) 선택 버튼 */
   .step-fold{flex:none; color:var(--faint); font-size:12px; padding:2px 4px;}
   .step-head{display:flex; align-items:flex-start; gap:11px;}
   .step-fig{flex:none; width:44px; height:44px; border-radius:10px; background:var(--surface-2); border:1px solid var(--line-2); color:var(--accent); display:flex; align-items:center; justify-content:center;}
@@ -1944,18 +1945,16 @@ function stepShell(figHtml,figCls,kicker,titleHtml,bodyHtml,id,dateStr,active,do
     return `<div class="step done collapsed" onclick="toggleDoneOpen('${dateStr}','${id}')">
       <div class="step-head">
         <div class="step-fig ${figCls}">${figHtml}</div>
-        <div class="step-main"><div class="step-hrow"><div class="step-hmain">${titleHtml}</div><div class="step-kicker">✓${elapsed?' '+fmtDur(elapsed):''}</div></div></div>
+        <div class="step-main"><div class="step-hrow"><div class="step-hmain">${titleHtml}</div><div class="step-kicker">✓</div></div></div>
         <span class="step-fold">▾</span>
       </div>
     </div>`;
   }
   let btn;
   if(done){
-    btn=`<div class="step-done-row">✓ 완료${elapsed?` <b>${fmtDur(elapsed)}</b> 걸림`:''} <button class="step-reopen" onclick="resetStep('${dateStr}','${id}')">다시 열기</button> <button class="step-reopen" onclick="toggleDoneOpen('${dateStr}','${id}')">접기 ▴</button></div>`;
-  } else if(started){
-    btn=`<button class="step-done-btn timing" onclick="doneStep('${dateStr}','${id}')">완료 <span class="live-timer" data-start="${started}">0:00</span></button>`;
+    btn=`<div class="step-done-row">✓ 완료 <button class="step-reopen" onclick="resetStep('${dateStr}','${id}')">다시 열기</button> <button class="step-reopen" onclick="toggleDoneOpen('${dateStr}','${id}')">접기 ▴</button></div>`;
   } else {
-    btn=`<button class="step-done-btn start" onclick="startStep('${dateStr}','${id}')">시작 →</button>`;
+    btn=`<button class="step-done-btn" onclick="doneStep('${dateStr}','${id}')">완료 ✓</button>`;
   }
   return `<div class="step ${active?'active':''} ${done?'done':''} ${started&&!done?'timing':''}">
     <div class="step-head">
@@ -2343,10 +2342,13 @@ function wuStepCard(phase,s,dateStr,active,done,mins){
   const isWarm=phase==='warm', role=isWarm?'준비 운동':'마무리 운동', nm=isWarm?'WARM-UP':'COOL-DOWN';
   const kicker=`약 ${mins}분`;
   const arr=isWarm?s.warm:s.cool, fig=stepIcon(isWarm?'warmup':'cooldown');
-  const elapsed=state.stepMs&&state.stepMs[dateStr]&&state.stepMs[dateStr][phase];
+  /* 완료 → 접힘 카드(운동 단계와 동일), 탭하면 펼침 */
+  if(done && !_openDone[dateStr+':'+phase]){
+    return `<div class="step done collapsed" onclick="toggleDoneOpen('${dateStr}','${phase}')"><div class="step-head"><div class="step-fig">${fig}</div><div class="step-main"><div class="step-hrow"><div class="step-hmain"><div class="step-title">${role}</div><div class="step-name">${nm}</div></div><div class="step-kicker">✓</div></div></div><span class="step-fold">▾</span></div></div>`;
+  }
   let btn;
-  if(done) btn=`<div class="step-done-row">✓ 완료${elapsed?` <b>${fmtDur(elapsed)}</b> 걸림`:''} <button class="step-reopen" onclick="resetStep('${dateStr}','${phase}')">다시 열기</button></div>`;
-  else btn=`<button class="step-done-btn start" onclick="wuStart('${phase}','${dateStr}')">${isWarm?'WARM-UP':'COOL-DOWN'} 시작 →</button>`;
+  if(done) btn=`<div class="step-done-row">✓ 완료 <button class="step-reopen" onclick="resetStep('${dateStr}','${phase}')">다시 열기</button> <button class="step-reopen" onclick="toggleDoneOpen('${dateStr}','${phase}')">접기 ▴</button></div>`;
+  else btn=`<button class="step-done-btn" onclick="doneStep('${dateStr}','${phase}')">완료 ✓</button><div class="wu-guide-row"><button class="step-reopen" onclick="wuStart('${phase}','${dateStr}')">▶ 가이드 따라하기(타이머)</button></div>`;
   return `<div class="step ${active?'active':''} ${done?'done':''}" data-step="${phase}"><div class="step-head"><div class="step-fig">${fig}</div><div class="step-main"><div class="step-hrow"><div class="step-hmain"><div class="step-title">${role}</div><div class="step-name">${nm}</div></div><div class="step-kicker">${kicker}</div></div></div></div><div class="step-body">${listBody(arr)}</div>${btn}</div>`;
 }
 function sessionTimes(s, kept, si){
@@ -2418,8 +2420,7 @@ function celebrate(dt){
   const isToday=dt===todayStr();
   const kcal=anKcalFor(dt);
   const stk=streak();
-  const ms=Object.values((state.stepMs&&state.stepMs[dt])||{}).reduce((a,b)=>a+(+b||0),0);
-  const mins=Math.max(1,Math.round(ms/60000));
+  const mins=Math.max(1, state.sessionMinutes||60); /* 시간 측정 제거 → 계획 운동 시간 표시 */
   const prs=prsForDay(dt);
   const stat=(v,l)=>`<div class="cel-stat"><b>${v}</b><span>${l}</span></div>`;
   const kcalStat=`<div class="cel-stat"><b>🔥<span data-count-from="0" data-val="${kcal}">${kcal}</span></b><span>kcal</span></div>`; /* 0→N 카운트업 */

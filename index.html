@@ -287,6 +287,20 @@
   .step.collapsed .step-fig .ic-msk, .step.collapsed .step-fig svg{width:26px; height:26px;}
   .step.collapsed .step-name{font-size:14.5px;}
   .wu-guide-row{margin-top:8px; text-align:center;} /* 웜업/쿨다운 가이드(타이머) 선택 버튼 */
+  /* 세트별 무게+횟수 행(2026-07) */
+  .setlog.v2{margin-top:10px;}
+  .setr{display:flex; align-items:center; gap:8px; padding:4px 0;}
+  .setr.head{padding:0 0 2px;}
+  .setr-n{flex:0 0 44px; font-size:13px; font-weight:700; color:var(--faint);}
+  .setr-cells{flex:1; display:flex; gap:10px; min-width:0;}
+  .setr-col{flex:1; min-width:0;}
+  .setr-col .wtstep{width:100%;}
+  .setr-cch{flex:1; text-align:center; font-size:11px; font-weight:600; color:var(--faint);}
+  .setx{flex:0 0 30px; height:30px; border:none; background:transparent; color:var(--faint); font-size:14px; cursor:pointer; border-radius:8px; padding:0;}
+  .setx:active{transform:scale(.9);}
+  .setx.ph{visibility:hidden;}
+  .setadd{width:100%; margin-top:8px; border:1px dashed var(--accent); background:transparent; color:var(--accent-ink); font-weight:700; font-size:13.5px; padding:9px; border-radius:11px; cursor:pointer; font-family:inherit;}
+  .setadd:active{transform:scale(.99);}
   .step-fold{flex:none; color:var(--faint); font-size:12px; padding:2px 4px;}
   .step-head{display:flex; align-items:flex-start; gap:11px;}
   .step-fig{flex:none; width:44px; height:44px; border-radius:10px; background:var(--surface-2); border:1px solid var(--line-2); color:var(--accent); display:flex; align-items:center; justify-content:center;}
@@ -1549,7 +1563,7 @@ function buildCD(s){
 }
 SESSIONS.forEach(s=>{ s.warm=buildWU(s); s.cool=buildCD(s); });
 /* ---------------- App state ---------------- */
-function freshState(){ return { equipment:[...DEFAULT_EQUIP], includeBodyweight:true, includeFloor:true, workoutDays:[...DEFAULT_WORKOUT_DAYS], sessionMinutes:60, startDate:todayStr(), restDays:[], doneDays:[], log:{}, steps:{}, stepStart:{}, stepMs:{}, slotCustom:{}, slotPick:{}, cardioMin:{}, cardioChoice:null, wDefaults:null, authPassed:false, authProvider:null, consent:null, profile:null, onboarded:true }; }
+function freshState(){ return { equipment:[...DEFAULT_EQUIP], includeBodyweight:true, includeFloor:true, workoutDays:[...DEFAULT_WORKOUT_DAYS], sessionMinutes:60, startDate:todayStr(), restDays:[], doneDays:[], log:{}, rlog:{}, exMem:{}, steps:{}, stepStart:{}, stepMs:{}, slotCustom:{}, slotPick:{}, cardioMin:{}, cardioChoice:null, wDefaults:null, authPassed:false, authProvider:null, consent:null, profile:null, onboarded:true }; }
 let state=freshState();
 let activeTab='home';
 let openDays={}; // schedule expand state
@@ -1732,6 +1746,24 @@ function cellBasis(n){ const per=Math.ceil(n/Math.ceil(n/4)); return `flex:0 0 c
 function setCols(n){ return n<=3?n:Math.ceil(n/2); }
 function setBasis(n){ const per=setCols(n); return `flex:0 0 calc((100% - ${(per-1)*7}px) / ${per})`; }
 
+/* ===== 세트별 무게+횟수 로깅 + 운동별 마지막값 기억 (2026-07 개편) ===== */
+function getReps(date,oi){ return (state.rlog&&state.rlog[date]&&state.rlog[date][oi])||[]; }
+function exMemGet(name){ return (name&&state.exMem&&state.exMem[name])||null; }
+function exMemEnsure(name){ if(!state.exMem)state.exMem={}; if(!state.exMem[name])state.exMem[name]={sets:0,w:[],reps:[]}; return state.exMem[name]; }
+/* 세트 수: 오늘 커스텀 → 운동별 기억 → 기본값(base) 순 */
+function setCountFor(si,oi,name,base){
+  const c=state.slotCustom&&state.slotCustom[si+':'+oi]; if(c&&c.sets) return c.sets;
+  const m=exMemGet(name); if(m&&m.sets) return m.sets;
+  return base;
+}
+/* 한 세트 무게/횟수: 오늘 입력 → 운동별 기억 → 기본값 순 (자동 채움) */
+function resolveW(date,oi,name,k,dv){ const sv=getLog(date,oi); if(typeof sv[k]==='number') return sv[k];
+  const m=exMemGet(name); if(m&&typeof m.w[k]==='number') return m.w[k]; return dv; }
+function resolveR(date,oi,name,k,dv){ const sv=getReps(date,oi); if(typeof sv[k]==='number') return sv[k];
+  const m=exMemGet(name); if(m&&typeof m.reps[k]==='number') return m.reps[k]; return dv; }
+function repDefault(slot,r){ const n=parseInt(String(recReps(slot,r)),10); return (isNaN(n)||n<=0)?10:n; }
+function jsq(s){ return String(s).replace(/\\/g,'\\\\').replace(/'/g,"\\'"); }
+
 /* ── 무게 기본값(시작 무게 제안) ─────────────────────────────
    기구의 "가장 가벼운 상태"를 시작값으로 제안한다. 무게는 사용자가 직접 올리는 게 맞다.
    - 핀 스택 머신·케이블: 최소 스택 (보통 5kg)
@@ -1820,7 +1852,7 @@ function wtCell(date,oi,k,label,step,dv,basis){
   const a=`this,'${date}','${oi}',${k}`;
   return `<div class="setcell wtc" style="${basis||''}">${label?`<span class="sn">${label}</span>`:''}<div class="wtstep"><button class="wtb" tabindex="-1" aria-label="무게 줄이기" onpointerdown="wtHold(${a},-1,${step},event)">−</button><span class="wtmid"><input class="wt${pre}" type="number" inputmode="decimal" min="0" step="${step}" value="${v}" placeholder="–" aria-label="무게(kg)" oninput="this.classList.remove('pre')" onchange="logWeight('${date}','${oi}',${k},this.value)"></span><button class="wtb" tabindex="-1" aria-label="무게 늘리기" onpointerdown="wtHold(${a},1,${step},event)">+</button></div></div>`;
 }
-function renderSetLog(slot,r,dateStr,oi,nSets){
+function renderSetLog(slot,r,dateStr,oi,nSets,si){
   const saved=getLog(dateStr,oi);
   const n=nSets; const cb=cellBasis(n);
   if(r.bw){ // bodyweight/floor move → per-set completion dots
@@ -1836,13 +1868,23 @@ function renderSetLog(slot,r,dateStr,oi,nSets){
     for(let k=0;k<n;k++){ rows+=`<div class="ss-row"><span class="ss-lab">${k+1}세트</span><div class="ss-cells">${wtCell(dateStr, oi+'L', k, '', wstep, defaultWeight(r,k), '')}${wtCell(dateStr, oi+'R', k, '', wstep, defaultWeight(r,k), '')}</div></div>`; }
     return `<div class="setlog">${head}${rows}</div>`;
   }
-  const last=lastLog(dateStr,oi);
-  let hint='';
-  if(last){ const md=last.date.slice(5).replace('-','/'); const parts=last.w.slice(0,n).map(x=>(typeof x==='number'&&x>0)?(''+x):'–'); hint=`<div class="lastw">지난 기록 <b>${md}</b><span class="vdiv"></span>${parts.join(', ')} kg</div>`; }
-  const wstep=weightStep(r.eq);
-  let cells='';
-  for(let k=0;k<n;k++){ cells+=wtCell(dateStr, String(oi), k, (k+1)+'세트', wstep, defaultWeight(r,k), bs); }
-  return `<div class="setlog">${hint}<div class="setrow" style="justify-content:center">${cells}</div></div>`;
+  /* 표준 무게 운동: 세트별 [무게][횟수][X] 한 줄씩 + 아래 [+ 세트 추가]. 무게/횟수는 마지막 입력값 자동 채움 */
+  const name=r.name, nm=jsq(name), o=String(oi);
+  const count=setCountFor(si,o,name,n);
+  const wstep=weightStep(r.eq), rDef=repDefault(slot,r);
+  const stepper=(cls,minus,plus,input)=>`<div class="wtstep"><button class="wtb" tabindex="-1" onpointerdown="${minus}">−</button><span class="wtmid">${input}</span><button class="wtb" tabindex="-1" onpointerdown="${plus}">+</button></div>`;
+  let rows=`<div class="setr head"><span class="setr-n"></span><div class="setr-cells"><span class="setr-cch">무게(kg)</span><span class="setr-cch">횟수</span></div><span class="setx ph"></span></div>`;
+  for(let k=0;k<count;k++){
+    const w=resolveW(dateStr,o,name,k,defaultWeight(r,k));
+    const rp=resolveR(dateStr,o,name,k,rDef);
+    const wIn=`<input class="wt" type="number" inputmode="decimal" min="0" step="${wstep}" value="${w}" aria-label="무게(kg)" onchange="logW2('${dateStr}','${o}','${nm}',${k},this.value)">`;
+    const rIn=`<input class="wt rp" type="number" inputmode="numeric" min="1" step="1" value="${rp}" aria-label="횟수" onchange="logR2('${dateStr}','${o}','${nm}',${k},this.value)">`;
+    const wCell=stepper('w',`wtHold2(this,'${dateStr}','${o}','${nm}',${k},-1,${wstep},event)`,`wtHold2(this,'${dateStr}','${o}','${nm}',${k},1,${wstep},event)`,wIn);
+    const rCell=stepper('r',`rpHold2(this,'${dateStr}','${o}','${nm}',${k},-1,event)`,`rpHold2(this,'${dateStr}','${o}','${nm}',${k},1,event)`,rIn);
+    const del = k>0 ? `<button class="setx" aria-label="세트 삭제" onclick="delSet(${si},'${o}','${nm}',${k},'${dateStr}')">✕</button>` : `<span class="setx ph"></span>`;
+    rows+=`<div class="setr"><span class="setr-n">${k+1}세트</span><div class="setr-cells"><div class="setr-col">${wCell}</div><div class="setr-col">${rCell}</div></div>${del}</div>`;
+  }
+  return `<div class="setlog v2">${rows}<button class="setadd" onclick="addSet(${si},'${o}','${nm}')">+ 세트 추가</button></div>`;
 }
 
 /* 동작별 reps 우선 — 유지형(월 싯 등)은 슬롯의 횟수 대신 자기 시간을 씀 */
@@ -1906,7 +1948,8 @@ function effVol(si,oi,slot,r){
   let delta=gm.setDelta;
   if(gm.posture && isPostureSlot(slot)) delta+=1;
   base=Math.max(2,Math.min(5,base+delta));
-  const sets=(c&&c.sets)?c.sets:base;
+  const m=exMemGet(r&&r.name);
+  const sets=(c&&c.sets)?c.sets:(m&&m.sets?m.sets:base);
   const reps=(c&&c.reps!=null&&c.reps!=='')?c.reps:recReps(slot,r);
   return {sets, reps, customized:!!c};
 }
@@ -2474,7 +2517,7 @@ function renderSessionCard(s,dateStr,si){
     const id=x.id, active=activeId===id, done=!!completed[id];
     const v=effVol(si,x.key,x.sl,x.r);
     const title=`<div class="step-title">${roleTitle(x.sl.role)}</div><div class="step-name">${x.r.name}</div>`;
-    let body = v.customized ? `<div class="ex-meta" style="margin-top:6px"><span class="vol-tag">직접 설정</span></div>` : '';
+    let body = '';
     if(x.eqCands.length){
       const eqLabel=c=>{ const ids=c.eq||[]; return EQ_COMBO_LABEL[ids.join(',')] || ids.map(e=>EQ_SHORT[e]||EQ_LABEL[e]||e).join('/'); };
       const rlab=eqLabel(x.r); const seenEq=new Set(); const eqbtns=[];
@@ -2483,9 +2526,8 @@ function renderSessionCard(s,dateStr,si){
     } else {
       body+=`<div class="ex-meta" style="margin-top:6px"><span class="ex-eq">맨몸 운동</span></div>`;
     }
-    body+=volEditor(si,x.key,x.sl,v,x.r);
     if(x.r.cue) body+=`<div class="step-cue">${fmtCue(x.r.cue)}</div>`;
-    body+=renderSetLog(x.sl,x.r,dateStr,x.key,v.sets);
+    body+=renderSetLog(x.sl,x.r,dateStr,x.key,v.sets,si);
     html+=stepShell(exFig(x.r,x.sl.role),'', `운동 ${idx+1} / ${kept.length} (약 ${tm.ex[idx]}분)`, title, body, id, dateStr, active, done, howtoLinks(x.r.name));
   });
 
@@ -3411,6 +3453,38 @@ function logWeight(date,oi,k,val){
   state.log[date][oi][k]=isNaN(v)?null:v;
   touch(); // no re-render: keep input focus while typing across sets
 }
+/* ===== 세트별 무게/횟수 편집 + 운동별 기억 ===== */
+function _wr(store,date,oi,k,v){ if(!state[store])state[store]={}; if(!state[store][date])state[store][date]={}; if(!state[store][date][oi])state[store][date][oi]=[]; state[store][date][oi][k]=v; }
+function logW2(date,oi,name,k,val){ let v=parseFloat(val); v=isNaN(v)?null:Math.max(0,Math.round(v*10)/10);
+  _wr('log',date,oi,k,v); const m=exMemEnsure(name); m.w[k]=v; if(k+1>m.sets)m.sets=k+1; touch(); }
+function logR2(date,oi,name,k,val){ let v=parseInt(val,10); v=(isNaN(v)||v<1)?null:Math.min(999,v);
+  _wr('rlog',date,oi,k,v); const m=exMemEnsure(name); m.reps[k]=v; if(k+1>m.sets)m.sets=k+1; touch(); }
+function adjW2(btn,date,oi,name,k,dir,step){ const inp=btn.parentElement.querySelector('.wt'); let v=parseFloat(inp.value);
+  if(isNaN(v)){ v=resolveW(date,oi,name,k,0); if(dir>0&&v===0)v=step; } else v=v+step*dir;
+  v=Math.max(0,Math.round(v*10)/10); inp.value=v; logW2(date,oi,name,k,v); }
+function adjR2(btn,date,oi,name,k,dir){ const inp=btn.parentElement.querySelector('.rp'); let v=parseInt(inp.value,10);
+  if(isNaN(v)) v=resolveR(date,oi,name,k,10); v=Math.max(1,Math.min(999,v+dir)); inp.value=v; logR2(date,oi,name,k,v); }
+let _stepHold=null;
+function _holdStop(btn){ if(_stepHold){clearTimeout(_stepHold);_stepHold=null;} window.removeEventListener('pointerup',_pu); window.removeEventListener('pointercancel',_pu); if(btn)btn.removeEventListener('pointerleave',_pu); }
+let _pu=null;
+function _hold(fn,btn){ fn(); let d=420; const t=()=>{ fn(); d=Math.max(45,d*0.6); _stepHold=setTimeout(t,d); }; _stepHold=setTimeout(t,420);
+  _pu=()=>_holdStop(btn); window.addEventListener('pointerup',_pu); window.addEventListener('pointercancel',_pu); btn.addEventListener('pointerleave',_pu); }
+function wtHold2(btn,date,oi,name,k,dir,step,ev){ if(ev&&ev.preventDefault)ev.preventDefault(); _hold(()=>adjW2(btn,date,oi,name,k,dir,step),btn); }
+function rpHold2(btn,date,oi,name,k,dir,ev){ if(ev&&ev.preventDefault)ev.preventDefault(); _hold(()=>adjR2(btn,date,oi,name,k,dir),btn); }
+function addSet(si,oi,name){ const key=si+':'+oi; if(!state.slotCustom)state.slotCustom={};
+  const cur=setCountFor(si,oi,name,(state.slotCustom[key]&&state.slotCustom[key].sets)||3);
+  const n=Math.min(12,cur+1); state.slotCustom[key]=Object.assign({},state.slotCustom[key],{sets:n});
+  const m=exMemEnsure(name); m.sets=n;
+  if(cur>0){ if(m.w[cur-1]!=null)m.w[cur]=m.w[cur-1]; if(m.reps[cur-1]!=null)m.reps[cur]=m.reps[cur-1]; } // 새 세트는 직전 값 복사
+  touch(); renderToday(); }
+function delSet(si,oi,name,k,date){ const key=si+':'+oi; if(!state.slotCustom)state.slotCustom={};
+  const cur=setCountFor(si,oi,name,3); if(cur<=1||k<=0) return;
+  const spl=a=>{ if(Array.isArray(a)&&k<a.length) a.splice(k,1); };
+  if(state.log&&state.log[date]) spl(state.log[date][oi]);
+  if(state.rlog&&state.rlog[date]) spl(state.rlog[date][oi]);
+  const m=exMemGet(name); if(m){ spl(m.w); spl(m.reps); m.sets=Math.max(1,cur-1); }
+  state.slotCustom[key]=Object.assign({},state.slotCustom[key],{sets:Math.max(1,cur-1)});
+  touch(); renderToday(); }
 function toggleSetDone(date,oi,k){
   if(!state.log) state.log={};
   if(!state.log[date]) state.log[date]={};
@@ -3747,7 +3821,7 @@ const Sync=(()=>{
       const d=JSON.parse(r.data);
       const merged={...state,...d};
       /* 날짜 키 기반 append-only 필드는 로컬·원격을 병합 — 두 기기가 다른 날짜를 편집해도 서로를 통째로 덮지 않게(문서 LWW 완화). 같은 날짜는 원격이 우선. */
-      ['log','steps','stepStart','stepMs'].forEach(f=>{ merged[f]={...(state[f]||{}),...(d[f]||{})}; });
+      ['log','rlog','steps','stepStart','stepMs'].forEach(f=>{ merged[f]={...(state[f]||{}),...(d[f]||{})}; });
       state=merged; state._ts=r.updatedAt||Date.now(); clampStartDate(); persist(); refresh();
     }catch(e){}
   }

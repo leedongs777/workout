@@ -287,20 +287,27 @@
   .step.collapsed .step-fig .ic-msk, .step.collapsed .step-fig svg{width:26px; height:26px;}
   .step.collapsed .step-name{font-size:14.5px;}
   .wu-guide-row{margin-top:8px; text-align:center;} /* 웜업/쿨다운 가이드(타이머) 선택 버튼 */
-  /* 세트별 무게+횟수 행(2026-07) */
-  .setlog.v2{margin-top:10px;}
-  .setr{display:flex; align-items:center; gap:8px; padding:4px 0;}
-  .setr.head{padding:0 0 2px;}
-  .setr-n{flex:0 0 44px; font-size:13px; font-weight:700; color:var(--faint);}
+  /* 세트별 무게+횟수 행 — 애플 디자인(즉각 반응·브랜드 재질·절제) */
+  .setlog.v2{margin-top:12px;}
+  .setr{display:flex; align-items:center; gap:9px; padding:4px 0;}
+  .setr.head{padding:0 0 3px;}
+  .setr-n{flex:0 0 42px; font-size:12.5px; font-weight:700; color:var(--muted); letter-spacing:-.01em; font-variant-numeric:tabular-nums;}
   .setr-cells{flex:1; display:flex; gap:10px; min-width:0;}
   .setr-col{flex:1; min-width:0;}
   .setr-col .wtstep{width:100%;}
-  .setr-cch{flex:1; text-align:center; font-size:11px; font-weight:600; color:var(--faint);}
-  .setx{flex:0 0 30px; height:30px; border:none; background:transparent; color:var(--faint); font-size:14px; cursor:pointer; border-radius:8px; padding:0;}
-  .setx:active{transform:scale(.9);}
+  .setr-cch{flex:1; text-align:center; font-size:11px; font-weight:600; color:var(--faint); letter-spacing:.01em;}
+  .wtb{transition:transform .1s var(--ease-out), background-color .14s ease, color .14s ease;}
+  .wtb:active{background:var(--accent-soft); color:var(--accent-ink);}
+  .wt::-webkit-outer-spin-button,.wt::-webkit-inner-spin-button{-webkit-appearance:none; margin:0;}
+  .setx{flex:0 0 30px; height:30px; display:inline-flex; align-items:center; justify-content:center; border:none; background:transparent; color:var(--faint); cursor:pointer; border-radius:50%; padding:0; -webkit-tap-highlight-color:transparent; transition:transform .13s var(--ease-out), background-color .14s ease, color .14s ease;}
+  .setx svg{width:13px; height:13px; fill:none; stroke:currentColor; stroke-width:2.4; stroke-linecap:round;}
+  .setx:hover{color:var(--muted);}
+  .setx:active{transform:scale(.84); background:var(--surface-2); color:var(--danger);}
   .setx.ph{visibility:hidden;}
-  .setadd{width:100%; margin-top:8px; border:1px dashed var(--accent); background:transparent; color:var(--accent-ink); font-weight:700; font-size:13.5px; padding:9px; border-radius:11px; cursor:pointer; font-family:inherit;}
-  .setadd:active{transform:scale(.99);}
+  .setadd{width:100%; margin-top:11px; display:inline-flex; align-items:center; justify-content:center; gap:6px; border:1px solid var(--line); background:var(--surface-2); color:var(--accent-ink); font-weight:700; font-size:13.5px; letter-spacing:-.01em; padding:11px; border-radius:12px; cursor:pointer; font-family:inherit; -webkit-tap-highlight-color:transparent; transition:transform .13s var(--ease-out), background-color .16s ease, border-color .16s ease;}
+  .setadd svg{width:15px; height:15px; fill:none; stroke:currentColor; stroke-width:2.2; stroke-linecap:round;}
+  .setadd:hover{border-color:var(--accent);}
+  .setadd:active{transform:scale(.985); background:var(--accent-soft);}
   .step-fold{flex:none; color:var(--faint); font-size:12px; padding:2px 4px;}
   .step-head{display:flex; align-items:flex-start; gap:11px;}
   .step-fig{flex:none; width:44px; height:44px; border-radius:10px; background:var(--surface-2); border:1px solid var(--line-2); color:var(--accent); display:flex; align-items:center; justify-content:center;}
@@ -1881,10 +1888,10 @@ function renderSetLog(slot,r,dateStr,oi,nSets,si){
     const rIn=`<input class="wt rp" type="number" inputmode="numeric" min="1" step="1" value="${rp}" aria-label="횟수" onchange="logR2('${dateStr}','${o}','${nm}',${k},this.value)">`;
     const wCell=stepper('w',`wtHold2(this,'${dateStr}','${o}','${nm}',${k},-1,${wstep},event)`,`wtHold2(this,'${dateStr}','${o}','${nm}',${k},1,${wstep},event)`,wIn);
     const rCell=stepper('r',`rpHold2(this,'${dateStr}','${o}','${nm}',${k},-1,event)`,`rpHold2(this,'${dateStr}','${o}','${nm}',${k},1,event)`,rIn);
-    const del = k>0 ? `<button class="setx" aria-label="세트 삭제" onclick="delSet(${si},'${o}','${nm}',${k},'${dateStr}')">✕</button>` : `<span class="setx ph"></span>`;
+    const del = k>0 ? `<button class="setx" aria-label="${k+1}세트 삭제" onclick="delSet(${si},'${o}','${nm}',${k},'${dateStr}')"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>` : `<span class="setx ph"></span>`;
     rows+=`<div class="setr"><span class="setr-n">${k+1}세트</span><div class="setr-cells"><div class="setr-col">${wCell}</div><div class="setr-col">${rCell}</div></div>${del}</div>`;
   }
-  return `<div class="setlog v2">${rows}<button class="setadd" onclick="addSet(${si},'${o}','${nm}')">+ 세트 추가</button></div>`;
+  return `<div class="setlog v2">${rows}<button class="setadd" onclick="addSet(${si},'${o}','${nm}')"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>세트 추가</button></div>`;
 }
 
 /* 동작별 reps 우선 — 유지형(월 싯 등)은 슬롯의 횟수 대신 자기 시간을 씀 */

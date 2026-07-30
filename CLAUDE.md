@@ -251,7 +251,14 @@
 - `renderSessionCard`에서 'warm'/'cool' 단계: wuP 활성이면 `wuPlayerCard()`, 아니면 `wuStepCard()`.
 - **쿨다운 마침 → 운동 완료로 이어짐**(doneStep이 모든 단계 완료 시 그날 완료 처리).
 
-### 4.7 본운동 단계별 타이머
+### 4.7 본운동 단계 (세트별 무게+횟수)
+
+> ⚠️ **2026-07 개편(운영자 요청).** 아래 옛 설명(브릭 무게칸·`volEditor`·프리필 `.pre`·시작/완료 타이머)은 **표준 무게 운동에서 폐기**. 지금은 `renderSetLog`의 v2 경로가 **세트마다 한 줄 `[N세트][무게 −/+][횟수 −/+][✕]` + [+ 세트 추가]**를 렌더한다. 되돌리지 말 것.
+> - 세트별 **횟수 독립**: 무게=`state.log[date][oi][k]`, 횟수=`state.rlog[date][oi][k]`. 핸들러 `logW2`/`logR2`/`adjW2`/`adjR2`(+`wtHold2`/`rpHold2` 롱프레스), `addSet`/`delSet(si,oi,name,k,date)`(1세트는 삭제 불가).
+> - **운동별 마지막값 기억** `state.exMem[name]={sets,w[],reps[]}` — 무게/횟수/세트수 변경 시 갱신. 렌더는 `setCountFor`/`resolveW`/`resolveR`로 **오늘입력 → exMem → 기본값** 순 자동 채움. `effVol().sets`도 exMem 반영. `applyRemote`가 `rlog`도 날짜별 병합.
+> - **아직 옛 UI 유지**: 좌/우(측면, `측`) 운동은 `wtCell` L/R 경로, 맨몸(`r.bw`)은 완료 점(`toggleSetDone`). 확장 시 같은 v2로.
+
+#### (구) 본운동 단계별 타이머 — 시작/타이머는 이미 폐기(§4.7 위, stepShell)
 - `stepShell`: 각 단계 카드. **시작 버튼·시간측정 폐기(2026-07, 운영자 요청 — 시작 누르는 걸 자주 잊고 시간측정이 무의미)**. 미완료→[완료 ✓](`doneStep`), 완료→**접힘 카드**(요약 한 줄, 탭하면 펼침 `toggleDoneOpen`) + 다시 열기(`resetStep`). `startStep`/`stepMs`/`live-timer`는 더 이상 렌더에 쓰지 않음(되돌리지 말 것). 완료 축하 "시간" 스탯과 `anKcalFor`는 측정값이 없으면 계획 운동시간(`sessionMinutes`)으로 추정.
 - 전역 `setInterval(1s)`가 `.live-timer`(data-start) 갱신. `fmtDur(ms)`→"N분 M초".
 - **세트 무게 입력 = −/+ 스텝퍼**(`wtCell`/`adjWeight`). 직접 타이핑도 되지만 폰트는 **반드시 16px 이상**이어야 iOS가 입력 포커스 시 화면을 자동 확대하지 않는다(과거 14px이라 확대 불편 있었음). 무게 승계는 프리필이 담당(아래 참조).

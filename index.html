@@ -61,7 +61,7 @@
     .cal-wd.sun, .cal-cell.sun .cal-n, .bcal-wd .sun, .bcal-cell.sun{color:#E8917D;}
     .cal-wd.sat, .cal-cell.sat .cal-n, .bcal-wd .sat, .bcal-cell.sat{color:#8FB0E8;}
   }
-  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;touch-action:manipulation;} /* 더블탭 확대 차단(핀치줌은 유지) — 무게/횟수 ± 조작 편의 */
   /* 키보드 포커스 링(마우스/터치엔 안 뜸) — outline:none으로 지워진 포커스 가시성 복원 */
   :focus-visible{outline:2px solid var(--accent); outline-offset:2px; border-radius:4px;}
   button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--accent); outline-offset:2px;}

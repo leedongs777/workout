@@ -308,6 +308,14 @@
   .setadd svg{width:15px; height:15px; fill:none; stroke:currentColor; stroke-width:2.2; stroke-linecap:round;}
   .setadd:hover{border-color:var(--accent);}
   .setadd:active{transform:scale(.985); background:var(--accent-soft);}
+  /* 오늘 운동 강도(RPE) */
+  .rpe{display:flex; align-items:center; gap:10px; margin-top:12px; flex-wrap:wrap;}
+  .rpe-q{font-size:12.5px; font-weight:700; color:var(--muted); letter-spacing:-.01em; flex:none;}
+  .rpe-opts{flex:1; min-width:180px; display:flex; gap:6px;}
+  .rpe-opt{flex:1; padding:9px 6px; border:1px solid var(--line); background:var(--surface-2); color:var(--ink); font:600 13px Pretendard; border-radius:10px; cursor:pointer; -webkit-tap-highlight-color:transparent; transition:transform .1s var(--ease-out), background-color .14s ease, border-color .14s ease, color .14s ease;}
+  .rpe-opt:active{transform:scale(.96);}
+  .rpe-opt.on{background:var(--accent); color:var(--on-accent); border-color:var(--accent);}
+  .rpe-note{font-size:12px; color:var(--accent-ink); font-weight:600; margin-bottom:8px; padding-left:2px;}
   .step-fold{flex:none; color:var(--faint); font-size:12px; padding:2px 4px;}
   .step-head{display:flex; align-items:flex-start; gap:11px;}
   .step-fig{flex:none; width:44px; height:44px; border-radius:10px; background:var(--surface-2); border:1px solid var(--line-2); color:var(--accent); display:flex; align-items:center; justify-content:center;}
@@ -1570,7 +1578,7 @@ function buildCD(s){
 }
 SESSIONS.forEach(s=>{ s.warm=buildWU(s); s.cool=buildCD(s); });
 /* ---------------- App state ---------------- */
-function freshState(){ return { equipment:[...DEFAULT_EQUIP], includeBodyweight:true, includeFloor:true, workoutDays:[...DEFAULT_WORKOUT_DAYS], sessionMinutes:60, startDate:todayStr(), restDays:[], doneDays:[], log:{}, rlog:{}, exMem:{}, steps:{}, stepStart:{}, stepMs:{}, slotCustom:{}, slotPick:{}, cardioMin:{}, cardioChoice:null, wDefaults:null, authPassed:false, authProvider:null, consent:null, profile:null, onboarded:true }; }
+function freshState(){ return { equipment:[...DEFAULT_EQUIP], includeBodyweight:true, includeFloor:true, workoutDays:[...DEFAULT_WORKOUT_DAYS], sessionMinutes:60, startDate:todayStr(), restDays:[], doneDays:[], log:{}, rlog:{}, rpe:{}, exMem:{}, steps:{}, stepStart:{}, stepMs:{}, slotCustom:{}, slotPick:{}, cardioMin:{}, cardioChoice:null, wDefaults:null, authPassed:false, authProvider:null, consent:null, profile:null, onboarded:true }; }
 let state=freshState();
 let activeTab='home';
 let openDays={}; // schedule expand state
@@ -1879,10 +1887,12 @@ function renderSetLog(slot,r,dateStr,oi,nSets,si){
   const name=r.name, nm=jsq(name), o=String(oi);
   const count=setCountFor(si,o,name,n);
   const wstep=weightStep(r.eq), rDef=repDefault(slot,r);
+  const mem=exMemGet(name); const easyBump=(mem&&mem.rpe==='easy')?wstep:0; let bumped=false;
   const stepper=(cls,minus,plus,input)=>`<div class="wtstep"><button class="wtb" tabindex="-1" onpointerdown="${minus}">−</button><span class="wtmid">${input}</span><button class="wtb" tabindex="-1" onpointerdown="${plus}">+</button></div>`;
   let rows=`<div class="setr head"><span class="setr-n"></span><div class="setr-cells"><span class="setr-cch">무게(kg)</span><span class="setr-cch">횟수</span></div><span class="setx ph"></span></div>`;
   for(let k=0;k<count;k++){
-    const w=resolveW(dateStr,o,name,k,defaultWeight(r,k));
+    let w=resolveW(dateStr,o,name,k,defaultWeight(r,k));
+    if(easyBump && typeof getLog(dateStr,o)[k]!=='number' && mem && typeof mem.w[k]==='number'){ w=Math.round((mem.w[k]+easyBump)*10)/10; bumped=true; }
     const rp=resolveR(dateStr,o,name,k,rDef);
     const wIn=`<input class="wt" type="number" inputmode="decimal" min="0" step="${wstep}" value="${w}" aria-label="무게(kg)" onchange="logW2('${dateStr}','${o}','${nm}',${k},this.value)">`;
     const rIn=`<input class="wt rp" type="number" inputmode="numeric" min="1" step="1" value="${rp}" aria-label="횟수" onchange="logR2('${dateStr}','${o}','${nm}',${k},this.value)">`;
@@ -1891,7 +1901,8 @@ function renderSetLog(slot,r,dateStr,oi,nSets,si){
     const del = k>0 ? `<button class="setx" aria-label="${k+1}세트 삭제" onclick="delSet(${si},'${o}','${nm}',${k},'${dateStr}')"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>` : `<span class="setx ph"></span>`;
     rows+=`<div class="setr"><span class="setr-n">${k+1}세트</span><div class="setr-cells"><div class="setr-col">${wCell}</div><div class="setr-col">${rCell}</div></div>${del}</div>`;
   }
-  return `<div class="setlog v2">${rows}<button class="setadd" onclick="addSet(${si},'${o}','${nm}')"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>세트 추가</button></div>`;
+  const note = bumped ? `<div class="rpe-note">지난번 여유로웠어요, 무게를 조금 올려봤어요.</div>` : '';
+  return `<div class="setlog v2">${note}${rows}<button class="setadd" onclick="addSet(${si},'${o}','${nm}')"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>세트 추가</button></div>`;
 }
 
 /* 동작별 reps 우선 — 유지형(월 싯 등)은 슬롯의 횟수 대신 자기 시간을 씀 */
@@ -2535,6 +2546,7 @@ function renderSessionCard(s,dateStr,si){
     }
     if(x.r.cue) body+=`<div class="step-cue">${fmtCue(x.r.cue)}</div>`;
     body+=renderSetLog(x.sl,x.r,dateStr,x.key,v.sets,si);
+    body+=rpeSelector(dateStr,x.key,x.r.name);
     html+=stepShell(exFig(x.r,x.sl.role),'', `운동 ${idx+1} / ${kept.length} (약 ${tm.ex[idx]}분)`, title, body, id, dateStr, active, done, howtoLinks(x.r.name));
   });
 
@@ -3492,6 +3504,18 @@ function delSet(si,oi,name,k,date){ const key=si+':'+oi; if(!state.slotCustom)st
   const m=exMemGet(name); if(m){ spl(m.w); spl(m.reps); m.sets=Math.max(1,cur-1); }
   state.slotCustom[key]=Object.assign({},state.slotCustom[key],{sets:Math.max(1,cur-1)});
   touch(); renderToday(); }
+/* 오늘 운동 강도(RPE) — 여유면 다음번 무게를 조금 올려 제안 */
+function rpeSelector(date,oi,name){
+  const cur=(state.rpe&&state.rpe[date]&&state.rpe[date][oi])||'';
+  const nm=jsq(name), o=String(oi);
+  const opt=(v,label)=>`<button class="rpe-opt${cur===v?' on':''}" onclick="setRpe('${date}','${o}','${nm}','${v}')">${label}</button>`;
+  return `<div class="rpe"><span class="rpe-q">오늘 강도</span><div class="rpe-opts">${opt('easy','여유')}${opt('mid','딱 좋음')}${opt('hard','빡셈')}</div></div>`;
+}
+function setRpe(date,oi,name,v){
+  if(!state.rpe)state.rpe={}; if(!state.rpe[date])state.rpe[date]={};
+  state.rpe[date][oi]=(state.rpe[date][oi]===v)?'':v; // 다시 누르면 해제
+  exMemEnsure(name).rpe=state.rpe[date][oi]||''; touch(); renderToday();
+}
 function toggleSetDone(date,oi,k){
   if(!state.log) state.log={};
   if(!state.log[date]) state.log[date]={};
@@ -3828,7 +3852,7 @@ const Sync=(()=>{
       const d=JSON.parse(r.data);
       const merged={...state,...d};
       /* 날짜 키 기반 append-only 필드는 로컬·원격을 병합 — 두 기기가 다른 날짜를 편집해도 서로를 통째로 덮지 않게(문서 LWW 완화). 같은 날짜는 원격이 우선. */
-      ['log','rlog','steps','stepStart','stepMs'].forEach(f=>{ merged[f]={...(state[f]||{}),...(d[f]||{})}; });
+      ['log','rlog','rpe','steps','stepStart','stepMs'].forEach(f=>{ merged[f]={...(state[f]||{}),...(d[f]||{})}; });
       state=merged; state._ts=r.updatedAt||Date.now(); clampStartDate(); persist(); refresh();
     }catch(e){}
   }

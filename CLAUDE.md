@@ -307,7 +307,8 @@
 ### 4.11 온보딩 (Onboard 모듈, 3스텝, 자유 이동)
 - Step1 개인정보: 이름 + 닉네임(최대10자) + **생년월일 커스텀 달력**(네이티브 date input 아님. `Onboard.openBirth` → `renderBirthCal`, bdStep 'year'|'month'|'cal'. **연도 선택은 1930~올해 스크롤 목록** + 선택 연도 자동 스크롤) + 성별(남/여만, "기타" 없음) + 내/외국인 + 본인인증(스텁).
 - Step2 신상정보: 키/몸무게/목표몸무게/근력경험/러닝경험(→pace+최장거리)/운동목표/부상·수술/지병.
-- Step3 운동환경·요일: 운동 요일 칩(월~일) + 하루 운동 시간(30/45/60/75/90/120) + 맨몸/바닥 토글 + 장비 그리드. `finish()`가 닉네임·workoutDays·sessionMinutes 포함 저장.
+- Step3 운동환경·요일: 운동 요일 칩(월~일) + 하루 운동 시간(30/45/60/75/90/120) + **운동 장소(gym/homegym/home/outdoor — 고르면 장비 프리셋)** + 맨몸/바닥 토글 + 장비 그리드 + **웜업 길이(short/normal/long) · 유산소 선호(more/normal/less/none) · 운동량(low/normal/high)**. `finish()`가 닉네임·workoutDays·sessionMinutes 포함 저장.
+- **온보딩 성향 필드(2026-07, profile에 저장) → 플랜 엔진 연결**: `warmupLen`→`sessionTimes` 웜업/쿨다운 배수·클램프, `cardioPref`→`sessionTimes` cardio 배수(none은 유산소 세션 아닌 날 0, 잔여는 본운동으로), `volumePref`→`effVol` 세트 base ±1(클램프 2~6), `place`→온보딩에서 장비 프리셋만(엔진은 equipment로 반영). 시간합=sessionMinutes 불변 유지(회귀 매트릭스 통과).
 - `Onboard.startEdit()`: state에서 값 채워 온보딩 재오픈(설정에서 호출).
 
 ---

@@ -309,7 +309,8 @@
 - Step2 신상정보: 키/몸무게/목표몸무게/근력경험/러닝경험(→pace+최장거리)/운동목표/부상·수술/지병.
 - Step3 운동환경·요일: 운동 요일 칩(월~일) + 하루 운동 시간(30/45/60/75/90/120) + **운동 장소(gym/homegym/home/outdoor — 고르면 장비 프리셋)** + 맨몸/바닥 토글 + 장비 그리드 + **웜업 길이(short/normal/long) · 유산소 선호(more/normal/less/none) · 운동량(low/normal/high)**. `finish()`가 닉네임·workoutDays·sessionMinutes 포함 저장.
 - **온보딩 성향 필드(2026-07, profile에 저장) → 플랜 엔진 연결**: `warmupLen`→`sessionTimes` 웜업/쿨다운 배수·클램프, `cardioPref`→`sessionTimes` cardio 배수(none은 유산소 세션 아닌 날 0, 잔여는 본운동으로), `volumePref`→`effVol` 세트 base ±1(클램프 2~6), `place`→온보딩에서 장비 프리셋만(엔진은 equipment로 반영). 시간합=sessionMinutes 불변 유지(회귀 매트릭스 통과).
-- **플랜 기간(`planWeeks` 4/8/12/16, 2026-07)**: `planWeek(date)`=startDate 기준 주차, `isDeloadWk`=매 4주차(회복), `planDone`=기간 초과. `effVol`이 디로드 주간에 세트 −1(회복). 홈에 "이번 플랜 N주차/총 M주 + 강화/회복" 카드, 완주 시 `newPlanCycle()`(startDate=오늘로 리셋). `planWeeks` 미설정(0)이면 기존 무기한 동작(하위호환).
+- **플랜 기간(`planWeeks` 4/8/12/16, 2026-07)**: `planWeek(date)`=startDate 기준 주차, `isDeloadWk`=매 4주차(회복), `planDone`=기간 초과. `effVol`이 디로드 주간에 세트 −1(회복). 홈에 "이번 플랜 N주차/총 M주" 카드(회복주만 안내 문구), 완주 시 `newPlanCycle()`(startDate=오늘로 리셋). `planWeeks` 미설정(0)이면 기존 무기한 동작(하위호환).
+- ⚠️ **디로드는 근거가 약함(2026 근거검토)**: 주기화가 무주기화보다 나은 건 근력에서 소폭(ES 0.2~0.3), 근비대는 볼륨 동일 시 무차이. 디로드가 성과를 개선한다는 직접 근거는 없고(디로드 RCT 2024 무이득) "4주마다"는 관행. 그래서 **`profile.deload` 토글(선택형, 기본 켬)** 로 끌 수 있고, 문구는 "성과 향상"이 아니라 "꾸준함·피로 관리"로만 표현(과장 금지, §3.5). RPE 점진과부하가 가장 강한 근거이니 그쪽을 밀 것. 성과 핵심 지렛대는 볼륨(주당 세트)+빈도(주2회+).
 - `Onboard.startEdit()`: state에서 값 채워 온보딩 재오픈(설정에서 호출).
 
 ---
